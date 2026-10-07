@@ -13,10 +13,12 @@ Each subdirectory will hold an independent Lake project prepared for the
 
 ## AI disclosure
 
-The mathematics and the formalizations were produced with substantial assistance from
-AI systems (Anthropic Claude). Each project's `formalization.yaml` and README record the
-automation used, the scope of what is formalized, and what remains informal. No AI system
-is listed as an author.
+The constructions, proofs and Lean formalization were produced by AI systems (Anthropic Claude)
+under the author's direction; the author selected the problems, steered the research and reviewed
+the formal statements, but has not verified every proof by hand. AI systems are not listed as
+authors, in accordance with the policies of Hexagon, Palomar and arXiv; responsibility for the
+deposit rests with the author. Each project's `formalization.yaml` and README record the
+automation used, the scope of what is formalized, and what remains informal.
 
 ## Licence
 
