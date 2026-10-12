@@ -10,7 +10,7 @@ license: MIT
 repository-code: "https://github.com/lgruen/separated-nets-lean"
 url: "https://lgruen.github.io/separated-nets-lean/"
 version: "1.0.0"
-date-released: "2026-10-13"   # RELEASE_DATE_TBD: set to the date of the v1.0.0 release
+date-released: "2026-10-13"   # date of the v1.0.0 release
 # doi: "10.5281/zenodo.ZENODO_DOI_TBD"   # Zenodo concept DOI, added after the first release
 keywords:
   - digital nets
