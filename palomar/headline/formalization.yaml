@@ -39,8 +39,8 @@ project:
 
 classification:
   arxiv: [math.NT, math.NA]
-  # Proposed MSC 2020 set (identical in the Hexagon and Zenodo metadata); the author confirms it at the deposit.
-  msc2020: [11K38, 65C05, 11K45, 52C17, 11H06, 94B05, 68V20]
+  # MSC 2020 (decided by the author 2026-10-13; identical in the Hexagon and Zenodo metadata).
+  msc2020: [11K38, 65C05, 11K45, 52C17, 68V20]
 
 sources:
   - title: "Low-discrepancy quasi-uniform digital nets in every dimension (version 1)"
@@ -159,8 +159,11 @@ review:
     the Challenge and Solution environments. Comparator (Lean kernel + NanoDa) accepts the
     four declarations of comparatorHeadline.json with axioms propext, Quot.sound, Classical.choice
     (COMPARATOR_RESULTS.md). The author reviewed the statement against the manuscript
-    and signed it off on 2026-10-12 (approved). No independent human
-    peer review has been performed.
+    and signed it off on 2026-10-12 (approved). Beyond this entry, the author accepts the statements of
+    the full library (comparator.json) on the basis of the statement-review notes of the
+    development repository, which give each formal statement in words next to the printed
+    statement, with every divergence (recorded 2026-10-13). No independent human peer review
+    has been performed.
 
 alignment:
   namespace: "Z3NetA"

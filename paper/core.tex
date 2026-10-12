@@ -59,13 +59,13 @@
 \author{Leonhard Gruenschloss}
 \thanks{ORCID iD: \url{https://orcid.org/0009-0004-6476-2191}}
 \hypersetup{pdfauthor={Leonhard Gruenschloss}}
-% Version line (research revision 15.13). PLACEHOLDERS: \VersionDate (the release date of version 1) and \LeanDOI
-% (the Zenodo concept DOI of the Lean formalization, as "doi:10.5281/zenodo.<n>") are filled in at the deposit.
+% Version line. PLACEHOLDER: \VersionDate = the release date of version 1 (YYYY-MM-DD); it is set in this one line
+% when the author approves the first push of the deposit repository (DEPOSIT_CHECKLIST step A2). The paper carries no
+% DOI: the Zenodo DOI goes only into the metadata of the deposit (README, CITATION.cff, Palomar yaml, Hexagon).
 \newcommand{\VersionDate}{2026-10-xx}
-\newcommand{\LeanDOI}{DOI to be assigned}
 % Interactive companions (GitHub Pages of the deposit repository; live once Pages is enabled).
 \newcommand{\interactive}[1]{ Interactive version: \protect\href{https://lgruen.github.io/separated-nets-lean/explainers/#1}{\protect\texttt{explainers/#1}} (Section~\protect\ref{sec:intro}).}
-\date{Version~1, \VersionDate. The Lean formalization of this version is release v1.0.0 of \url{https://github.com/lgruen/separated-nets-lean} (\LeanDOI).}
+\date{Version~1, \VersionDate. The Lean formalization of this version is release v1.0.0 of \url{https://github.com/lgruen/separated-nets-lean}.}
 
 \begin{document}
 
@@ -3048,7 +3048,7 @@ The only axioms used are \texttt{propext}, \texttt{Classical.choice} and \texttt
 
 \emph{Theorem~A as a self-contained entry.} Theorem~A also forms a separate entry in the format of the Palomar collection of formalizations: a statement file of $438$ lines that imports only Mathlib, copies verbatim the $43$ definitions that the statement reaches, and states Theorem~A together with three theorems that justify the data defined by choice: the columns of Definition~\ref{def:Ustar} are the only family with the properties required there, the positive generator $\gamma_j$ of Lemma~\ref{lem:sat} is unique, and the net of Definition~\ref{def:Ns} exists and does not depend on the choices made in its construction (the reduction modulo $q$ and the solution of the residual problem, Propositions~\ref{prop:Ns} and~\ref{prop:Gs}). Its solution derives the four theorems from the library, and Comparator checks the entry separately.
 
-\emph{Blueprint.} A blueprint, made with \texttt{leanblueprint}, presents the results of the paper in its words, with their proofs, links every formalized result to the Lean declarations that prove it, and shows the dependency graph. The developments will be public at \url{https://github.com/lgruen/separated-nets-lean} and archived at Zenodo, DOI [to be added at deposit].
+\emph{Blueprint.} A blueprint, made with \texttt{leanblueprint}, presents the results of the paper in its words, with their proofs, links every formalized result to the Lean declarations that prove it, and shows the dependency graph. The developments are in the repository \url{https://github.com/lgruen/separated-nets-lean}; its release v1.0.0 accompanies this version of the paper and is archived at Zenodo.
 
 \emph{What is formalized.} Every theorem, proposition, lemma and corollary of the paper, every definition except Definition~\ref{def:geom} (which only introduces names), and the proved statements of the remarks listed in Table~\ref{tab:lean} are formalized, apart from the finite computations listed below.
 

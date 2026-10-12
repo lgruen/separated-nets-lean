@@ -23,6 +23,11 @@ keywords:
   - Lean 4
   - Mathlib
   - formal verification
+  - "MSC2020: 11K38"
+  - "MSC2020: 65C05"
+  - "MSC2020: 11K45"
+  - "MSC2020: 52C17"
+  - "MSC2020: 68V20"
 abstract: >-
   LaTeX source, reproduction scripts, Lean 4 / Mathlib formalization (616 compared theorems, accepted by
   Comparator with the Lean and NanoDa kernels), leanblueprint and interactive explainers of the manuscript

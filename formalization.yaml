@@ -20,8 +20,8 @@ project:
 
 classification:
   arxiv: [math.NT, math.NA]
-  # Proposed MSC 2020 set (identical in the Hexagon and Zenodo metadata); the author confirms it at the deposit.
-  msc2020: [11K38, 65C05, 11K45, 52C17, 11H06, 94B05, 68V20]
+  # MSC 2020 (decided by the author 2026-10-13; identical in the Hexagon and Zenodo metadata).
+  msc2020: [11K38, 65C05, 11K45, 52C17, 68V20]
 
 sources:
   - title: "Low-discrepancy quasi-uniform digital nets in every dimension (version 1)"
@@ -85,7 +85,10 @@ automation:
       tool_setup: >-
         Author review of the formal statements against the manuscript. The headline statement (thm:A,
         Z3NetA.theoremA, palomar/headline/formalization.yaml) was reviewed and signed off by the author on
-        2026-10-12. REVIEW_SCOPE_TBD (the scope of the author's review of the other library statements).
+        2026-10-12. The statements of the other library theorems the author accepts on the basis of the
+        statement-review notes of the development repository (prepared in AI-assisted review passes, one per
+        formalization stage; each gives every formal statement in words next to the printed statement, with its
+        divergences); recorded 2026-10-13.
   spend_usd: "not tracked"
   notes: >-
     The constructions, proofs and Lean formalization were produced by AI systems (Anthropic Claude Opus 5.5; some early exploratory results used Claude Fable 5.1) under the author's direction. The author selected the problems, steered the research and reviewed the formal statements, but has not verified every proof by hand. AI systems are not listed as authors; responsibility for the deposit rests with the author.
@@ -109,8 +112,11 @@ review:
     Every statement was checked against the source by AI-assisted passes (Anthropic Claude), acting as automated
     assistants rather than reviewers of record. Hash checks (scripts/check_statement_identity.py,
     scripts/check_headline_identity.py) confirm that the statements and the constants they reach are identical
-    in the Challenge and Solution environments. The author signed off the headline statement (thm:A) on
-    2026-10-12. No independent human peer review has been performed.
+    in the Challenge and Solution environments. The author reviewed the headline statement (thm:A) against
+    the manuscript and signed it off on 2026-10-12; he accepts the other library statements on the basis of the
+    statement-review notes of the development repository, which give each formal statement in words next to
+    the printed statement, with every divergence (recorded 2026-10-13). No independent human peer review has
+    been performed.
 
 alignment:
   namespace: "Z3Net"

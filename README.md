@@ -43,7 +43,9 @@ Hajós's theorem, Keller's property for s ≤ 7 and the optimal packing bounds f
 sentence of `rem:projlines` (the parallel lines). Details: [`COVERAGE_GAPS.md`](COVERAGE_GAPS.md).
 
 The headline statement (Theorem A, `Headline/Challenge.lean`) was reviewed against the manuscript and signed off by the
-author on 2026-10-12.
+author on 2026-10-12. The author accepts the other statements of the library on the basis of statement-review notes
+prepared in AI-assisted review passes, which give each formal statement in words next to the printed statement, with
+every divergence. No independent human peer review has been performed.
 
 ## Building
 
