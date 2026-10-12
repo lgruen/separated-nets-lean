@@ -47,8 +47,8 @@ sources:
     authors:
       - {name: "Leonhard Gruenschloss", orcid: "0009-0004-6476-2191"}
     type: paper
-    id: "HEXAGON_ID_TBD"
-    location: "paper/core.tex in https://github.com/lgruen/separated-nets-lean (archived at Zenodo, ZENODO_DOI_TBD)"
+    id: "doi:10.5281/zenodo.23327749"
+    location: "https://doi.org/10.5281/zenodo.23327749 (paper/core.tex of release v1.0.0 of https://github.com/lgruen/separated-nets-lean; all versions: https://doi.org/10.5281/zenodo.23327748)"
     relationship: formalizes
     note: >-
       Results cited by their LaTeX labels. This entry formalizes thm:A of version 1 (Theorem A

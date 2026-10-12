@@ -1,5 +1,7 @@
 # Low-discrepancy quasi-uniform digital nets in every dimension
 
+[![DOI](https://zenodo.org/badge/DOI/10.5281/zenodo.23327748.svg)](https://doi.org/10.5281/zenodo.23327748)
+
 Manuscript, Lean 4 formalization, blueprint and interactive explainers for
 
 > Leonhard Gruenschloss, *Low-discrepancy quasi-uniform digital nets in every dimension*, version 1 (2026).
@@ -11,8 +13,10 @@ such nets in every dimension: for every s ≥ 3, every base q whose prime factor
 explicit digital (0, sk, s)-nets over ℤ/qℤ with N = q^(sk) points (Theorem A, `thm:A`). This repository is release
 **v1.0.0**, which accompanies **version 1** of the manuscript.
 
-Archived at Zenodo: ZENODO_DOI_TBD (concept DOI, all versions). Palomar entry (Theorem A): PALOMAR_ID_TBD.
-Website (blueprint and explainers): <https://lgruen.github.io/separated-nets-lean/>.
+Archived at Zenodo: concept DOI [10.5281/zenodo.23327748](https://doi.org/10.5281/zenodo.23327748) (all versions); release v1.0.0: version DOI
+[10.5281/zenodo.23327749](https://doi.org/10.5281/zenodo.23327749). Palomar entry (Theorem A): PALOMAR_ID_TBD.
+Website: <https://lgruen.github.io/separated-nets-lean/>, with the Lean blueprint <https://lgruen.github.io/separated-nets-lean/blueprint/> and the interactive explainers
+<https://lgruen.github.io/separated-nets-lean/explainers/>.
 
 ## Contents
 
@@ -101,7 +105,9 @@ The constructions, proofs and Lean formalization were produced by AI systems (An
 
 ## Citation
 
-See [`CITATION.cff`](CITATION.cff).
+See [`CITATION.cff`](CITATION.cff). The archive is cited by its Zenodo concept DOI
+[10.5281/zenodo.23327748](https://doi.org/10.5281/zenodo.23327748) (all versions) or, for release v1.0.0, by its version DOI
+[10.5281/zenodo.23327749](https://doi.org/10.5281/zenodo.23327749).
 
 ## Licence and third-party material
 

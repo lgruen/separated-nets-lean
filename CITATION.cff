@@ -11,7 +11,20 @@ repository-code: "https://github.com/lgruen/separated-nets-lean"
 url: "https://lgruen.github.io/separated-nets-lean/"
 version: "1.0.0"
 date-released: "2026-10-13"   # date of the v1.0.0 release
-# doi: "10.5281/zenodo.ZENODO_DOI_TBD"   # Zenodo concept DOI, added after the first release
+doi: "10.5281/zenodo.23327748"   # Zenodo concept DOI (all versions)
+identifiers:
+  - type: doi
+    value: "10.5281/zenodo.23327748"
+    description: "Zenodo concept DOI (all versions)"
+  - type: doi
+    value: "10.5281/zenodo.23327749"
+    description: "Zenodo version DOI of release v1.0.0"
+  - type: url
+    value: "https://lgruen.github.io/separated-nets-lean/blueprint/"
+    description: "Lean blueprint"
+  - type: url
+    value: "https://lgruen.github.io/separated-nets-lean/explainers/"
+    description: "Interactive explainers"
 keywords:
   - digital nets
   - quasi-Monte Carlo
