@@ -10,8 +10,8 @@ project:
     the paper is formalized, with the exceptions listed in COVERAGE_GAPS.md (finite computations checked by
     scripts, two classical theorems used as explicit hypotheses, one sentence of rem:projlines). The headline
     result, Theorem A (thm:A), is also a separate Palomar entry: Headline/Challenge.lean, comparatorHeadline.json,
-    metadata palomar/headline/formalization.yaml. This file describes the library; it is not a Palomar
-    submission by itself.
+    metadata palomar/headline/formalization.yaml. This file describes the library in the same format; it is not
+    Palomar metadata and is deliberately not named formalization.yaml.
   authors:
     - {name: "Leonhard Gruenschloss", orcid: "0009-0004-6476-2191"}
   responsible_maintainers:

@@ -20,7 +20,7 @@ Website (blueprint and explainers): <https://lgruen.github.io/separated-nets-lea
 |---|---|---|
 | repository root | the Lean 4 / Mathlib Lake project: statement library `QUNets/Statements/*.lean` (616 statements, one file per part of the paper), roots `Challenge.lean` / `Solution.lean`, Comparator configuration `comparator.json`, proofs in `Z3Net/` and `QUNetsM3/`, fidelity checks `Checks*.lean`, `KNChecks.lean`, tools in `scripts/` | MIT |
 | [`Headline/`](Headline/), `comparatorHeadline.json`, [`palomar/headline/formalization.yaml`](palomar/headline/formalization.yaml) | the Palomar entry for Theorem A: a Mathlib-only statement file of 438 lines | MIT |
-| [`formalization.yaml`](formalization.yaml) | metadata of the whole library (`comparator.json`) | MIT |
+| [`docs/library-formalization.yaml`](docs/library-formalization.yaml) | metadata of the whole library (`comparator.json`), in the `formalization.yaml` format; not a Palomar entry | MIT |
 | [`STATEMENTS_INDEX.md`](STATEMENTS_INDEX.md), [`COVERAGE_GAPS.md`](COVERAGE_GAPS.md), [`COMPARATOR_RESULTS.md`](COMPARATOR_RESULTS.md) | theorem → paper label map; what is not formalized; the Comparator runs | MIT |
 | [`blueprint/`](blueprint/) | leanblueprint sources, generated from `paper/core.tex` | MIT |
 | [`paper/`](paper/) | `core.tex` (bibliography inline), `core.pdf`, `figs/`, [`scripts/`](paper/scripts/) (the programs that reproduce every computed value and figure; driver `scripts/run_all.sh`), `certificates/` (checkers and witness chains of the bases two and three) | manuscript CC BY 4.0 ([`paper/LICENSE.md`](paper/LICENSE.md)); programs and data MIT |

@@ -2,8 +2,8 @@
 """Mechanical Palomar layout checks for this Lean project (a local pre-flight, not the verifier).
 
 Run from anywhere:   uv run --with pyyaml scripts/check_layout.py [CONFIG.json [METADATA.yaml]]
-  (defaults: comparator.json and formalization.yaml at the project root; for the other entries
-  pass e.g. `comparatorEis.json palomar/eis/formalization.yaml`, paths relative to the root)
+  (defaults: comparatorHeadline.json and palomar/headline/formalization.yaml, the Palomar entry;
+  paths relative to the root)
 Checks (PalomarPolicy CONTRIBUTING.md §2.1-2.5, §3.1-3.2):
   * every .lean file outside .lake/.git uses the module system and has <= 10,000 lines;
     no .lean symlinks;
@@ -101,8 +101,8 @@ ok(f"{len(lean_files)} .lean files: all use `module`, max {maxlines} lines (limi
    if not any("module" in e or "lines >" in e for e in errors) else "lean file checks run")
 
 # ---------------------------------------------------------------- comparator.json
-CFG_REL = sys.argv[1] if len(sys.argv) > 1 else "comparator.json"
-META_REL = sys.argv[2] if len(sys.argv) > 2 else "formalization.yaml"
+CFG_REL = sys.argv[1] if len(sys.argv) > 1 else "comparatorHeadline.json"
+META_REL = sys.argv[2] if len(sys.argv) > 2 else "palomar/headline/formalization.yaml"
 if os.path.basename(META_REL) != "formalization.yaml":
     err(f"metadata basename must be exactly formalization.yaml: {META_REL}")
 cfg_path = os.path.join(ROOT, CFG_REL)
