@@ -1,0 +1,69 @@
+name = "z3net"
+version = "0.1.0"
+defaultTargets = ["Z3Net", "Challenge", "Solution"]
+
+[leanOptions]
+autoImplicit = false
+
+[[require]]
+name = "mathlib"
+scope = "leanprover-community"
+rev = "v4.35.0-rc3"
+
+[[lean_lib]]
+name = "Z3Net"
+
+# V14 stage S0: one statement library (`QUNets/Statements/*.lean`, one file per paper section plus
+# the holding section `Hold.lean`), one Challenge root, one Solution root, one Comparator
+# configuration (`comparator.json`, all compared theorems).
+[[lean_lib]]
+name = "Challenge"
+roots = ["Challenge"]
+
+[[lean_lib]]
+name = "Solution"
+roots = ["Solution"]
+
+[[lean_lib]]
+name = "Checks"
+roots = ["Checks"]
+
+[[lean_lib]]
+name = "ChecksCpp"
+roots = ["ChecksCpp"]
+
+[[lean_lib]]
+name = "KNChecks"
+roots = ["KNChecks"]
+
+[[lean_lib]]
+name = "Checks4D"
+roots = ["Checks4D"]
+
+[[lean_lib]]
+name = "ChecksU"
+roots = ["ChecksU"]
+
+[[lean_lib]]
+name = "ChecksS1"
+roots = ["ChecksS1"]
+
+# The nets at m = 3 (`prop:twocoset`, `sec:wnet`).
+[[lean_lib]]
+name = "QUNetsM3"
+globs = ["QUNetsM3.+"]
+
+[[lean_lib]]
+name = "ChecksHL8"
+roots = ["ChecksHL8"]
+
+[[lean_lib]]
+name = "QUNets"
+globs = ["QUNets.+"]
+
+# The Palomar headline entry (stage 13d; `thm:A` since V14 stage S6):
+# `Headline/Challenge.lean` (Mathlib-only, verbatim copies of the definitions),
+# `Headline/Solution.lean`, configuration `comparatorHeadline.json`.
+[[lean_lib]]
+name = "Headline"
+globs = ["Headline.+"]

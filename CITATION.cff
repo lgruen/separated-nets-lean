@@ -1,0 +1,42 @@
+cff-version: 1.2.0
+message: "If you use this software or the manuscript, please cite them as below."
+title: "Low-discrepancy quasi-uniform digital nets in every dimension: manuscript, Lean formalization and blueprint"
+type: software
+authors:
+  - family-names: "Gruenschloss"
+    given-names: "Leonhard"
+    orcid: "https://orcid.org/0009-0004-6476-2191"
+license: MIT
+repository-code: "https://github.com/lgruen/separated-nets-lean"
+url: "https://lgruen.github.io/separated-nets-lean/"
+version: "1.0.0"
+date-released: "2026-10-13"   # RELEASE_DATE_TBD: set to the date of the v1.0.0 release
+# doi: "10.5281/zenodo.ZENODO_DOI_TBD"   # Zenodo concept DOI, added after the first release
+keywords:
+  - digital nets
+  - quasi-Monte Carlo
+  - quasi-uniformity
+  - minimum distance
+  - covering radius
+  - low discrepancy
+  - lattices
+  - Lean 4
+  - Mathlib
+  - formal verification
+abstract: >-
+  LaTeX source, reproduction scripts, Lean 4 / Mathlib formalization (616 compared theorems, accepted by
+  Comparator with the Lean and NanoDa kernels), leanblueprint and interactive explainers of the manuscript
+  "Low-discrepancy quasi-uniform digital nets in every dimension" (version 1), which constructs, for every
+  dimension s >= 3, explicit low-discrepancy digital nets in a fixed base whose minimum distance and covering
+  radius are of the optimal order N^(-1/s), answering a question of Dick, Goda and Suzuki. The constructions,
+  proofs and Lean formalization were produced by AI systems under the author's direction; see the section
+  "Use of AI" of README.md.
+preferred-citation:
+  type: article
+  title: "Low-discrepancy quasi-uniform digital nets in every dimension"
+  authors:
+    - family-names: "Gruenschloss"
+      given-names: "Leonhard"
+      orcid: "https://orcid.org/0009-0004-6476-2191"
+  year: 2026
+  notes: "Version 1. Hexagon identifier HEXAGON_ID_TBD"

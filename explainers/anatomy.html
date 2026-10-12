@@ -1,0 +1,1469 @@
+<title>Digits, Cubes, Lattices</title>
+<style>
+@import url('https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500&family=IBM+Plex+Sans:wght@400;500;600&family=Source+Serif+4:ital,opsz,wght@0,8..60,400;0,8..60,600;1,8..60,400&display=swap');
+/* Layout: one reading column (68ch) for prose; figure rows break wider, plot left and an instrument panel right; everything stacks to one column on phones. */
+:root {
+  --bg: #f5f6f8;
+  --surface: #ffffff;
+  --ink: #15191f;
+  --muted: #586271;
+  --rule: #d5dae1;
+  --grid: #e6e9ee;
+  --grid-strong: #b9c1cc;
+  --accent: #2b6cb0;
+  --accent-soft: rgba(43, 108, 176, 0.13);
+  --on-accent: #ffffff;
+  --slip: #c0561d;
+  --jit: #8792a2;
+  --chip: #eef1f5;
+  --ramp-lo: #8ea3bb;
+  --ramp-hi: #12284a;
+  --box-empty: rgba(135, 146, 162, 0.28);
+  --box-many: rgba(192, 86, 29, 0.32);
+  --serif: 'Source Serif 4', 'Source Serif Pro', Georgia, 'Times New Roman', serif;
+  --sans: 'IBM Plex Sans', system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif;
+  --mono: 'IBM Plex Mono', ui-monospace, 'SF Mono', Menlo, Consolas, monospace;
+}
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    --bg: #0e1116; --surface: #151a21; --ink: #e4e8ee; --muted: #98a3b2; --rule: #2a313c;
+    --grid: #1e242d; --grid-strong: #3a4452; --accent: #6aa8ea; --accent-soft: rgba(106, 168, 234, 0.17);
+    --on-accent: #0b1220; --slip: #f09a52; --jit: #6d7888; --chip: #1f2630; --ramp-lo: #4b5c72; --ramp-hi: #dce8f6; --box-empty: rgba(109, 120, 136, 0.35); --box-many: rgba(240, 154, 82, 0.38);
+    color-scheme: dark;
+  }
+}
+:root[data-theme="dark"] {
+  --bg: #0e1116; --surface: #151a21; --ink: #e4e8ee; --muted: #98a3b2; --rule: #2a313c;
+  --grid: #1e242d; --grid-strong: #3a4452; --accent: #6aa8ea; --accent-soft: rgba(106, 168, 234, 0.17);
+  --on-accent: #0b1220; --slip: #f09a52; --jit: #6d7888; --chip: #1f2630; --ramp-lo: #4b5c72; --ramp-hi: #dce8f6; --box-empty: rgba(109, 120, 136, 0.35); --box-many: rgba(240, 154, 82, 0.38);
+  color-scheme: dark;
+}
+* { box-sizing: border-box; }
+body { background: var(--bg); color: var(--ink); font-family: var(--serif); font-size: 17px; line-height: 1.58; margin: 0; }
+.page { max-width: 1100px; margin-inline: auto; padding-inline: clamp(16px, 4vw, 40px); padding-block: 40px 72px; }
+.prose { max-width: 68ch; }
+p { margin-block: 0 0.85em; }
+i, .m { font-style: italic; }
+sub, sup { font-size: 0.72em; line-height: 0; }
+.eyebrow { font-family: var(--mono); font-size: 12.5px; letter-spacing: 0.08em; text-transform: uppercase; color: var(--muted); margin: 0 0 10px; }
+h1 { font-weight: 600; font-size: clamp(2rem, 5.2vw, 3.1rem); line-height: 1.08; letter-spacing: -0.012em; margin: 0 0 14px; text-wrap: balance; }
+h2 { font-weight: 600; font-size: clamp(1.45rem, 3.2vw, 1.85rem); line-height: 1.2; margin: 0; text-wrap: balance; }
+h3 { font-family: var(--sans); font-weight: 600; font-size: 13px; letter-spacing: 0.06em; text-transform: uppercase; color: var(--muted); margin: 0 0 8px; }
+.lede { font-size: 1.12rem; color: var(--ink); }
+.byline { font-family: var(--sans); font-size: 14px; color: var(--muted); }
+a { color: var(--accent); }
+:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+
+/* digit ruler */
+.ruler { margin-block: 28px 8px; display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 14px; }
+.ruler .lead { grid-column: 1 / -1; font-family: var(--mono); font-size: clamp(15px, 2.6vw, 20px); display: flex; flex-wrap: wrap; align-items: baseline; gap: 6px; }
+.ruler .lead .grp { padding: 2px 8px 4px; border-bottom: 3px solid; }
+.ruler .lead .g1 { border-color: var(--ink); }
+.ruler .lead .g2 { border-color: var(--accent); color: var(--accent); }
+.ruler .lead .g3 { border-color: var(--jit); color: var(--muted); border-bottom-style: dashed; }
+.step { border-top: 3px solid var(--ink); padding-top: 10px; min-width: 0; font-size: 15.5px; }
+.step.s2 { border-color: var(--accent); }
+.step.s3 { border-color: var(--jit); border-top-style: dashed; }
+.step b { font-family: var(--sans); font-weight: 600; font-size: 14px; display: block; margin-bottom: 4px; }
+@media (max-width: 760px) { .ruler { grid-template-columns: minmax(0, 1fr); } }
+
+section { margin-top: 64px; }
+.sechead { display: flex; align-items: baseline; gap: 14px; margin-bottom: 14px; }
+.secno { font-family: var(--mono); font-size: 15px; color: var(--accent); border: 1px solid var(--accent); border-radius: 3px; padding: 1px 7px; flex: none; }
+.refs { display: flex; flex-wrap: wrap; gap: 6px 8px; margin: 2px 0 0; font-family: var(--sans); font-size: 13px; color: var(--muted); align-items: baseline; }
+.ref { font-family: var(--mono); font-size: 12px; color: var(--ink); background: var(--chip); border: 1px solid var(--rule); border-radius: 3px; padding: 1px 6px; white-space: nowrap; }
+.ref span { font-family: var(--sans); color: var(--muted); margin-left: 4px; }
+
+.fig { display: grid; grid-template-columns: minmax(0, 1fr) minmax(250px, 310px); gap: 24px; align-items: start; margin-block: 22px 6px; }
+@media (max-width: 860px) { .fig { grid-template-columns: minmax(0, 1fr); } }
+.plot { position: relative; width: 100%; max-width: 100%; aspect-ratio: 1 / 1; background: var(--surface); border: 1px solid var(--rule); border-radius: 4px; overflow: hidden; }
+.plot canvas { display: block; width: 100%; height: 100%; max-width: 100%; touch-action: manipulation; }
+.plot .hint { position: absolute; left: 10px; bottom: 8px; font-family: var(--sans); font-size: 12px; color: var(--muted); pointer-events: none; background: var(--surface); padding: 1px 4px; border-radius: 2px; }
+.plot .fallback { position: absolute; inset: 0; display: grid; place-items: center; padding: 24px; text-align: center; font-family: var(--sans); color: var(--muted); }
+.panel { font-family: var(--sans); font-size: 14px; display: flex; flex-direction: column; gap: 18px; min-width: 0; }
+.ctl { display: flex; flex-direction: column; gap: 6px; }
+.ctl .row { display: flex; justify-content: space-between; align-items: baseline; gap: 8px; }
+.ctl .val { font-family: var(--mono); font-variant-numeric: tabular-nums; }
+input[type=range] { width: 100%; accent-color: var(--accent); margin: 0; }
+.checks { display: flex; flex-direction: column; gap: 7px; }
+.checks label { display: flex; gap: 8px; align-items: center; cursor: pointer; }
+.checks input { accent-color: var(--accent); width: 16px; height: 16px; margin: 0; }
+.checks label.off { color: var(--muted); cursor: default; }
+.seg { display: flex; flex-wrap: wrap; gap: 6px; }
+.btn { font: 500 13px/1.2 var(--sans); padding: 7px 10px; border: 1px solid var(--rule); background: var(--surface); color: var(--ink); border-radius: 4px; cursor: pointer; }
+.btn:hover { border-color: var(--grid-strong); }
+.btn[aria-pressed="true"] { border-color: var(--accent); color: var(--accent); background: var(--accent-soft); }
+.btn:disabled { color: var(--muted); cursor: default; opacity: 0.6; }
+select { font: 14px var(--sans); color: var(--ink); background: var(--surface); border: 1px solid var(--rule); border-radius: 4px; padding: 6px 8px; width: 100%; }
+dl.read { display: grid; grid-template-columns: minmax(0, 1fr) auto; gap: 5px 12px; margin: 0; padding-top: 12px; border-top: 1px solid var(--rule); }
+dl.read dt { color: var(--muted); min-width: 0; }
+dl.read dd { margin: 0; font-family: var(--mono); font-variant-numeric: tabular-nums; text-align: right; }
+dl.read dd.em { color: var(--accent); font-weight: 500; }
+.note { font-size: 12.5px; color: var(--muted); line-height: 1.45; }
+.legend { display: flex; flex-wrap: wrap; gap: 6px 14px; font-family: var(--sans); font-size: 12.5px; color: var(--muted); margin-top: 8px; }
+.legend span { display: inline-flex; align-items: center; gap: 6px; }
+.legend span .lt { display: inline; }
+.sw { display: inline-block; width: 18px; height: 10px; position: relative; }
+.sw.pt::after { content: ''; position: absolute; left: 5px; top: 1px; width: 8px; height: 8px; border-radius: 50%; background: var(--ink); }
+.sw.ring::after { content: ''; position: absolute; left: 4px; top: 0; width: 8px; height: 8px; border-radius: 50%; border: 1.5px solid var(--accent); }
+.sw.slip { border-top: 2px dashed var(--slip); top: 4px; height: 2px; }
+.sw.jit { border-top: 1.5px solid var(--jit); top: 4px; height: 2px; }
+.sw.carry { border-top: 1.5px solid var(--grid-strong); top: 4px; height: 2px; }
+.sw.pair { border-top: 2.5px solid var(--accent); top: 4px; height: 2px; }
+.sw.rl1, .sw.rl2, .sw.rl3 { width: 4px; height: 14px; border-left: 3px solid var(--ink); }
+.sw.rl2 { border-left-color: var(--accent); }
+.sw.rl3 { border-left: 3px dashed var(--jit); }
+
+/* digit inspector */
+.insp { border-top: 1px solid var(--rule); padding-top: 12px; display: flex; flex-direction: column; gap: 8px; }
+.drow { display: flex; align-items: center; gap: 6px; flex-wrap: wrap; font-family: var(--mono); font-size: 13px; }
+.drow .lab { width: 2.6em; color: var(--muted); }
+.digits { display: inline-flex; flex-wrap: wrap; gap: 2px; }
+.d { min-width: 1.55em; text-align: center; padding: 1px 2px; border-radius: 3px; background: var(--chip); font-variant-numeric: tabular-nums; }
+.d.geo { background: var(--accent); color: var(--on-accent); }
+.d.jit { background: transparent; color: var(--muted); outline: 1px dashed var(--rule); outline-offset: -1px; }
+.formula { font-family: var(--mono); font-size: 12.5px; line-height: 1.6; }
+.formula .r { color: var(--accent); font-weight: 500; }
+
+/* holonomy chart */
+.chartwrap { background: var(--surface); border: 1px solid var(--rule); border-radius: 4px; padding: 10px 8px 4px; }
+.chartwrap svg { display: block; width: 100%; height: auto; max-width: 100%; }
+.tablewrap { overflow-x: auto; }
+table.dir { border-collapse: collapse; font-family: var(--sans); font-size: 13px; width: 100%; }
+table.dir th, table.dir td { padding: 4px 6px; text-align: right; border-bottom: 1px solid var(--rule); white-space: nowrap; }
+table.dir th:first-child, table.dir td:first-child { text-align: left; }
+table.dir td { font-family: var(--mono); font-variant-numeric: tabular-nums; }
+table.dir th { font-weight: 500; color: var(--muted); }
+
+/* worked example */
+.wk-ctl { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 16px 20px; margin-block: 22px 4px; align-items: end; }
+@media (max-width: 860px) { .wk-ctl { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
+@media (max-width: 480px) { .wk-ctl { grid-template-columns: minmax(0, 1fr); } }
+.wk-irow { display: flex; gap: 8px; }
+.wk-irow input { font: 14px var(--mono); width: 7.5em; min-width: 0; padding: 6px 8px; color: var(--ink); background: var(--surface); border: 1px solid var(--rule); border-radius: 4px; }
+ol.steps { list-style: none; padding: 0; margin: 18px 0 0; }
+ol.steps > li { display: grid; grid-template-columns: 10.5rem minmax(0, 1fr); gap: 8px 20px; border-top: 1px solid var(--rule); padding-block: 18px; }
+@media (max-width: 760px) { ol.steps > li { grid-template-columns: minmax(0, 1fr); } }
+.sh { font-family: var(--sans); font-weight: 600; font-size: 15px; }
+.stn { display: block; font-family: var(--mono); font-weight: 400; font-size: 12px; color: var(--accent); letter-spacing: 0.06em; text-transform: uppercase; }
+.sb { min-width: 0; font-size: 15.5px; }
+.sb p { max-width: 68ch; }
+.scrollx { overflow-x: auto; max-width: 100%; }
+.coords { display: flex; flex-wrap: wrap; gap: 18px 32px; align-items: flex-start; }
+.coordblk { min-width: 0; max-width: 100%; }
+.coordblk h4 { font-family: var(--sans); font-size: 13px; font-weight: 600; margin: 0 0 4px; }
+table.gm { border-collapse: separate; border-spacing: 2px; font-family: var(--mono); font-size: 13px; font-variant-numeric: tabular-nums; }
+table.gm th, table.gm td { padding: 1px 5px; text-align: center; white-space: nowrap; }
+table.gm thead th { color: var(--muted); font-weight: 400; font-size: 11.5px; }
+table.gm td.ent { background: var(--chip); border-radius: 2px; min-width: 1.7em; }
+table.gm td.lab { text-align: left; color: var(--muted); font-size: 11.5px; border-left: 3px solid var(--ink); }
+table.gm tr.georow td.lab { border-left-color: var(--accent); }
+table.gm tr.jitrow td.lab { border-left: 3px dashed var(--jit); }
+table.gm td.res { font-weight: 500; }
+table.gm tr.georow td.res { color: var(--accent); }
+table.gm tr.jitrow td.res { color: var(--muted); }
+table.gm tbody tr { cursor: default; }
+table.gm tbody tr:focus-visible { outline: 2px solid var(--accent); outline-offset: 0; }
+table.gm tr.hot td.ent { background: var(--accent-soft); }
+table.gm tr.hot td.ent.z { background: var(--chip); color: var(--muted); }
+table.gm th.vh { color: var(--ink); }
+.expand { font-family: var(--mono); font-size: 12.5px; margin-top: 6px; line-height: 1.5; overflow-wrap: anywhere; }
+.chipline { display: flex; flex-wrap: wrap; gap: 4px 10px; align-items: center; font-family: var(--mono); font-size: 13px; }
+.grpd { display: inline-flex; gap: 2px; padding-bottom: 3px; border-bottom: 3px solid var(--ink); }
+.grpd.g2 { border-color: var(--accent); }
+.grpd.g3 { border-bottom: 3px dashed var(--jit); }
+.vlab { display: inline-flex; flex-direction: column; align-items: center; font-family: var(--mono); }
+.vlab small { font-size: 10.5px; color: var(--muted); }
+table.lat { border-collapse: collapse; font-family: var(--mono); font-size: 13px; font-variant-numeric: tabular-nums; }
+table.lat th, table.lat td { padding: 4px 9px; text-align: right; border-bottom: 1px solid var(--rule); white-space: nowrap; }
+table.lat th { font-family: var(--sans); font-weight: 500; font-size: 12.5px; color: var(--muted); }
+table.lat td:first-child, table.lat th:first-child { text-align: left; }
+table.lat td.em { color: var(--accent); font-weight: 500; }
+.verdict { font-family: var(--sans); font-size: 14px; padding: 8px 12px; border-left: 3px solid var(--accent); background: var(--accent-soft); margin-block: 10px; max-width: 68ch; }
+.codebar { display: flex; gap: 12px; align-items: center; margin-bottom: 8px; }
+pre.code { font-family: var(--mono); font-size: 12.5px; line-height: 1.5; background: var(--surface); border: 1px solid var(--rule); border-radius: 4px; padding: 12px 14px; margin: 0; overflow-x: auto; max-width: 100%; color: var(--ink); }
+
+/* navigation between the pages; box occupancy swatches; [hidden] */
+.pagenav { display: flex; flex-wrap: wrap; gap: 4px 20px; font-family: var(--sans); font-size: 13.5px; margin: 0 0 26px; padding-bottom: 10px; border-bottom: 1px solid var(--rule); }
+.pagenav a { color: var(--muted); text-decoration: none; }
+.pagenav a:hover { color: var(--accent); }
+.pagenav a[aria-current="page"] { color: var(--ink); font-weight: 600; }
+.pagenav .pn { font-family: var(--mono); color: var(--accent); margin-right: 6px; }
+.sw.boxone { border: 1px solid var(--grid-strong); height: 10px; }
+.sw.boxzero { background: var(--box-empty); border: 1px solid var(--grid-strong); height: 10px; }
+.sw.boxmany { background: var(--box-many); border: 1px solid var(--slip); height: 10px; }
+table.gm td.chg { outline: 2px solid var(--slip); outline-offset: -2px; }
+table.gm td.low { background: var(--accent-soft); }
+table.lat td.bad { color: var(--slip); font-weight: 500; }
+[hidden] { display: none !important; }
+
+footer { margin-top: 72px; padding-top: 18px; border-top: 1px solid var(--rule); font-size: 15px; }
+footer ol { padding-left: 1.3em; margin: 6px 0 0; }
+footer li { margin-bottom: 3px; }
+</style>
+
+<main class="page">
+  <header>
+    <nav class="pagenav" aria-label="Explainer pages">
+      <a href="anatomy.html" aria-current="page"><span class="pn">1</span>How the nets are built</a>
+      <a href="shifts.html"><span class="pn">2</span>Digital shifts</a>
+      <a href="beyond.html"><span class="pn">3</span>Beyond the cube</a>
+    </nav>
+    <p class="eyebrow">Interactive companion &middot; page 1</p>
+    <h1>How the nets are built</h1>
+    <div class="prose">
+      <p class="lede">Figures for <i>Low-discrepancy quasi-uniform digital nets in every dimension</i>. The page starts from the standard frame, which puts one point in every box but lets some points nearly touch, and then repairs it in two steps: keep the frame's deeper digits, and move the lattice inside each cell. Every point is computed in your browser from the generator matrices in the paper, with exact integer arithmetic.</p>
+      <p class="byline">Leonhard Gruenschloss &middot; labels such as <span class="ref">thm:main</span> name the matching statement in the paper</p>
+    </div>
+    <div class="ruler" aria-label="The three roles of the base-q digits of a coordinate">
+      <div class="lead"><span>x = 0.</span><span class="grp g1">d<sub>1</sub> d<sub>2</sub> &hellip; d<sub>k</sub></span><span class="grp g2">d<sub>k+1</sub></span><span class="grp g3">d<sub>k+2</sub> d<sub>k+3</sub> &hellip;</span><span style="color:var(--muted)">(base <i>q</i>)</span></div>
+      <div class="step"><b>Digits 1 to <i>k</i>: the cube</b>For <i>N</i> = <i>q</i><sup><i>sk</i></sup> points, the first <i>k</i> digits of every coordinate select one of <i>N</i> cubes of side <i>q</i><sup>&minus;<i>k</i></sup>. A <span style="white-space:nowrap">(0,&thinsp;<i>sk</i>,&thinsp;<i>s</i>)-net</span> has exactly one point in each cube.</div>
+      <div class="step s2"><b>Digit <i>k</i>+1: the lattice</b>Because the net is digital, this digit is a linear function, modulo <i>q</i>, of the cell digits of all coordinates. The construction re-chooses it to depend only on the last cell digit of each coordinate (plus carries): <i>r</i> = <i>M&#771;</i>&#8467; mod <i>q</i>. Between the planes where it wraps around modulo <i>q</i>, the points then lie on a lattice. At those planes the pattern slips, and no cube is skipped.</div>
+      <div class="step s3"><b>Digits <i>k</i>+2 onward: the jitter</b>These digits are kept from the frame. They fill every thin box, and they move a point by less than 1/<i>q</i> of the cube side: they cost at most one unit of 1/<i>q</i> per coordinate, the summand 1 in the first-order deficit (<span class="ref">lem:Ss</span>, <span class="ref">rem:K</span>).</div>
+    </div>
+  </header>
+
+  <!-- ===================================================== 1. the frame -->
+  <section id="frame" aria-labelledby="h-frame">
+    <div class="sechead"><span class="secno">1</span><h2 id="h-frame">The standard frame</h2></div>
+    <div class="prose">
+      <p>Everything starts from a frame: a digital net whose coordinates read one polynomial at different places. In two dimensions it is the Hammersley net. Write the index <i>i</i> in base <i>q</i>; the coordinate <i>x</i> reads its digits from the most significant one down, and <i>y</i> reads them in reverse order, which is the van der Corput sequence. So the point with index <i>i</i> is (<i>i</i>, rev(<i>i</i>))/<i>N</i>.</p>
+      <p>An elementary box of shape (<i>d<sub>x</sub></i>, <i>d<sub>y</sub></i>) with <i>d<sub>x</sub></i> + <i>d<sub>y</sub></i> = <i>m</i> fixes the first <i>d<sub>x</sub></i> digits of <i>x</i> and the first <i>d<sub>y</sub></i> digits of <i>y</i>. For the Hammersley net these are the top <i>d<sub>x</sub></i> and the bottom <i>d<sub>y</sub></i> digits of <i>i</i>, which together are all of them: each box holds exactly one point, for every shape, including the long thin ones. The cells of the later sections are just the shape (<i>k</i>, <i>k</i>). In matrix terms, the box matrix stacks the first <i>d<sub>x</sub></i> rows of <i>C<sub>x</sub></i> and the first <i>d<sub>y</sub></i> rows of <i>C<sub>y</sub></i>; every box holds one point exactly when its determinant is a unit modulo <i>q</i>. For a frame every such determinant is &plusmn;1, in every base.</p>
+    </div>
+    <div class="refs">In the paper: <span class="ref">sec:frames</span><span class="ref">lem:nie<span>box criterion</span></span><span class="ref">lem:Ts<span>box minors of a frame</span></span><span class="ref">lem:hermite</span></div>
+
+    <div class="fig">
+      <div>
+        <div class="plot" id="plotF"><canvas id="cF" aria-label="The Hammersley frame with the elementary boxes of one shape"></canvas></div>
+        <div class="legend" aria-hidden="true">
+          <span><i class="sw pt"></i><span class="lt">point</span></span><span><i class="sw boxone"></i><span class="lt">box with one point</span></span><span><i class="sw boxzero"></i><span class="lt">empty box</span></span><span><i class="sw boxmany"></i><span class="lt">box with two or more</span></span><span><i class="sw pair"></i><span class="lt">closest pair (torus)</span></span>
+        </div>
+      </div>
+      <div class="panel">
+        <div class="ctl">
+          <div class="row"><label for="qF">Base <i>q</i></label><span class="val" id="qFv">5</span></div>
+          <input type="range" id="qF" min="2" max="13" step="1" value="5">
+        </div>
+        <div class="ctl">
+          <div class="row"><span id="kFlab">Cell digits <i>k</i></span><span class="note">q^k &le; 64</span></div>
+          <div class="seg" role="group" aria-labelledby="kFlab" id="kFseg">
+            <button class="btn" type="button" data-k="1" aria-pressed="false">1</button>
+            <button class="btn" type="button" data-k="2" aria-pressed="true">2</button>
+            <button class="btn" type="button" data-k="3" aria-pressed="false">3</button>
+          </div>
+        </div>
+        <div class="ctl">
+          <div class="row"><label for="dF">Box shape (<i>d<sub>x</sub></i>, <i>d<sub>y</sub></i>)</label><span class="val" id="dFv"></span></div>
+          <input type="range" id="dF" min="0" max="4" step="1" value="1">
+        </div>
+        <dl class="read" id="readF"></dl>
+        <div>
+          <h3 style="margin-bottom:4px">Box matrix of this shape</h3>
+          <div class="scrollx"><table class="gm" id="boxF"></table></div>
+          <p class="formula" id="detF"></p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ===================================================== 2. the problem -->
+  <section id="problem" aria-labelledby="h-problem">
+    <div class="sechead"><span class="secno">2</span><h2 id="h-problem">The problem: the closest pair</h2></div>
+    <div class="prose">
+      <p>The frame fills every box, but some of its points nearly touch. Its geometric digit, the digit after the cell digits, is <i>r</i> = <i>M&#771;</i>&#8467; mod <i>q</i> with the layer <i>M&#771;</i> = [0 1; 1 0]: the digit of <i>x</i> is the last cell digit of <i>y</i> and vice versa. Away from carries this is harmless: the local lattice (<i>I</i> + <i>M&#771;</i>/<i>q</i>)&#8484;<sup>2</sup> has its shortest vector close to one cell (see the table). The trouble sits at the carries.</p>
+      <p>Step diagonally across a carry: from a cell whose last digits are both <i>q</i> &minus; 1 to the next cell in both directions, where both last digits roll over to 0. Both geometric digits wrap from <i>q</i> &minus; 1 to 0, and each wrap pulls the second point back by almost a whole cell, nearly cancelling the step: the two points end up about 1/<i>q</i> of a cell apart in each coordinate. A coordinate of the frame does not see its own step (the diagonal of <i>M&#771;</i> is 0), so nothing stops the wraps from cancelling it; in the paper's words this step has two moving axes and no backward coordinate (<span class="ref">rem:K</span>). With one cell digit the only such carry is the corner of the torus. With more cell digits it happens at every corner of a block of <i>q</i> &times; <i>q</i> cells, and the separation falls with every added digit (in base 2 the closest difference on the torus is one unit in each coordinate at every size shown). These values are computed; the paper proves no separation value for the unscrambled frame.</p>
+    </div>
+    <div class="refs">In the paper: <span class="ref">def:geom</span><span class="ref">lem:Rs<span>first offset rows of the frame</span></span><span class="ref">rem:K<span>backward coordinates</span></span></div>
+
+    <div class="fig">
+      <div>
+        <div class="chartwrap"><svg id="probchart" viewBox="0 0 640 330" role="img" aria-label="Exact separation of the Hammersley frame and of the turned layer against the base"></svg></div>
+        <p class="note" style="margin:14px 0 6px">For the base and cell digits chosen in section 1:</p>
+        <div class="scrollx"><table class="lat" id="probtab"></table></div>
+        <div class="legend" aria-hidden="true" style="margin-top:8px">
+          <span><svg width="22" height="8"><line x1="1" y1="4" x2="21" y2="4" style="stroke:var(--muted);stroke-width:1.6;stroke-dasharray:4 3"/></svg><span class="lt">frame, <i>k</i> = 1</span></span>
+          <span><svg width="22" height="8"><line x1="1" y1="4" x2="21" y2="4" style="stroke:var(--ink);stroke-width:1.6"/></svg><span class="lt">frame, <i>k</i> = 2</span></span>
+          <span><svg width="22" height="8"><line x1="1" y1="4" x2="21" y2="4" style="stroke:var(--accent);stroke-width:2"/></svg><span class="lt">turned layer of section 4, <i>k</i> = 2</span></span>
+        </div>
+      </div>
+      <div class="panel">
+        <div class="verdict" id="probstep" style="margin:0"></div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ===================================================== 3. the freedom -->
+  <section id="freedom" aria-labelledby="h-freedom">
+    <div class="sechead"><span class="secno">3</span><h2 id="h-freedom">What can change without breaking <i>t</i> = 0</h2></div>
+    <div class="prose">
+      <p>A lower-triangular scramble of a coordinate adds to each of its digits a combination of that coordinate's earlier digits, and may multiply the digit by a unit. Two points that share the first <i>d</i> digits of <i>x</i> still share them afterwards, so every box goes to a box of the same shape, and one point per box survives for free. In matrices: the first <i>d</i> rows of <i>LC</i> are the leading block of <i>L</i> times the first <i>d</i> rows of <i>C</i>, so every box minor is multiplied by a unit. This is why linear scrambling (Matou&#353;ek) and Tezuka's generalized Faure sequences keep <i>t</i>; Owen's nested scrambles are a larger, nonlinear family that also keeps it.</p>
+      <p>The construction uses this freedom on one digit only. It rewrites the geometric digit of each coordinate by subtracting the coordinate's own last cell digit (and, for <i>x</i>, flipping its sign), so that the layer becomes the turned layer of section 4. The deeper digits, the jitter, are borrowed from the frame unchanged up to a sign; they are what keeps every thin box filled. The table compares the two nets matrix by matrix.</p>
+    </div>
+    <div class="refs">In the paper: <span class="ref">lem:box<span>gauge moves</span></span><span class="ref">eq:scr</span><span class="ref">prop:Gs</span><span class="ref">cor:tsk</span></div>
+
+    <div class="coords" id="scrF" style="margin-top:22px"></div>
+    <div class="scrollx" style="margin-top:18px"><table class="lat" id="shapesF"></table></div>
+    <p class="note" id="scrNote"></p>
+  </section>
+
+  <!-- ===================================================== 4. 2D -->
+  <section id="square" aria-labelledby="h-square">
+    <div class="sechead"><span class="secno">4</span><h2 id="h-square">The fix: move the lattice in each cell</h2></div>
+    <div class="prose">
+      <p>The repaired net keeps the frame's cells and its deeper digits (up to a sign) and changes only the geometric digit, to <i>r</i> = <i>M&#771;</i>&#8467; mod <i>q</i> with the turned layer <i>M&#771;</i> = &minus;<i>I</i> + quarter turn = [&minus;1 &minus;1; 1 &minus;1]; &#8467; holds the last cell digit of each coordinate. Along its own axis each coordinate's digit now moves backward (the diagonal of <i>M&#771;</i> is &minus;1), so on a step to a neighbouring cell, carries included, a wrap can only lengthen the coordinates that move. In higher dimensions the frame's geometric digit also depends on how far a carry reaches (<span class="ref">lem:Rs</span>), and the construction chooses it through a design that behaves well at every carry depth (<span class="ref">prop:Gs</span>); in two dimensions the last cell digits suffice. Between the dashed slip lines the points sit on the lattice (<i>I</i> + <i>M&#771;</i>/<i>q</i>)&#8484;<sup>2</sup>, a copy of the square grid turned by arctan(1/(<i>q</i>&minus;1)) and shrunk slightly. Click a cell to read its digits; switch the layer to compare with the plain frame.</p>
+      <p>Now turn the deeper digits off and show the boxes of a long thin shape. The points drop to their lattice images, and those boxes are no longer filled one by one: some are empty, some hold several points. The borrowed jitter is exactly what fills them. This layer is the <i>xy</i>-block of the three-dimensional layer in section 6.</p>
+    </div>
+    <div class="refs">In the paper: <span class="ref">sec:prelim<span>The lattice picture</span></span><span class="ref">def:geom</span><span class="ref">lem:box<span>gauge moves</span></span><span class="ref">fig:arc</span></div>
+
+    <div class="fig">
+      <div>
+        <div class="plot" id="plot2d"><canvas id="c2d" tabindex="0" aria-label="Two-dimensional net. Use the arrow keys to move the selected cell."></canvas></div>
+        <div class="legend" aria-hidden="true">
+          <span><i class="sw pt"></i><span class="lt">point</span></span><span><i class="sw ring"></i><span class="lt">lattice image (digits 1 to <i>k</i>+1)</span></span><span><i class="sw slip"></i><span class="lt">slip, where <i>r</i> wraps</span></span><span><i class="sw jit"></i><span class="lt">jitter</span></span><span><i class="sw carry"></i><span class="lt">carry line</span></span><span><i class="sw pair"></i><span class="lt">closest pair</span></span><span><i class="sw boxzero"></i><span class="lt">empty box</span></span><span><i class="sw boxmany"></i><span class="lt">box with two or more</span></span>
+        </div>
+      </div>
+      <div class="panel">
+        <div class="ctl">
+          <div class="row"><label for="q2">Base <i>q</i></label><span class="val" id="q2v">5</span></div>
+          <input type="range" id="q2" min="2" max="13" step="1" value="5">
+        </div>
+        <div class="ctl">
+          <div class="row"><span id="k2lab">Cell digits <i>k</i></span><span class="note" id="k2note"></span></div>
+          <div class="seg" role="group" aria-labelledby="k2lab" id="k2seg">
+            <button class="btn" type="button" data-k="1" aria-pressed="false">1</button>
+            <button class="btn" type="button" data-k="2" aria-pressed="true">2</button>
+            <button class="btn" type="button" data-k="3" aria-pressed="false">3</button>
+          </div>
+        </div>
+        <div class="ctl">
+          <label for="var2">Layer</label>
+          <select id="var2">
+            <option value="rotated">Turned: M&#771; = &minus;I + quarter turn</option>
+            <option value="frame">Plain Hammersley frame</option>
+          </select>
+        </div>
+        <div class="checks">
+          <label><input type="checkbox" id="lat2" checked> Lattice and slips</label>
+          <label><input type="checkbox" id="jit2" checked> Deeper digits (jitter)</label>
+          <label><input type="checkbox" id="pair2" checked> Closest pair</label>
+          <label><input type="checkbox" id="box2"> Boxes of one shape</label>
+        </div>
+        <div class="ctl" id="box2ctl" hidden>
+          <div class="row"><label for="d2">Box shape (<i>d<sub>x</sub></i>, <i>d<sub>y</sub></i>)</label><span class="val" id="d2v"></span></div>
+          <input type="range" id="d2" min="0" max="4" step="1" value="0">
+        </div>
+        <dl class="read" id="read2"></dl>
+        <div class="insp" id="insp2" aria-live="polite"></div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ===================================================== 5. worked example -->
+  <section id="worked" aria-labelledby="h-worked">
+    <div class="sechead"><span class="secno">5</span><h2 id="h-worked">From index to point</h2></div>
+    <div class="prose">
+      <p>This is the implementation view of the repaired net. A digital net is computed one digit at a time. Write the index <i>i</i> of a point in base <i>q</i>, multiply its digit vector by one integer matrix per coordinate, reduce modulo <i>q</i>, and read the result as the base-<i>q</i> digits of the coordinate. The steps below do this for one point, then split the digits into cell, geometric digit and jitter, and show where the lattice comes from.</p>
+    </div>
+    <div class="refs">In the paper: <span class="ref">sec:conv<span>index conventions</span></span><span class="ref">lem:nie</span><span class="ref">sec:prelim<span>graph forms</span></span><span class="ref">def:geom</span><span class="ref">prop:cell</span><span class="ref">def:col</span></div>
+
+    <div class="wk-ctl panel">
+      <div class="ctl">
+        <label for="wnet">Net</label>
+        <select id="wnet">
+          <option value="rotated">2D net of section 4, turned layer</option>
+          <option value="frame">2D Hammersley frame</option>
+          <option value="P">3D net &#119979; of def:net, k cell digits</option>
+          <option value="C">3D column net &#119966; of def:col</option>
+        </select>
+      </div>
+      <div class="ctl">
+        <label for="wq">Base <i>q</i></label>
+        <select id="wq"></select>
+      </div>
+      <div class="ctl">
+        <span id="wklab">Cell digits <i>k</i></span>
+        <div class="seg" role="group" aria-labelledby="wklab" id="wkseg">
+          <button class="btn" type="button" data-k="1" aria-pressed="false">1</button>
+          <button class="btn" type="button" data-k="2" aria-pressed="true">2</button>
+        </div>
+      </div>
+      <div class="ctl wk-idx">
+        <div class="row"><label for="wi">Index <i>i</i></label><span class="note" id="wimax"></span></div>
+        <div class="wk-irow"><input type="number" id="wi" min="0" step="1" value="0" inputmode="numeric"><button class="btn" type="button" id="wrand">Pick a random point</button></div>
+        <input type="range" id="wir" min="0" max="10" step="1" value="0" aria-label="Index i">
+      </div>
+    </div>
+
+    <ol class="steps">
+      <li><div class="sh"><span class="stn">Step 1</span>Index digits</div><div class="sb" id="w1"></div></li>
+      <li><div class="sh"><span class="stn">Step 2</span>Generator matrices</div><div class="sb" id="w2"></div></li>
+      <li><div class="sh"><span class="stn">Step 3</span>The coordinates</div><div class="sb" id="w3"></div></li>
+      <li><div class="sh"><span class="stn">Step 4</span>The same point in graph form</div><div class="sb" id="w4"></div></li>
+      <li><div class="sh"><span class="stn">Step 5</span>Where the lattice comes from</div><div class="sb" id="w5"></div></li>
+      <li><div class="sh"><span class="stn">Step 6</span>Reference implementation</div><div class="sb" id="w6">
+        <p class="note" style="margin-top:0">All points of the net from its generator matrices, in plain Python. It is the algorithm the page runs, and the cross-check executes this exact text. The matrices and the index below are those chosen above.</p>
+        <div class="codebar"><button class="btn" type="button" id="wcopy">Copy code</button><span class="note" id="wcopied" aria-live="polite"></span></div>
+        <pre class="code" id="wcode" tabindex="0"></pre>
+      </div></li>
+    </ol>
+  </section>
+
+  <!-- ===================================================== 6. 3D -->
+  <section id="cubes" aria-labelledby="h-cubes">
+    <div class="sechead"><span class="secno">6</span><h2 id="h-cubes">Cubes in three dimensions</h2></div>
+    <div class="prose">
+      <p>In three dimensions the frame reads one polynomial at the places &infin;, 0 and 1; it is the Hammersley net of the two-dimensional Faure sequence, and every box minor is &plusmn;1. Its closest pairs are again far too close. The net &#119979;<sub>2,<i>q</i></sub> has <i>N</i> = <i>q</i><sup>6</sup> points in <i>q</i><sup>2</sup> &times; <i>q</i><sup>2</sup> &times; <i>q</i><sup>2</sup> cubes. One integer lower-triangular scramble of the frame of the places &infin;, 0, 1 makes digit 3 of each coordinate equal to <i>M</i>&#8467; + <i>J</i><i>h</i> mod <i>q</i>, with &#8467; and <i>h</i> the last and second-last cell digits of all three coordinates. Its layer <i>M</i> turns &#8484;<sup>3</sup> slightly about (1,1,1) and shrinks it. A one-layer slab seen from above shows the lattice patches and the staircase slips, and the readout compares the exact minimum distance with the bound of the theorem.</p>
+      <p>The column net &#119966;<sub><i>q</i></sub> gives all three coordinates the same two digits after the cell digit. Each point then sits on the body diagonal of its cell, and the points form <i>q</i><sup>2</sup> lines parallel to (1,1,1). Seen down the diagonal, these columns stand over a triangular lattice.</p>
+    </div>
+    <div class="refs">In the paper: <span class="ref">def:net</span><span class="ref">prop:cell</span><span class="ref">rem:lattice3</span><span class="ref">thm:main</span><span class="ref">def:col</span><span class="ref">thm:col</span><span class="ref">fig:arcsmall</span><span class="ref">fig:col</span></div>
+
+    <div class="fig">
+      <div>
+        <div class="plot" id="plot3d"><div class="hint" id="hint3">Drag to turn, scroll or pinch to zoom</div></div>
+        <div class="legend" aria-hidden="true" id="legend3">
+          <span><i class="sw pt"></i><span class="lt">point</span></span><span><i class="sw ring"></i><span class="lt">lattice image</span></span><span><i class="sw slip"></i><span class="lt">slip, where digit 3 of <i>x</i> or <i>y</i> wraps</span></span><span><i class="sw jit"></i><span class="lt">jitter</span></span><span><i class="sw carry"></i><span class="lt">carry line</span></span><span><i class="sw pair"></i><span class="lt">closest pair</span></span>
+        </div>
+      </div>
+      <div class="panel">
+        <div class="ctl">
+          <span id="net3lab">Net</span>
+          <div class="seg" role="group" aria-labelledby="net3lab" id="net3seg">
+            <button class="btn" type="button" data-net="F" aria-pressed="false">Frame (&infin;, 0, 1)</button>
+            <button class="btn" type="button" data-net="P" aria-pressed="true">&#119979;<sub>2,<i>q</i></sub> (thm:main)</button>
+            <button class="btn" type="button" data-net="C" aria-pressed="false">&#119966;<sub><i>q</i></sub> (thm:col)</button>
+          </div>
+        </div>
+        <div class="ctl">
+          <div class="row"><label for="q3">Base <i>q</i></label><span class="val" id="q3v">5</span></div>
+          <input type="range" id="q3" min="0" max="3" step="1" value="1">
+        </div>
+        <div class="checks">
+          <label><input type="checkbox" id="slab3" checked> Slab of cell layers</label>
+          <label><input type="checkbox" id="grid3" checked> Cell grid</label>
+          <label id="lat3lab"><input type="checkbox" id="lat3" checked> Lattice and slips</label>
+          <label><input type="checkbox" id="pair3" checked> Closest pair</label>
+        </div>
+        <div class="ctl" id="slabctl">
+          <div class="row"><label for="z3">Slab: first layer <i>n<sub>z</sub></i></label><span class="val" id="z3v">0</span></div>
+          <input type="range" id="z3" min="0" max="24" step="1" value="0">
+          <div class="row"><label for="th3">Layers in the slab</label><span class="val" id="th3v">1</span></div>
+          <input type="range" id="th3" min="1" max="3" step="1" value="1">
+        </div>
+        <div class="ctl">
+          <span id="view3lab">View</span>
+          <div class="seg" role="group" aria-labelledby="view3lab">
+            <button class="btn" type="button" data-view="top">From above</button>
+            <button class="btn" type="button" data-view="diag">Along (1,1,1)</button>
+            <button class="btn" type="button" data-view="oblique">Oblique</button>
+            <button class="btn" type="button" id="gopair">Slab at closest pair</button>
+          </div>
+        </div>
+        <dl class="read" id="read3"></dl>
+      </div>
+    </div>
+  </section>
+
+  <!-- ===================================================== 7. holonomy -->
+  <section id="holonomy" aria-labelledby="h-hol">
+    <div class="sechead"><span class="secno">7</span><h2 id="h-hol">Columns and the holonomy defect</h2></div>
+    <div class="prose">
+      <p>In a column net, a step to the neighbouring column changes the common height of the points. The ideal arrangement, the cube &#8484;<sup>3</sup> turned half a turn about (1,1,1), climbs <i>q</i><sup>2</sup>/3 per step. After <i>q</i> steps in one direction you are back at the same column, so the heights must agree modulo <i>q</i><sup>2</sup>, but <i>q</i> &middot; <i>q</i><sup>2</sup>/3 is not a multiple of <i>q</i><sup>2</sup> when 3 does not divide <i>q</i>.</p>
+      <p>The leftover, a third or two thirds of a period, has to be spread over the <i>q</i> steps of the cycle. The chart shows the realized heights against the ideal along the three cycles through one column. The largest excess &eta; of a single step sets the separation, &delta;<i>N</i><sup>1/3</sup> = 1 &minus; &eta;/<i>q</i><sup>2</sup> + &hellip;, and among all column nets &#119966;<sub><i>q</i></sub> spreads the leftover as evenly as possible.</p>
+    </div>
+    <div class="refs">In the paper: <span class="ref">sec:drift</span><span class="ref">lem:drift</span><span class="ref">thm:O<span>column optimum</span></span><span class="ref">fig:drift</span></div>
+
+    <div class="fig">
+      <div>
+        <div class="legend" aria-hidden="true" style="margin:0 0 8px">
+          <span><svg width="22" height="8"><line x1="1" y1="4" x2="21" y2="4" style="stroke:var(--muted);stroke-width:1.6;stroke-dasharray:3 2"/></svg><span class="lt">cycle along <i>e<sub>x</sub></i></span></span>
+          <span><svg width="22" height="8"><line x1="1" y1="4" x2="21" y2="4" style="stroke:var(--ink);stroke-width:1.6"/></svg><span class="lt">along <i>e<sub>y</sub></i></span></span>
+          <span><svg width="22" height="8"><line x1="1" y1="4" x2="21" y2="4" style="stroke:var(--accent);stroke-width:1.8"/></svg><span class="lt">along <i>e<sub>z</sub></i></span></span>
+          <span><svg width="22" height="8"><line x1="1" y1="4" x2="21" y2="4" style="stroke:var(--muted);stroke-width:1;stroke-dasharray:1 2.5"/></svg><span class="lt">drift (even spread)</span></span>
+          <span><svg width="22" height="8"><line x1="1" y1="4" x2="21" y2="4" style="stroke:var(--grid-strong);stroke-width:1.2;stroke-dasharray:5 3"/></svg><span class="lt">ideal climb</span></span>
+        </div>
+        <div class="chartwrap"><svg id="holo" viewBox="0 0 640 360" role="img" aria-label="Heights along the three cycles of the column net against the ideal climb"></svg></div>
+      </div>
+      <div class="panel">
+        <div class="ctl">
+          <div class="row"><label for="qh">Base <i>q</i> (coprime to 6)</label><span class="val" id="qhv">11</span></div>
+          <input type="range" id="qh" min="0" max="10" step="1" value="2">
+        </div>
+        <div class="tablewrap"><table class="dir" id="holotab"></table></div>
+        <dl class="read" id="readh"></dl>
+        <p class="note">The third digit of a column net wraps <i>r</i> times per cycle; on the other steps it adds <i>r</i> to the excess. That ripple is the jitter. The drift is the leftover spread evenly.</p>
+      </div>
+    </div>
+  </section>
+
+
+  <!-- ===================================================== 8. not frame scrambles -->
+  <section id="direct" aria-labelledby="h-direct">
+    <div class="sechead"><span class="secno">8</span><h2 id="h-direct">Nets that are not frame scrambles</h2></div>
+    <div class="prose">
+      <p>The column nets &#119966;<sub><i>q</i></sub> of section 6 and the nets &#119983;<sub><i>p</i></sub> and &#119986;<sub><i>p</i></sub> of page 3 do not come from a frame. They are graph forms whose second and third digits are chosen directly, and their net property is proved the plain way: every box minor is checked to be a unit (<span class="ref">thm:col</span>(1), <span class="ref">prop:twocoset</span>(1), <span class="ref">prop:wnet</span>(1); <span class="ref">prop:half5</span>(1) does the same in dimension five with 126 minors). For &#119983;<sub><i>p</i></sub> one minor vanishes exactly at <i>p</i> = 23, which is why that prime is excluded.</p>
+      <p>The table lists every box shape of the chosen net with its determinant modulo the base, and the number of points per box counted directly. Set the third digit to 0 to see which shapes need it: the third digit plays the part that the borrowed jitter plays for the frame nets.</p>
+    </div>
+    <div class="refs">In the paper: <span class="ref">def:col</span><span class="ref">thm:col</span><span class="ref">prop:twocoset</span><span class="ref">prop:wnet</span><span class="ref">lem:box</span></div>
+    <div class="wk-ctl panel">
+      <div class="ctl">
+        <label for="dnet">Net</label>
+        <select id="dnet">
+          <option value="C">column net &#119966; (def:col)</option>
+          <option value="T">two-coset net &#119983; (prop:twocoset)</option>
+          <option value="W">rank-one net &#119986; (prop:wnet)</option>
+        </select>
+      </div>
+      <div class="ctl">
+        <label for="dq">Base <i>q</i> or prime <i>p</i></label>
+        <select id="dq"></select>
+      </div>
+      <div class="ctl">
+        <span>Third digit</span>
+        <div class="checks"><label><input type="checkbox" id="dzero"> Set the third digit to 0</label></div>
+      </div>
+      <div class="ctl"><span class="note" id="dsum" aria-live="polite"></span></div>
+    </div>
+    <div class="scrollx" style="margin-top:12px"><table class="lat" id="dtab"></table></div>
+  </section>
+
+  <footer>
+    <div class="prose">
+      <h3>How this page is checked</h3>
+      <p>The functions that build the nets live in <code>netcore.js</code>, which all pages share. A Python reference rebuilds the same nets from the paper's definitions and compares the point sets exactly, the minimum distances, the box determinants and box counts of sections 1, 3, 4 and 8, the scrambles of section 3, and the heights of section 7; the property <i>t</i> = 0 is checked by Niederreiter's rank test for prime bases and by counting points in every elementary box. Distances are on the torus, as in the paper, and decimals are truncated.</p>
+      <h3>More pages</h3>
+      <ol>
+        <li><a href="shifts.html">Digital shifts and the question of Dick, Goda and Suzuki</a></li>
+        <li><a href="beyond.html">Beyond the cube: two-coset, rank-one and half-integer layers</a></li>
+        <li>Planned: Theorem A in higher dimensions, through slabs and two-dimensional projections</li>
+        <li>Planned: the deep-shift lift in bases two and three</li>
+        <li>Planned: the slide arrangement of the Gr&uuml;nschlo&szlig;&ndash;Keller nets in dimension two</li>
+      </ol>
+    </div>
+  </footer>
+</main>
+
+<script src="netcore.js"></script>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/controls/OrbitControls.js"></script>
+
+<script>
+(function () {
+  'use strict';
+  var NC = NetCore;
+  function $(s) { return document.querySelector(s); }
+  function tok(name) { return getComputedStyle(document.documentElement).getPropertyValue(name).trim(); }
+  function trunc(x, d) { var p = Math.pow(10, d === undefined ? 4 : d); return (Math.floor(x * p + 1e-9) / p).toFixed(d === undefined ? 4 : d); }
+  function sup(x) { return '<sup>' + x + '</sup>'; }
+  var SUBS = ['x', 'y', 'z'];
+  var themeFns = [];
+  function themeChanged() { themeFns.forEach(function (f) { f(); }); }
+  try { matchMedia('(prefers-color-scheme: dark)').addEventListener('change', themeChanged); } catch (e) {}
+  new MutationObserver(themeChanged).observe(document.documentElement, { attributes: true, attributeFilter: ['data-theme'] });
+  function dl(el, rows) {
+    el.innerHTML = rows.map(function (r) { return '<dt>' + r[0] + '</dt><dd' + (r[2] ? ' class="em"' : '') + '>' + r[1] + '</dd>'; }).join('');
+  }
+  function pressed(group, attr, val) {
+    group.querySelectorAll('button').forEach(function (b) { b.setAttribute('aria-pressed', String(b.getAttribute(attr) === String(val))); });
+  }
+
+  /* ================================================================ sections 1-3: the frame, its problem, the freedom */
+  function maxKq(q) { var k = 1; while (k < 3 && Math.pow(q, k + 1) <= 64) k++; return k; }
+  var SF = { q: 5, k: 2, dx: 1 }, DF = null, PROB = null;
+  function boxColors() { return { empty: tok('--box-empty'), many: tok('--box-many'), line: tok('--grid-strong') }; }
+  /* draw the boxes of shape d over a unit square mapped by px, py (x, y in [0,1]); colour by point count */
+  function drawBoxes(g, occ, px, py) {
+    var bc = boxColors(), nx = occ.dims[0], ny = occ.dims[1], i, j;
+    for (i = 0; i < nx; i++) for (j = 0; j < ny; j++) {
+      var cnt = occ.counts[i + nx * j];
+      if (cnt === 1) continue;
+      g.fillStyle = cnt === 0 ? bc.empty : bc.many;
+      g.fillRect(px(i / nx), py((j + 1) / ny), px((i + 1) / nx) - px(i / nx), py(j / ny) - py((j + 1) / ny));
+    }
+    g.strokeStyle = bc.line; g.lineWidth = 0.7; g.beginPath();
+    if (nx <= 256) for (i = 1; i < nx; i++) { g.moveTo(px(i / nx), py(0)); g.lineTo(px(i / nx), py(1)); }
+    if (ny <= 256) for (j = 1; j < ny; j++) { g.moveTo(px(0), py(j / ny)); g.lineTo(px(1), py(j / ny)); }
+    g.stroke();
+  }
+  function computeF() {
+    var net = NC.hammersley2D(SF.k, 'frame'), B = NC.build(net, SF.q);
+    if (SF.dx > B.m) SF.dx = B.m;
+    DF = { net: net, B: B, md: NC.minDist(B, true), occ: NC.boxOccupancy(B, [SF.dx, B.m - SF.dx]), box: NC.boxDet(net.C, [SF.dx, B.m - SF.dx], SF.q),
+           all: NC.boxTable(net, SF.q) };
+  }
+  function drawF() {
+    var cv = $('#cF'), wrap = $('#plotF');
+    var dpr = Math.min(window.devicePixelRatio || 1, 2), W = wrap.clientWidth, H = wrap.clientHeight;
+    if (!W || !H) return;
+    cv.width = Math.round(W * dpr); cv.height = Math.round(H * dpr);
+    var g = cv.getContext('2d'); g.setTransform(dpr, 0, 0, dpr, 0, 0);
+    var B = DF.B, Wn = B.W, pad = 10, sc = Math.min(W, H) - 2 * pad, i;
+    function px(x) { return pad + x * sc; }
+    function py(y) { return pad + (1 - y) * sc; }
+    g.fillStyle = tok('--surface'); g.fillRect(0, 0, W, H);
+    drawBoxes(g, DF.occ, px, py);
+    var r = Math.max(1.3, Math.min(4.2, 0.13 * sc / B.G));
+    g.fillStyle = tok('--ink'); g.beginPath();
+    for (i = 0; i < B.N; i++) { var a = px(B.X[0][i] / Wn), b = py(B.X[1][i] / Wn); g.moveTo(a + r, b); g.arc(a, b, r, 0, 2 * Math.PI); }
+    g.fill();
+    var pr = DF.md.pair;
+    if (pr) {
+      var acc = tok('--accent'), X0 = B.X[0][pr.i] / Wn, Y0 = B.X[1][pr.i] / Wn;
+      g.strokeStyle = acc; g.lineWidth = 2;
+      [[X0, Y0], [X0 + pr.D[0] / Wn, Y0 + pr.D[1] / Wn]].forEach(function (p) {
+        var wx = ((p[0] % 1) + 1) % 1, wy = ((p[1] % 1) + 1) % 1;
+        g.beginPath(); g.arc(px(wx), py(wy), r + 4, 0, 2 * Math.PI); g.stroke();
+      });
+    }
+  }
+  function matHtml(A, opts) {
+    opts = opts || {};
+    var html = '<tbody>';
+    A.forEach(function (row, i) {
+      html += '<tr>' + (opts.labels ? '<td class="lab">' + opts.labels[i] + '</td>' : '');
+      row.forEach(function (x, j) {
+        var cls = 'ent' + (x === 0 ? ' z' : '') + (opts.low && j < i && x !== 0 ? ' low' : '') + (opts.chg && opts.chg[i][j] ? ' chg' : '');
+        html += '<td class="' + cls + '">' + x + '</td>';
+      });
+      html += '</tr>';
+    });
+    return html + '</tbody>';
+  }
+  function readF() {
+    var B = DF.B, q = SF.q, m = B.m, o = DF.occ, bx = DF.box, nunit = DF.all.filter(function (b) { return b.unit; }).length;
+    $('#dFv').textContent = '(' + SF.dx + ', ' + (m - SF.dx) + ')';
+    dl($('#readF'), [
+      ['Points <i>N</i> = <i>q</i>' + sup('2<i>k</i>'), String(B.N)],
+      ['boxes of this shape', String(o.counts.length) + ' = ' + q + sup(SF.dx) + ' × ' + q + sup(m - SF.dx)],
+      ['boxes with exactly one point', String(o.one), true],
+      ['empty, or with two or more', o.empty + ', ' + o.many],
+      ['shapes with a unit box minor', nunit + ' of ' + DF.all.length],
+      ['δ√<i>N</i> (torus)', trunc(DF.md.c)]
+    ]);
+    var labels = [];
+    for (var j = 0; j < SF.dx; j++) labels.push('x d<sub>' + (j + 1) + '</sub>');
+    for (j = 0; j < m - SF.dx; j++) labels.push('y d<sub>' + (j + 1) + '</sub>');
+    $('#boxF').innerHTML = matHtml(bx.A, { labels: labels });
+    $('#detF').innerHTML = 'determinant = ' + neg(bx.det) + (bx.unit ? ', a unit mod ' + q + ': one point in every box of this shape.' : ', not a unit mod ' + q + '.');
+  }
+  function updateF() {
+    computeF();
+    $('#qFv').textContent = SF.q; $('#qF').value = SF.q;
+    var mk = maxKq(SF.q);
+    $('#kFseg').querySelectorAll('button').forEach(function (b) { b.disabled = +b.getAttribute('data-k') > mk; });
+    pressed($('#kFseg'), 'data-k', SF.k);
+    $('#dF').max = DF.B.m; $('#dF').value = SF.dx;
+    readF(); drawF(); updateProblem(); updateFreedom();
+  }
+  $('#qF').addEventListener('input', function (e) { SF.q = +e.target.value; if (SF.k > maxKq(SF.q)) SF.k = maxKq(SF.q); updateF(); });
+  $('#kFseg').addEventListener('click', function (e) { var b = e.target.closest('button'); if (!b || b.disabled) return; SF.k = +b.getAttribute('data-k'); updateF(); });
+  $('#dF').addEventListener('input', function (e) { SF.dx = +e.target.value; computeF(); readF(); drawF(); });
+
+  /* section 2: the frame's closest pair, the chart against q */
+  var PROBCACHE = {};
+  function sepOf(variant, k, q) {
+    var key = variant + k + '-' + q;
+    if (!(key in PROBCACHE)) {
+      var net = NC.hammersley2D(k, variant), B = NC.build(net, q);
+      PROBCACHE[key] = { tor: NC.minDist(B, true), euc: NC.minDist(B, false), lat: k + 1 < B.m ? NC.minDist(NC.truncate(B, k + 1), true) : null,
+                         lam: NC.latticeMin(net.M, q), B: B };
+    }
+    return PROBCACHE[key];
+  }
+  function drawProbChart() {
+    var svg = $('#probchart'); while (svg.firstChild) svg.removeChild(svg.firstChild);
+    var x0 = 60, x1 = 620, y0 = 14, y1 = 280, qs = [2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13];
+    function X(q) { return x0 + (x1 - x0) * (q - 2) / 11; }
+    function Y(v) { return y1 - (y1 - y0) * v; }
+    [0, 0.2, 0.4, 0.6, 0.8, 1].forEach(function (v) {
+      svgEl('line', { x1: x0, x2: x1, y1: Y(v), y2: Y(v), style: 'stroke:var(--grid);stroke-width:1' }, svg);
+      svgEl('text', { x: x0 - 8, y: Y(v) + 4, 'text-anchor': 'end', style: 'fill:var(--muted);font:12px var(--mono)' }, svg, v.toFixed(1));
+    });
+    qs.forEach(function (q) { svgEl('text', { x: X(q), y: y1 + 18, 'text-anchor': 'middle', style: 'fill:var(--muted);font:12px var(--mono)' }, svg, String(q)); });
+    svgEl('text', { x: (x0 + x1) / 2, y: y1 + 40, 'text-anchor': 'middle', style: 'fill:var(--muted);font:13px var(--sans)' }, svg, 'base q');
+    svgEl('text', { x: 14, y: (y0 + y1) / 2, 'text-anchor': 'middle', transform: 'rotate(-90 14 ' + (y0 + y1) / 2 + ')', style: 'fill:var(--muted);font:13px var(--sans)' }, svg, 'δ√N on the torus, exact');
+    var series = [['frame', 1, 'stroke:var(--muted);stroke-width:1.6;stroke-dasharray:4 3', 'var(--muted)'], ['frame', 2, 'stroke:var(--ink);stroke-width:1.6', 'var(--ink)'],
+                  ['rotated', 2, 'stroke:var(--accent);stroke-width:2', 'var(--accent)']];
+    series.forEach(function (s) {
+      var pts = qs.filter(function (q) { return Math.pow(q, s[1]) <= 64; }).map(function (q) { return [X(q), Y(sepOf(s[0], s[1], q).tor.c)]; });
+      svgEl('polyline', { points: pts.map(function (p) { return p[0].toFixed(1) + ',' + p[1].toFixed(1); }).join(' '), fill: 'none', style: s[2] }, svg);
+      pts.forEach(function (p) { svgEl('circle', { cx: p[0], cy: p[1], r: 2.6, style: 'fill:' + s[3] }, svg); });
+    });
+    var cur = sepOf('frame', SF.k, SF.q);
+    if (SF.k <= 2) svgEl('circle', { cx: X(SF.q), cy: Y(cur.tor.c), r: 6, style: 'fill:none;stroke:var(--slip);stroke-width:1.8' }, svg);
+  }
+  function updateProblem() {
+    var q = SF.q, k = SF.k, f = sepOf('frame', k, q), t = sepOf('rotated', k, q), D = function (r) { return '(' + r.pair.D.map(neg).join(', ') + ')'; };
+    var rows = [['', 'frame', 'turned layer'],
+                ['δ√<i>N</i>, torus', trunc(f.tor.c), trunc(t.tor.c)],
+                ['δ√<i>N</i>, in the square (Euclidean)', trunc(f.euc.c), trunc(t.euc.c)],
+                ['closest difference, units of ' + q + sup('−' + 2 * k), D(f.tor), D(t.tor)],
+                ['closest pairs', String(f.tor.count), String(t.tor.count)],
+                ['shortest vector of (<i>I</i>+<i>M&#771;</i>/<i>q</i>)ℤ' + sup(2), trunc(f.lam), trunc(t.lam)]];
+    if (f.lat) rows.push(['δ√<i>N</i>, digits 1 to <i>k</i>+1 only (torus)', trunc(f.lat.c), trunc(t.lat.c)]);
+    $('#probtab').innerHTML = '<thead><tr>' + rows[0].map(function (x) { return '<th>' + x + '</th>'; }).join('') + '</tr></thead><tbody>' +
+      rows.slice(1).map(function (r) { return '<tr><td>' + r[0] + '</td><td>' + r[1] + '</td><td class="em">' + r[2] + '</td></tr>'; }).join('') + '</tbody>';
+    var B = f.B, n = [q - 1, q - 1], st = NC.cellStep(B, n, [1, 1], k), cw = B.cw;
+    $('#probstep').innerHTML = 'Frame, step (1, 1) from the cell (' + n.join(', ') + ')' + (B.G === q ? ', across the corner of the torus' : '') +
+      ': the geometric digits change by (' + st.digits.map(function (o) { return neg(o.value); }).join(', ') + '), both wraps. In cell units the two points differ by (' +
+      st.D.map(function (x) { return (x < 0 ? '−' : '') + trunc(Math.abs(x) / cw, 4); }).join(', ') + '), length ' + trunc(st.len, 4) + '.';
+    drawProbChart();
+  }
+
+  /* section 3: frame and turned layer, matrix by matrix */
+  function updateFreedom() {
+    var q = SF.q, k = SF.k, F = NC.hammersley2D(k, 'frame'), R = NC.hammersley2D(k, 'rotated'), m = 2 * k, html = '';
+    for (var c = 0; c < 2; c++) {
+      var Cf = F.C[c].map(function (r) { return r.map(function (x) { return NC.mod(x, q); }); });
+      var Cr = R.C[c].map(function (r) { return r.map(function (x) { return NC.mod(x, q); }); });
+      var chg = Cr.map(function (r, i) { return r.map(function (x, j) { return x !== Cf[i][j]; }); });
+      var sc = NC.scrambleBetween(Cf, Cr, q), deep = NC.deeperRows(sc.L, k, q);
+      var labels = []; for (var j = 0; j < m; j++) labels.push('d<sub>' + (j + 1) + '</sub>');
+      html += '<div class="coordblk"><h4>Coordinate ' + SUBS[c] + '</h4><div class="coords" style="gap:14px">';
+      html += '<div><div class="note">frame <i>C</i> mod ' + q + '</div><div class="scrollx"><table class="gm">' + matHtml(Cf, { labels: labels }) + '</table></div></div>';
+      html += '<div><div class="note">turned <i>C</i> mod ' + q + '</div><div class="scrollx"><table class="gm">' + matHtml(Cr, { labels: labels, chg: chg }) + '</table></div></div>';
+      html += '<div><div class="note">scramble <i>L</i> = turned &middot; frame' + sup('−1') + '</div><div class="scrollx"><table class="gm">' + matHtml(sc.L, { labels: labels, low: true }) + '</table></div></div>';
+      html += '</div><p class="note" style="margin:6px 0 0">' + (sc.lower ? '<i>L</i> is lower triangular with units on the diagonal. ' : '<i>L</i> is not lower triangular. ') +
+              'Row ' + (k + 1) + ' (the geometric digit) mixes in the earlier digits. ' + (deep.length ? (deep.length === 1 ? 'Row ' + m : 'Rows ' + (k + 2) + ' to ' + m) + ': ' + summarizeDeep(deep) + '.' : 'There are no deeper rows at this size.') + '</p></div>';
+    }
+    $('#scrF').innerHTML = html;
+    var tf = NC.boxTable(F, q), tr = NC.boxTable(R, q);
+    $('#shapesF').innerHTML = '<thead><tr><th>box shape (<i>d<sub>x</sub></i>, <i>d<sub>y</sub></i>)</th>' + tf.map(function (b) { return '<th>(' + b.d.join(', ') + ')</th>'; }).join('') + '</tr></thead><tbody>' +
+      '<tr><td>box minor, frame</td>' + tf.map(function (b) { return '<td>' + neg(b.det) + '</td>'; }).join('') + '</tr>' +
+      '<tr><td>box minor, turned layer</td>' + tr.map(function (b) { return '<td class="em">' + neg(b.det) + '</td>'; }).join('') + '</tr></tbody>';
+    $('#scrNote').textContent = 'Outlined entries changed. Shaded entries of L sit below the diagonal: they add earlier digits of the same coordinate. Every box minor stays a unit, so every box of every shape keeps one point.';
+  }
+  function summarizeDeep(deep) {
+    if (deep.every(function (x) { return x === 'same'; })) return 'identical to the frame, so the jitter digits are the frame’s own';
+    if (deep.every(function (x) { return x === 'negated'; })) return 'the frame’s rows times −1, so the jitter digits are the frame’s with their sign flipped';
+    return deep.join(', ');
+  }
+  function svgEl(name, attrs, parent, text) {
+    var e = document.createElementNS('http://www.w3.org/2000/svg', name);
+    for (var a in attrs) e.setAttribute(a, attrs[a]);
+    if (text !== undefined) e.textContent = text;
+    if (parent) parent.appendChild(e);
+    return e;
+  }
+  updateF();
+  if (window.ResizeObserver) new ResizeObserver(function () { drawF(); }).observe($('#plotF'));
+  themeFns.push(drawF);
+
+  /* ================================================================ section 8: nets that are not frame scrambles */
+  var SD = { net: 'C', q: 7, zero: false };
+  var DQ = { C: [5, 7, 11, 13], T: [7, 11, 13, 17, 19, 23, 29], W: [5, 7, 11, 13, 17] };
+  function netD() { return SD.net === 'C' ? NC.colNet(SD.q) : (SD.net === 'T' ? NC.twoCoset(SD.q) : NC.wNet(SD.q)); }
+  function updateD() {
+    var opts = DQ[SD.net]; if (opts.indexOf(SD.q) < 0) SD.q = opts[1];
+    $('#dq').innerHTML = opts.map(function (q) { return '<option value="' + q + '"' + (q === SD.q ? ' selected' : '') + '>' + q + ' (' + q * q * q + ' points)</option>'; }).join('');
+    var net = netD(), q = SD.q, keep = SD.zero ? 2 : undefined, tab = NC.boxTable(net, q, keep);
+    var B = NC.build(net, q); if (SD.zero) B = NC.truncate(B, 2);
+    var bad = 0, html = '<thead><tr><th>box shape (<i>d<sub>x</sub></i>, <i>d<sub>y</sub></i>, <i>d<sub>z</sub></i>)</th><th>box minor mod ' + q + '</th><th>unit?</th><th>points per box (counted)</th></tr></thead><tbody>';
+    tab.forEach(function (b) {
+      var o = NC.boxOccupancy(B, b.d), mn = Infinity, mx = 0;
+      for (var i = 0; i < o.counts.length; i++) { mn = Math.min(mn, o.counts[i]); mx = Math.max(mx, o.counts[i]); }
+      if (!b.unit) bad++;
+      html += '<tr><td>(' + b.d.join(', ') + ')</td><td' + (b.unit ? '' : ' class="bad"') + '>' + b.mod + '</td><td' + (b.unit ? '' : ' class="bad"') + '>' + (b.unit ? 'yes' : 'no') + '</td><td' + (mn === 1 && mx === 1 ? '' : ' class="bad"') + '>' + (mn === mx ? 'exactly ' + mn : mn + ' to ' + mx) + '</td></tr>';
+    });
+    $('#dtab').innerHTML = html + '</tbody>';
+    $('#dsum').textContent = bad ? bad + ' of ' + tab.length + ' shapes fail' + (SD.zero ? ' without the third digit.' : '.') : 'All ' + tab.length + ' shapes have a unit box minor and one point per box.';
+  }
+  $('#dnet').addEventListener('change', function (e) { SD.net = e.target.value; updateD(); });
+  $('#dq').addEventListener('change', function (e) { SD.q = +e.target.value; updateD(); });
+  $('#dzero').addEventListener('change', function (e) { SD.zero = e.target.checked; updateD(); });
+  updateD();
+
+  /* ================================================================ section 1: 2D */
+  var S2 = { q: 5, k: 2, variant: 'rotated', lattice: true, jitter: true, pair: true, sel: null, boxes: false, dx: 0 };
+  var D2 = null;
+  function maxK(q) { var k = 1; while (k < 3 && Math.pow(q, k + 1) <= 64) k++; return k; }
+
+  function compute2D() {
+    var net = NC.hammersley2D(S2.k, S2.variant), B = NC.build(net, S2.q), Bt = NC.truncate(B, S2.k + 1);
+    var G = B.G, q = S2.q, k = S2.k, cells = G * G, r = [new Int32Array(cells), new Int32Array(cells)];
+    for (var idx = 0; idx < cells; idx++) { var i = B.cell[idx]; r[0][idx] = NC.digit(B, 0, i, k); r[1][idx] = NC.digit(B, 1, i, k); }
+    D2 = { net: net, B: B, Bt: Bt, r: r, full: NC.minDist(B, true), lat: k + 1 < B.m ? NC.minDist(Bt, true) : null,
+           lam: NC.latticeMin(net.M, q), box: NC.boxCheck(B), boxT: NC.boxCheck(Bt), tabT: NC.boxTable(net, q, k + 1) };
+    if (S2.dx > B.m) S2.dx = B.m;
+    if (S2.sel === null || S2.sel >= cells) S2.sel = NC.cellIndex(B, [Math.floor(G / 2), Math.floor(G / 2)]);
+  }
+
+  function smooth2(n, d) {               /* does r change by exactly M e_d from cell n to n + e_d? */
+    var B = D2.B, G = B.G, M = D2.net.M, a = NC.cellIndex(B, n), n2 = n.slice(); n2[d] += 1;
+    if (n2[d] >= G) return null;
+    var b = NC.cellIndex(B, n2);
+    for (var c = 0; c < 2; c++) if (D2.r[c][b] - D2.r[c][a] !== M[c][d]) return false;
+    return true;
+  }
+
+  function draw2D() {
+    var cv = $('#c2d'), wrap = $('#plot2d');
+    var dpr = Math.min(window.devicePixelRatio || 1, 2), W = wrap.clientWidth, H = wrap.clientHeight;
+    if (!W || !H) return;
+    cv.width = Math.round(W * dpr); cv.height = Math.round(H * dpr);
+    var g = cv.getContext('2d'); g.setTransform(dpr, 0, 0, dpr, 0, 0);
+    var B = D2.B, G = B.G, q = S2.q, k = S2.k, cw = B.cw;
+    var col = { surface: tok('--surface'), grid: tok('--grid'), strong: tok('--grid-strong'), ink: tok('--ink'), accent: tok('--accent'),
+                soft: tok('--accent-soft'), slip: tok('--slip'), jit: tok('--jit') };
+    var pad = 10, sc = (Math.min(W, H) - 2 * pad) / G;
+    function px(x) { return pad + x * sc; }
+    function py(y) { return pad + (G - y) * sc; }
+    g.fillStyle = col.surface; g.fillRect(0, 0, W, H);
+    var sel = NC.cellCoords(B, S2.sel);
+    g.fillStyle = col.soft; g.fillRect(px(sel[0]), py(sel[1] + 1), sc, sc);
+    var i, x, y, idx, n;
+    g.lineWidth = 1; g.strokeStyle = col.grid; g.beginPath();
+    for (i = 0; i <= G; i++) { g.moveTo(px(i), py(0)); g.lineTo(px(i), py(G)); g.moveTo(px(0), py(i)); g.lineTo(px(G), py(i)); }
+    g.stroke();
+    if (k >= 2) {
+      g.strokeStyle = col.strong; g.beginPath();
+      for (i = 0; i <= G; i += q) { g.moveTo(px(i), py(0)); g.lineTo(px(i), py(G)); g.moveTo(px(0), py(i)); g.lineTo(px(G), py(i)); }
+      g.stroke();
+    }
+    var useB = S2.jitter ? B : D2.Bt;
+    if (S2.boxes) drawBoxes(g, NC.boxOccupancy(useB, [S2.dx, B.m - S2.dx]), function (x) { return px(x * G); }, function (y) { return py(y * G); });
+    function P(idx) { var j = B.cell[idx]; return [useB.X[0][j] / cw, useB.X[1][j] / cw]; }
+    function Lm(idx) { var nn = NC.cellCoords(B, idx); return [nn[0] + D2.r[0][idx] / q, nn[1] + D2.r[1][idx] / q]; }
+    var cells = G * G, ringR = Math.max(1.6, Math.min(0.2 * sc, 5)), dotR = Math.max(1.3, Math.min(0.13 * sc, 4.2));
+    if (S2.lattice) {
+      g.strokeStyle = col.soft; g.lineWidth = Math.max(1, Math.min(0.06 * sc, 2.5)); g.beginPath();
+      var slips = [];
+      for (idx = 0; idx < cells; idx++) {
+        n = NC.cellCoords(B, idx);
+        for (var d = 0; d < 2; d++) {
+          var sm = smooth2(n, d);
+          if (sm === null) continue;
+          if (sm) { var a = Lm(idx), n2 = n.slice(); n2[d]++; var b = Lm(NC.cellIndex(B, n2)); g.moveTo(px(a[0]), py(a[1])); g.lineTo(px(b[0]), py(b[1])); }
+          else slips.push([n, d]);
+        }
+      }
+      g.stroke();
+      g.strokeStyle = col.slip; g.lineWidth = Math.max(1.4, Math.min(0.08 * sc, 2.4)); g.setLineDash([Math.max(3, sc * 0.18), Math.max(2, sc * 0.12)]);
+      g.beginPath();
+      slips.forEach(function (sd) { var nn = sd[0]; if (sd[1] === 0) { g.moveTo(px(nn[0] + 1), py(nn[1])); g.lineTo(px(nn[0] + 1), py(nn[1] + 1)); } else { g.moveTo(px(nn[0]), py(nn[1] + 1)); g.lineTo(px(nn[0] + 1), py(nn[1] + 1)); } });
+      g.stroke(); g.setLineDash([]);
+      if (S2.jitter) {
+        g.strokeStyle = col.jit; g.lineWidth = 1; g.beginPath();
+        for (idx = 0; idx < cells; idx++) { var A = Lm(idx), Q = P(idx); g.moveTo(px(A[0]), py(A[1])); g.lineTo(px(Q[0]), py(Q[1])); }
+        g.stroke();
+      }
+      g.strokeStyle = col.accent; g.lineWidth = 1.2; g.beginPath();
+      for (idx = 0; idx < cells; idx++) { var Lp = Lm(idx); g.moveTo(px(Lp[0]) + ringR, py(Lp[1])); g.arc(px(Lp[0]), py(Lp[1]), ringR, 0, 2 * Math.PI); }
+      g.stroke();
+    }
+    g.fillStyle = col.ink; g.beginPath();
+    for (idx = 0; idx < cells; idx++) { var p = P(idx); g.moveTo(px(p[0]) + dotR, py(p[1])); g.arc(px(p[0]), py(p[1]), dotR, 0, 2 * Math.PI); }
+    g.fill();
+    var md = S2.jitter ? D2.full : (D2.lat || D2.full);
+    if (S2.pair && md.pair) {
+      var pi = md.pair.i, X0 = useB.X[0][pi] / cw, Y0 = useB.X[1][pi] / cw, X1 = X0 + md.pair.D[0] / cw, Y1 = Y0 + md.pair.D[1] / cw;
+      g.save(); g.beginPath(); g.rect(pad, pad, G * sc, G * sc); g.clip();
+      g.strokeStyle = col.accent; g.lineWidth = 2.5; g.beginPath(); g.moveTo(px(X0), py(Y0)); g.lineTo(px(X1), py(Y1)); g.stroke();
+      g.lineWidth = 2; g.beginPath();
+      [[X0, Y0], [X1, Y1]].forEach(function (pt) { g.moveTo(px(pt[0]) + dotR + 3, py(pt[1])); g.arc(px(pt[0]), py(pt[1]), dotR + 3, 0, 2 * Math.PI); });
+      g.stroke(); g.restore();
+    }
+    g.strokeStyle = col.accent; g.lineWidth = 1.5; g.strokeRect(px(sel[0]), py(sel[1] + 1), sc, sc);
+  }
+
+  function signedTerms(row, names, vals) {
+    var sym = '', num = '', first = true;
+    row.forEach(function (co, c) {
+      if (!co) return;
+      var mag = Math.abs(co) === 1 ? '' : Math.abs(co) + '·';
+      var sg = first ? (co < 0 ? '−' : '') : (co < 0 ? ' − ' : ' + ');
+      sym += sg + mag + names[c]; num += sg + mag + vals[c]; first = false;
+    });
+    return [sym || '0', num || '0'];
+  }
+
+  function inspect2D() {
+    var B = D2.B, q = S2.q, k = S2.k, m = B.m, idx = S2.sel, i = B.cell[idx], n = NC.cellCoords(B, idx);
+    var ell = [n[0] % q, n[1] % q], html = '<h3>Cell (' + n[0] + ', ' + n[1] + ')</h3>';
+    for (var c = 0; c < 2; c++) {
+      var ds = '';
+      for (var j = 0; j < m; j++) ds += '<span class="d' + (j === k ? ' geo' : (j > k ? ' jit' : '')) + '">' + NC.digit(B, c, i, j) + '</span>';
+      html += '<div class="drow"><span class="lab">' + SUBS[c] + ' = 0.</span><span class="digits">' + ds + '</span></div>';
+    }
+    html += '<div class="formula">';
+    for (c = 0; c < 2; c++) {
+      var t = signedTerms(D2.net.M[c], ['ℓ<sub>x</sub>', 'ℓ<sub>y</sub>'], ell);
+      html += '<div><span class="r">r<sub>' + SUBS[c] + '</sub></span> = (' + t[0] + ') mod ' + q + ' = (' + t[1] + ') mod ' + q + ' = <span class="r">' + D2.r[c][idx] + '</span></div>';
+    }
+    html += '</div><p class="note">Digits in base ' + q + '. ℓ = last cell digits (' + ell[0] + ', ' + ell[1] + '). Highlighted: digit ' + (k + 1) + ', the geometric digit r. Dashed: the deeper digits.</p>';
+    $('#insp2').innerHTML = html;
+  }
+
+  function read2D() {
+    var B = D2.B, q = S2.q, k = S2.k, M = D2.net.M;
+    var Ms = '[' + M.map(function (r) { return r.map(function (x) { return x < 0 ? '−' + (-x) : String(x); }).join(' '); }).join('; ') + ']';
+    var rows = [
+      ['Points <i>N</i> = <i>q</i>' + sup('2<i>k</i>'), String(B.N)],
+      ['Cells per side', String(B.G)],
+      ['Layer <i>M&#771;</i>', Ms],
+      ['δ√<i>N</i>, all digits', trunc(D2.full.c), true],
+      ['δ√<i>N</i>, digits 1 to <i>k</i>+1 only', D2.lat ? trunc(D2.lat.c) : 'same'],
+      ['shortest vector of (<i>I</i>+<i>M&#771;</i>/<i>q</i>)ℤ' + sup(2), trunc(D2.lam)],
+      ['closest pairs', String((S2.jitter ? D2.full : (D2.lat || D2.full)).count)],
+      ['every box of volume 1/<i>N</i> holds one point', D2.box.ok ? 'yes, ' + D2.box.shapes + ' shapes' : 'no']
+    ];
+    var bad = D2.tabT.filter(function (b) { return !b.unit; }).map(function (b) { return '(' + b.d.join(', ') + ')'; });
+    rows.push(['without the deeper digits: shapes with one point per box', String(D2.tabT.length - bad.length) + ' of ' + D2.tabT.length + (bad.length ? '; fail: ' + bad.join(' ') : '')]);
+    if (S2.boxes) {
+      var oc = NC.boxOccupancy(S2.jitter ? B : D2.Bt, [S2.dx, B.m - S2.dx]);
+      rows.push(['boxes (' + S2.dx + ', ' + (B.m - S2.dx) + ') with one point, shown points', oc.one + ' of ' + oc.counts.length, true]);
+    }
+    dl($('#read2'), rows);
+    $('#d2').max = B.m; $('#d2').value = S2.dx; $('#d2v').textContent = '(' + S2.dx + ', ' + (B.m - S2.dx) + ')';
+    $('#k2note').textContent = 'q^k ≤ 64';
+  }
+
+  function update2D(recompute) {
+    if (recompute) compute2D();
+    $('#q2v').textContent = S2.q;
+    var mk = maxK(S2.q);
+    $('#k2seg').querySelectorAll('button').forEach(function (b) { var kk = +b.getAttribute('data-k'); b.disabled = kk > mk; });
+    pressed($('#k2seg'), 'data-k', S2.k);
+    read2D(); inspect2D(); draw2D();
+  }
+
+  $('#q2').addEventListener('input', function (e) { S2.q = +e.target.value; if (S2.k > maxK(S2.q)) S2.k = maxK(S2.q); S2.sel = null; update2D(true); });
+  $('#k2seg').addEventListener('click', function (e) { var b = e.target.closest('button'); if (!b || b.disabled) return; S2.k = +b.getAttribute('data-k'); S2.sel = null; update2D(true); });
+  $('#var2').addEventListener('change', function (e) { S2.variant = e.target.value; update2D(true); });
+  $('#lat2').addEventListener('change', function (e) { S2.lattice = e.target.checked; update2D(false); });
+  $('#jit2').addEventListener('change', function (e) { S2.jitter = e.target.checked; update2D(false); });
+  $('#pair2').addEventListener('change', function (e) { S2.pair = e.target.checked; update2D(false); });
+  $('#box2').addEventListener('change', function (e) { S2.boxes = e.target.checked; $('#box2ctl').hidden = !S2.boxes; if (S2.boxes && S2.dx === 0) S2.dx = 0; update2D(false); });
+  $('#d2').addEventListener('input', function (e) { S2.dx = +e.target.value; update2D(false); });
+  $('#c2d').addEventListener('click', function (e) {
+    var B = D2.B, G = B.G, rect = e.target.getBoundingClientRect(), pad = 10, sc = (Math.min(rect.width, rect.height) - 2 * pad) / G;
+    var x = Math.floor((e.clientX - rect.left - pad) / sc), y = Math.floor(G - (e.clientY - rect.top - pad) / sc);
+    if (x < 0 || y < 0 || x >= G || y >= G) return;
+    S2.sel = NC.cellIndex(B, [x, y]); inspect2D(); draw2D(); syncFromSection1();
+  });
+  $('#c2d').addEventListener('keydown', function (e) {
+    var dir = { ArrowLeft: [-1, 0], ArrowRight: [1, 0], ArrowUp: [0, 1], ArrowDown: [0, -1] }[e.key];
+    if (!dir) return;
+    e.preventDefault();
+    var B = D2.B, n = NC.cellCoords(B, S2.sel);
+    n[0] = Math.min(B.G - 1, Math.max(0, n[0] + dir[0])); n[1] = Math.min(B.G - 1, Math.max(0, n[1] + dir[1]));
+    S2.sel = NC.cellIndex(B, n); inspect2D(); draw2D(); syncFromSection1();
+  });
+  update2D(true);
+  if (window.ResizeObserver) new ResizeObserver(function () { draw2D(); }).observe($('#plot2d'));
+  themeFns.push(draw2D);
+
+  /* ================================================================ section 0: from index to point */
+  var S0 = { net: 'rotated', q: 5, k: 2, i: D2.B.cell[S2.sel] };
+  var NET0 = null, E0 = null, HOT0 = {};
+  function neg(x) { return x < 0 ? '−' + (-x) : String(x); }
+  function fq(num, den) { return num % den === 0 ? neg(num / den) : neg(num) + '/' + den; }
+  function vec(a, f) { return '(' + a.map(f || neg).join(', ') + ')'; }
+  function qOptions0() { if (S0.net === 'C') return [5, 7, 11, 13]; var o = []; for (var q = 2; q <= 13; q++) o.push(q); return o; }
+  function net0() {
+    if (S0.net === 'C') return NC.colNet(S0.q);
+    if (S0.net === 'P') return NC.pNet(S0.k);
+    return NC.hammersley2D(S0.k, S0.net);
+  }
+  function roleClass(j, k) { return j < k ? 'cellrow' : (j === k ? 'georow' : 'jitrow'); }
+  function roleName(j, k) { return j < k ? 'cell' : (j === k ? 'geometric' : 'jitter'); }
+
+  function expansion(c, j) {
+    var E = E0, row = E.coords[c].rows[j], Cr = E.coords[c].C[j], parts = [];
+    for (var l = 0; l < E.m; l++) if (Cr[l] && E.v[l]) parts.push(Cr[l] + '·' + E.v[l]);
+    var body = parts.length ? parts.join(' + ') : '0';
+    return '<span class="' + (j === E.k ? 'r' : '') + '">d<sub>' + j + '</sub></span> = (' + body + ') mod ' + E.q + ' = ' + row.sum + ' mod ' + E.q + ' = <b>' + row.d + '</b>';
+  }
+  function setHot(c, j) {
+    HOT0[c] = j;
+    var blk = document.querySelector('#w2 [data-coord="' + c + '"]');
+    if (!blk) return;
+    blk.querySelectorAll('tbody tr').forEach(function (tr) { tr.classList.toggle('hot', +tr.getAttribute('data-j') === j); });
+    blk.querySelector('.expand').innerHTML = expansion(c, j);
+  }
+
+  function render0() {
+    NET0 = net0();
+    var q = S0.q, N = Math.pow(q, NET0.m);
+    if (S0.i >= N) S0.i = N - 1;
+    if (S0.i < 0 || !(S0.i >= 0)) S0.i = 0;
+    E0 = NC.explain(NET0, q, S0.i);
+    var E = E0, m = E.m, k = E.k, s = E.s, names = SUBS.slice(0, s), l, c, j, html;
+    /* controls */
+    $('#wnet').value = S0.net;
+    $('#wq').innerHTML = qOptions0().map(function (x) { return '<option value="' + x + '"' + (x === q ? ' selected' : '') + '>' + x + '</option>'; }).join('');
+    $('#wkseg').querySelectorAll('button').forEach(function (b) { b.disabled = S0.net === 'C' && b.getAttribute('data-k') === '2'; });
+    pressed($('#wkseg'), 'data-k', k);
+    $('#wi').max = N - 1; $('#wi').value = S0.i; $('#wir').max = N - 1; $('#wir').value = S0.i;
+    $('#wimax').textContent = '0 to ' + (N - 1);
+
+    /* step 1 */
+    html = '<div class="chipline">';
+    for (l = 0; l < m; l++) html += '<span class="vlab"><span class="d">' + E.v[l] + '</span><small>v' + '<sub>' + l + '</sub></small></span>';
+    html += '</div>';
+    var expo = E.v.map(function (d, l) { return l === 0 ? String(d) : d + '·' + q + (l > 1 ? sup(l) : ''); }).join(' + ');
+    html += '<p style="margin-top:10px"><i>i</i> = ' + S0.i + ' = ' + expo + '. The digit vector <i>v</i> lists the base-' + q + ' digits of <i>i</i>, least significant first: <i>v<sub>l</sub></i> is the coefficient of <i>t<sup>l</sup></i> (<span class="ref">sec:conv</span>). ';
+    if (S0.net === 'P') html += 'For &#119979;<sub><i>k</i>,<i>q</i></sub> the digits are the coefficients of a polynomial <i>V</i>(<i>t</i>) = &Sigma; <i>v<sub>l</sub></i> <i>t<sup>l</sup></i>, and each coordinate reads its Taylor coefficients at one of the places &infin;, 0, 1, scrambled by one matrix <i>L</i>.</p>';
+    else if (S0.net === 'C') html += 'For the column net the index digits are the cell digits: <i>v</i> = (<i>n<sub>x</sub></i>, <i>n<sub>y</sub></i>, <i>n<sub>z</sub></i>).</p>';
+    else html += 'This 2D net is written in graph form, so the index digits are the cell digits: <i>v</i><sub>0</sub> to <i>v</i><sub>' + (k - 1) + '</sub> are the digits of <i>n<sub>x</sub></i> and <i>v</i><sub>' + k + '</sub> to <i>v</i><sub>' + (2 * k - 1) + '</sub> those of <i>n<sub>y</sub></i>, most significant first.</p>';
+    $('#w1').innerHTML = html;
+
+    /* step 2 */
+    html = '<p style="margin-top:0">Row <i>j</i> of <i>C<sub>c</sub></i> gives output digit <i>d<sub>j</sub></i> = (row &middot; <i>v</i>) mod ' + q + ', most significant first (<span class="ref">lem:nie</span>). Hover or focus a row to expand its sum.</p><div class="coords">';
+    for (c = 0; c < s; c++) {
+      var Co = E.coords[c];
+      html += '<div class="coordblk" data-coord="' + c + '"><h4><i>C<sub>' + names[c] + '</sub></i> mod ' + q + '</h4><div class="scrollx"><table class="gm"><thead><tr><th></th>';
+      for (l = 0; l < m; l++) html += '<th class="vh"><i>v</i><sub>' + l + '</sub>=' + E.v[l] + '</th>';
+      html += '<th>&Sigma;</th><th><i>d</i></th></tr></thead><tbody>';
+      for (j = 0; j < m; j++) {
+        html += '<tr class="' + roleClass(j, k) + '" data-j="' + j + '" tabindex="0" aria-label="row ' + j + ', ' + roleName(j, k) + ' digit"><td class="lab">d<sub>' + j + '</sub></td>';
+        for (l = 0; l < m; l++) html += '<td class="ent' + (Co.C[j][l] * E.v[l] ? '' : ' z') + '">' + Co.C[j][l] + '</td>';
+        html += '<td>' + Co.rows[j].sum + '</td><td class="res">' + Co.rows[j].d + '</td></tr>';
+      }
+      html += '</tbody></table></div><div class="expand"></div></div>';
+    }
+    html += '</div><div class="legend"><span><i class="sw rl1"></i><span class="lt">rows giving the cell digits</span></span><span><i class="sw rl2"></i><span class="lt">the geometric digit</span></span><span><i class="sw rl3"></i><span class="lt">jitter digits</span></span></div>';
+    $('#w2').innerHTML = html;
+    for (c = 0; c < s; c++) setHot(c, HOT0[c] !== undefined && HOT0[c] < m ? HOT0[c] : Math.min(k, m - 1));
+    document.querySelectorAll('#w2 tbody tr').forEach(function (tr) {
+      var c = +tr.closest('[data-coord]').getAttribute('data-coord'), j = +tr.getAttribute('data-j');
+      tr.addEventListener('mouseenter', function () { setHot(c, j); });
+      tr.addEventListener('focus', function () { setHot(c, j); });
+    });
+
+    /* step 3 */
+    html = '';
+    for (c = 0; c < s; c++) {
+      var X = E.coords[c].X;
+      html += '<div class="drow" style="margin-bottom:6px"><span class="lab">' + names[c] + ' =</span><span>0.' + E.coords[c].d.join('') + '<sub>(' + q + ')</sub> = ' + X + '/' + q + sup(m) + ' = ' + trunc(X / E.N, 6) + '&hellip;</span></div>';
+    }
+    html += '<p class="note">Each coordinate is <i>x<sub>c</sub></i> = &Sigma;<sub><i>j</i></sub> <i>d<sub>j</sub></i> <i>q</i>' + sup('&minus;<i>j</i>&minus;1') + ', an exact fraction over <i>q</i>' + sup('<i>m</i>') + ' = ' + E.N + ' (decimal truncated). The numerator is the integer coordinate the page works with.</p>';
+    $('#w3').innerHTML = html;
+
+    /* step 4 */
+    var ellN = names.map(function (x) { return 'ℓ<sub>' + x + '</sub>'; }), hN = names.map(function (x) { return 'h<sub>' + x + '</sub>'; });
+    html = '<div class="coords">';
+    for (c = 0; c < s; c++) {
+      var dd = E.coords[c].d, g1 = '', g2 = '', g3 = '';
+      for (j = 0; j < m; j++) { var chip = '<span class="d' + (j === k ? ' geo' : (j > k ? ' jit' : '')) + '">' + dd[j] + '</span>'; if (j < k) g1 += chip; else if (j === k) g2 += chip; else g3 += chip; }
+      html += '<div class="coordblk"><div class="chipline"><span>' + names[c] + ' = 0.</span><span class="grpd">' + g1 + '</span><span class="grpd g2">' + g2 + '</span>' + (g3 ? '<span class="grpd g3">' + g3 + '</span>' : '') + '</div>';
+      html += '<div class="formula" style="margin-top:6px"><div>n<sub>' + names[c] + '</sub> = ' + E.n[c] + '</div>';
+      if (S0.net === 'C') {
+        html += '<div><span class="r">r</span> = a&middot;n mod ' + q + ' = (' + NET0.a.map(function (a, d) { return a + '·' + E.n[d]; }).join(' + ') + ') mod ' + q + ' = <span class="r">' + E.r[c] + '</span></div>';
+      } else {
+        var t = signedTerms(E.M[c].concat(E.J ? E.J[c] : []), ellN.concat(E.J ? hN : []), E.ell.concat(E.J ? E.h : []));
+        html += '<div><span class="r">r<sub>' + names[c] + '</sub></span> = (' + t[0] + ') mod ' + q + ' = (' + t[1] + ') mod ' + q + ' = <span class="r">' + E.r[c] + '</span></div>';
+      }
+      html += '</div></div>';
+    }
+    html += '</div>';
+    if (S0.net === 'C') html += '<p style="margin-top:12px">With <i>k</i> = 1 the first digit is the cell <i>n</i>. The next two digits are the same in all three coordinates: <i>h</i>(<i>n</i>) = <i>a</i>&middot;<i>n</i> mod ' + q + ' with <i>a</i> = ' + vec(NET0.a) + ', and <i>j</i>(<i>n</i>) = <i>n<sub>y</sub></i> &minus; <i>n<sub>x</sub></i> mod ' + q + ' = ' + E.col.jv + ', the jitter digit. The second digit of every coordinate reads the cell digits of all three coordinates: in the rows <i>d</i><sub>1</sub> of step 2 the index digits <i>v</i><sub>0</sub>, <i>v</i><sub>1</sub>, <i>v</i><sub>2</sub> are exactly &#8467;<sub>x</sub>, &#8467;<sub>y</sub>, &#8467;<sub>z</sub>.</p>';
+    else {
+      html += '<p style="margin-top:12px">The first ' + k + ' digit' + (k > 1 ? 's' : '') + ' of each coordinate form the cell index <i>n</i> = ' + vec(E.n) + '; the last cell digits of all coordinates are &#8467; = ' + vec(E.ell) + (E.J ? ' and the second-last <i>h</i> = ' + vec(E.h) : '') + '. Digit ' + (k + 1) + ' is the geometric digit <i>r</i> = <i>M&#771;</i>&#8467;' + (E.J ? ' + <i>J</i><i>h</i>' : '') + ' mod ' + q + ' (' + (S0.net === 'P' ? '<span class="ref">prop:cell</span>' : '<span class="ref">def:geom</span>') + '): each coordinate&rsquo;s digit ' + (k + 1) + ' reads the last cell digits of the other coordinates too, not only its own. ';
+      if (S0.net !== 'P') html += 'In the rows <i>d</i><sub>' + k + '</sub> of step 2, the only index digits with nonzero entries are among <i>v</i><sub>' + (k - 1) + '</sub> and <i>v</i><sub>' + (2 * k - 1) + '</sub>, which are exactly &#8467;<sub>x</sub> and &#8467;<sub>y</sub>. ';
+      html += m > k + 1 ? 'The remaining digits are the jitter: they move the point by less than 1/' + q + ' of a cell.</p>' : 'There are no deeper digits at this size, so there is no jitter.</p>';
+      if (S0.net !== 'P') html += '<button class="btn" type="button" id="wshow"' + (Math.pow(q, k) <= 64 ? '' : ' disabled') + '>Show this cell in section 4</button>' + (Math.pow(q, k) <= 64 ? '' : ' <span class="note">section 4 shows at most 64 cells per side</span>');
+    }
+    $('#w4').innerHTML = html;
+    var ws = $('#wshow');
+    if (ws) ws.addEventListener('click', showInSection1);
+
+    /* step 5 */
+    if (S0.net === 'C') html = step5col(E, q);
+    else html = step5lat(E, q, names);
+    $('#w5').innerHTML = html;
+
+    /* step 6 */
+    $('#wcode').textContent = NC.pyProgram(NET0, q, S0.i, E.coords.map(function (o) { return o.X; }));
+    $('#wcopied').textContent = '';
+  }
+
+  function step5lat(E, q, names) {
+    var k = E.k, s = E.s, c, sh = k >= 2, html = '';
+    var Mtxt = '<i>M&#771;</i>';
+    html += '<p style="margin-top:0">Digit ' + (k + 1) + ' is <i>r</i> = ' + Mtxt + '&#8467;' + (E.J ? ' + <i>J</i><i>h</i>' : '') + ' mod ' + q + '. Without the reduction mod ' + q + ', the truncated point <i>n</i> + <i>r</i>/<i>q</i> would be <i>n</i> + ' + Mtxt + '<i>n</i>/<i>q</i> = (<i>I</i> + ' + Mtxt + '/<i>q</i>)<i>n</i>: the cell vector <i>n</i> times one fixed matrix. So locally the points form the full-rank lattice (<i>I</i> + ' + Mtxt + '/<i>q</i>)&#8484;' + sup(s) + ', generated by the ' + s + ' columns of <i>I</i> + ' + Mtxt + '/<i>q</i>, a slightly turned and shrunk copy of &#8484;' + sup(s) + '.</p>';
+    html += '<p>The reduction subtracts <i>q</i>&kappa; from ' + Mtxt + '&#8467;' + (E.J ? ' + <i>J</i><i>h</i>' : '') + ', where &kappa; = &lfloor;(' + Mtxt + '&#8467;' + (E.J ? ' + <i>J</i><i>h</i>' : '') + ')/<i>q</i>&rfloor; is an integer vector. It is constant on a patch and changes exactly where a coordinate of ' + Mtxt + '&#8467; crosses a multiple of ' + q + ': those cell faces are the slips.';
+    if (sh) html += ' With ' + k + ' cell digits, &#8467; = <i>n</i> mod ' + q + ' sees only the last digit, so each block of ' + q + ' cells per axis carries its own shift: &minus;' + Mtxt + '&lfloor;<i>n</i>/' + q + '&rfloor;, an integer vector' + (E.J ? ', plus <i>J</i><i>h</i>/' + q + ', where <i>h</i> is the second-last cell digit. That is how a carry moves the patch by a fraction of a cell' : '') + '.';
+    html += '</p><div class="scrollx"><table class="lat"><thead><tr><th></th><th>cell <i>n</i></th><th>lattice point (<i>I</i>+' + Mtxt + '/<i>q</i>)<i>n</i></th>' + (sh ? '<th>block shift</th>' : '') + '<th>wrap &kappa;</th><th>point, digits 1 to ' + (k + 1) + ': <i>n</i> + <i>r</i>/<i>q</i></th></tr></thead><tbody>';
+    for (c = 0; c < s; c++) {
+      html += '<tr><td>' + names[c] + '</td><td>' + E.n[c] + '</td><td>' + fq(E.latNum[c], q) + '</td>' + (sh ? '<td>' + fq(E.shiftNum[c], q) + '</td>' : '') + '<td' + (E.kappa[c] ? ' class="em"' : '') + '>' + neg(E.kappa[c]) + '</td><td>' + fq(E.imgNum[c], q) + '</td></tr>';
+    }
+    html += '</tbody></table></div>';
+    var zero = E.kappa.every(function (x) { return x === 0; });
+    var wrapped = names.filter(function (_, c) { return E.kappa[c] !== 0; });
+    html += '<div class="verdict">Point = lattice point' + (sh ? ' + block shift' : '') + ' &minus; &kappa;, checked exactly: ' + (E.ok ? 'holds' : 'FAILS') + '. ';
+    var corner = sh ? 'the cell &#8467; = 0 of its block' : 'the cell <i>n</i> = 0';
+    if (zero) html += '&kappa; = 0 here: no coordinate of digit ' + (k + 1) + ' has wrapped, so this point lies on the same patch as ' + corner + ', exactly on its lattice.';
+    else html += '&kappa; = ' + vec(E.kappa) + ': digit ' + (k + 1) + ' of ' + wrapped.join(' and ') + ' has wrapped, so this point lies on another patch than ' + corner + ', shifted from the lattice point by the whole-cell vector &minus;&kappa;. Between the two patches lies a slip.';
+    html += '</div>';
+    html += '<p><b style="font-family:var(--sans)">Is this a rank-1 lattice?</b> No generating vector appears anywhere in the construction: the page never computes <i>i</i>&middot;<i>z</i>/<i>N</i> mod 1. The index <i>i</i> only labels the point. The point is determined by its cell <i>n</i>, and the lattice it sits on locally is (<i>I</i> + ' + Mtxt + '/<i>q</i>)&#8484;' + sup(s) + ', of full rank ' + s + ', with ' + Mtxt + ' = ' + matTxt(E.M) + (E.J ? ' and <i>J</i> = ' + matTxt(E.J) : '') + '.</p>';
+    return html;
+  }
+  function matTxt(A) { return '[' + A.map(function (r) { return r.map(neg).join(' '); }).join('; ') + ']'; }
+
+  function step5col(E, q) {
+    var C = E.col, qq = q * q, html = '';
+    html += '<p style="margin-top:0">In the column net all three coordinates share their last two digits, so the point is <i>n</i> + &phi;(<i>n</i>)/<i>q</i>' + sup(2) + ' &middot; (1, 1, 1), with the common height &phi;(<i>n</i>) = <i>q</i>&middot;<i>h</i>(<i>n</i>) + <i>j</i>(<i>n</i>). Without the reductions mod ' + q + ', &phi; would be the linear form (<i>q a</i> + &#8467;)&middot;<i>n</i> with &#8467; = (&minus;1, 1, 0), and the point would be (<i>I</i> + <b>1</b>(<i>q a</i> + &#8467;)' + sup('T') + '/<i>q</i>' + sup(2) + ')<i>n</i>: again one fixed full-rank matrix applied to the cell vector. The reductions subtract <i>q</i>' + sup(2) + '&kappa;<sub>2</sub> + <i>q</i>&kappa;<sub>3</sub>: a wrap of the second digit moves the point by a whole cell diagonal, a wrap of the third by 1/' + q + ' of it. Seen along (1,1,1) every column sits over a site of a triangular lattice, and section 7 follows the heights around the torus.</p>';
+    html += '<div class="scrollx"><table class="lat"><tbody>';
+    var rows = [
+      ['cell <i>n</i>', vec(E.n)],
+      ['<i>a</i>&middot;<i>n</i>, with <i>a</i> = ' + vec(NET0.a), String(C.an)],
+      ['second digit <i>h</i> = <i>a</i>&middot;<i>n</i> mod ' + q + ', wrap &kappa;<sub>2</sub>', C.hn + ', &kappa;<sub>2</sub> = ' + neg(C.k2)],
+      ['<i>n<sub>y</sub></i> &minus; <i>n<sub>x</sub></i>', neg(C.jn)],
+      ['third digit <i>j</i> = (<i>n<sub>y</sub></i> &minus; <i>n<sub>x</sub></i>) mod ' + q + ', wrap &kappa;<sub>3</sub>', C.jv + ', &kappa;<sub>3</sub> = ' + neg(C.k3)],
+      ['height &phi; = <i>q h</i> + <i>j</i>', String(C.phi)],
+      ['linear form (<i>q a</i> + &#8467;)&middot;<i>n</i>', neg(C.lin)],
+      ['&phi; = (<i>q a</i> + &#8467;)&middot;<i>n</i> &minus; ' + qq + '&kappa;<sub>2</sub> &minus; ' + q + '&kappa;<sub>3</sub>', E.ok ? 'holds' : 'FAILS'],
+      ['point in cell units, <i>n</i> + &phi;/' + qq + ' &middot; (1,1,1)', vec(E.n, function (x) { return fq(x * qq + C.phi, qq); })]
+    ];
+    rows.forEach(function (r) { html += '<tr><td>' + r[0] + '</td><td class="' + (r[1] === 'holds' ? 'em' : '') + '">' + r[1] + '</td></tr>'; });
+    html += '</tbody></table></div>';
+    html += '<p style="margin-top:12px"><b style="font-family:var(--sans)">Is this a rank-1 lattice?</b> No generating vector appears anywhere in the construction: the page never computes <i>i</i>&middot;<i>z</i>/<i>N</i> mod 1. The point is determined by its cell, and the matrix applied to the cell vector has full rank 3.</p>';
+    return html;
+  }
+
+  function showInSection1() {
+    if (S0.net === 'P' || S0.net === 'C' || Math.pow(S0.q, S0.k) > 64) return;
+    S2.variant = S0.net; S2.q = S0.q; S2.k = S0.k;
+    $('#var2').value = S2.variant; $('#q2').value = S2.q;
+    compute2D();
+    S2.sel = NC.cellIndex(D2.B, E0.n);
+    update2D(false);
+    $('#square').scrollIntoView({ behavior: matchMedia('(prefers-reduced-motion: reduce)').matches ? 'auto' : 'smooth', block: 'start' });
+  }
+  function syncFromSection1() {
+    if (S2.k > 2) return;
+    S0.net = S2.variant; S0.q = S2.q; S0.k = S2.k; S0.i = D2.B.cell[S2.sel];
+    render0();
+  }
+
+  $('#wnet').addEventListener('change', function (e) { S0.net = e.target.value; if (S0.net === 'C') { S0.k = 1; if (qOptions0().indexOf(S0.q) < 0) S0.q = 5; } HOT0 = {}; render0(); });
+  $('#wq').addEventListener('change', function (e) { S0.q = +e.target.value; render0(); });
+  $('#wkseg').addEventListener('click', function (e) { var b = e.target.closest('button'); if (!b || b.disabled) return; S0.k = +b.getAttribute('data-k'); HOT0 = {}; render0(); });
+  $('#wi').addEventListener('change', function (e) { var x = Math.floor(+e.target.value); S0.i = isFinite(x) ? x : 0; render0(); });
+  $('#wir').addEventListener('input', function (e) { S0.i = +e.target.value; render0(); });
+  $('#wrand').addEventListener('click', function () { S0.i = Math.floor(Math.random() * E0.N); render0(); });
+  $('#wcopy').addEventListener('click', function () {
+    var txt = $('#wcode').textContent, done = function () { $('#wcopied').textContent = 'Copied'; };
+    var fallback = function () {
+      var r = document.createRange(); r.selectNodeContents($('#wcode'));
+      var sel = window.getSelection(); sel.removeAllRanges(); sel.addRange(r);
+      $('#wcopied').textContent = 'Selected: press Ctrl+C or ⌘C to copy';
+    };
+    try { navigator.clipboard.writeText(txt).then(done, fallback); } catch (err) { fallback(); }
+  });
+  render0();
+
+  /* ================================================================ section 2: 3D */
+  var QP = [4, 5, 6, 7];
+  var QC = []; for (var qq = 5; qq * qq * qq <= 100000; qq++) if (qq % 2 && qq % 3) QC.push(qq);
+  var S3 = { net: 'P', iP: 1, iC: 2, slab: true, grid: true, lattice: true, pair: true, z0: null, th: 1, view: 'top' };
+  var D3 = null;
+  function q3() { return S3.net !== 'C' ? QP[S3.iP] : QC[S3.iC]; }
+
+  function compute3D() {
+    var q = q3(), net = S3.net === 'P' ? NC.pNet(2) : (S3.net === 'F' ? NC.frame3(2) : NC.colNet(q)), B = NC.build(net, q);
+    var md = NC.minDist(B, true);
+    var r = null;
+    if (S3.net === 'P') {
+      var cells = B.G * B.G * B.G; r = [new Int32Array(cells), new Int32Array(cells), new Int32Array(cells)];
+      for (var idx = 0; idx < cells; idx++) { var i = B.cell[idx]; for (var c = 0; c < 3; c++) r[c][idx] = NC.digit(B, c, i, B.k); }
+    }
+    D3 = { q: q, net: net, B: B, md: md, r: r, box: NC.boxCheck(B), bound: S3.net === 'P' ? NC.cMain(q) : (S3.net === 'F' ? null : NC.colTheory(q).c),
+           cmpP: S3.net === 'F' ? NC.minDist(NC.build(NC.pNet(2), q), true).c : null };
+    S3.z0 = pairLayer();
+  }
+  function pairLayer() {
+    var B = D3.B, p = D3.md.pair; if (!p) return 0;
+    var z = Math.floor(B.X[2][p.i] / B.cw), z2 = Math.floor((B.X[2][p.i] + p.D[2]) / B.cw);
+    return Math.max(0, Math.min(B.G - S3.th, Math.min(z, z2)));
+  }
+
+  function read3D() {
+    var B = D3.B, q = D3.q, md = D3.md, P = S3.net === 'P';
+    var Dv = md.pair ? '(' + md.pair.D.map(function (x) { return x < 0 ? '−' + (-x) : x; }).join(', ') + ')' : '';
+    var rows = [
+      ['Points <i>N</i>', String(B.N) + ' = ' + q + sup(B.m)],
+      ['Cells per side', String(B.G)],
+      ['δ<i>N</i>' + sup('1/3') + ', exact', trunc(md.c), true],
+      S3.net === 'F' ? ['for comparison: 𝒫<sub>2,<i>q</i></sub>, exact', trunc(D3.cmpP)] : [P ? 'proven bound <i>c</i>(<i>q</i>), thm:main' : 'closed form, thm:col', trunc(D3.bound)],
+      ['closest pairs', String(md.count)],
+      ['difference, units of <i>q</i>' + sup('−' + B.m), Dv],
+      ['every box of volume 1/<i>N</i> holds one point', D3.box.ok ? 'yes, ' + D3.box.shapes + ' shapes' : 'no']
+    ];
+    dl($('#read3'), rows);
+  }
+
+  var three = null;
+  function initThree() {
+    var host = $('#plot3d');
+    if (!window.THREE || !THREE.OrbitControls) { host.insertAdjacentHTML('beforeend', '<div class="fallback">The 3D view needs three.js from a CDN, which did not load. The numbers on the right are still exact.</div>'); return null; }
+    var renderer;
+    try { renderer = new THREE.WebGLRenderer({ antialias: true, alpha: true }); } catch (e) { host.insertAdjacentHTML('beforeend', '<div class="fallback">WebGL is not available in this browser. The numbers on the right are still exact.</div>'); return null; }
+    renderer.setPixelRatio(Math.min(window.devicePixelRatio || 1, 2));
+    renderer.domElement.setAttribute('aria-label', 'Three-dimensional view of the net');
+    host.insertBefore(renderer.domElement, host.firstChild);
+    var camera = new THREE.OrthographicCamera(-1, 1, 1, -1, 0.1, 1000);
+    camera.up.set(0, 0, 1);
+    var controls = new THREE.OrbitControls(camera, renderer.domElement);
+    controls.enableDamping = false; controls.screenSpacePanning = true;
+    var scene = new THREE.Scene();
+    var t = { renderer: renderer, camera: camera, controls: controls, scene: scene, group: null, mats: [] };
+    controls.addEventListener('change', function () { sizePoints(); render3(); });
+    return t;
+  }
+
+  var VS = 'attribute vec3 aColor; uniform float uSize; varying vec3 vColor; void main(){ vColor = aColor; gl_Position = projectionMatrix * modelViewMatrix * vec4(position, 1.0); gl_PointSize = uSize; }';
+  var FS = 'uniform float uRing; varying vec3 vColor; void main(){ vec2 c = gl_PointCoord - vec2(0.5); float r = length(c); if (r > 0.5) discard; if (uRing > 0.5) { if (r < 0.34) discard; gl_FragColor = vec4(vColor, 1.0); return; } gl_FragColor = vec4(mix(vColor, vColor * 0.72, smoothstep(0.25, 0.5, r)), 1.0); }';
+  function pointsObj(pos, colors, ring, scale) {
+    var geo = new THREE.BufferGeometry();
+    geo.setAttribute('position', new THREE.Float32BufferAttribute(pos, 3));
+    geo.setAttribute('aColor', new THREE.Float32BufferAttribute(colors, 3));
+    var mat = new THREE.ShaderMaterial({ vertexShader: VS, fragmentShader: FS, uniforms: { uSize: { value: 4 }, uRing: { value: ring ? 1 : 0 } } });
+    mat.userData.scale = scale;
+    three.mats.push(mat);
+    return new THREE.Points(geo, mat);
+  }
+  function lineObj(pos, color, dashed, opacity) {
+    var geo = new THREE.BufferGeometry();
+    geo.setAttribute('position', new THREE.Float32BufferAttribute(pos, 3));
+    var mat = dashed ? new THREE.LineDashedMaterial({ color: color, dashSize: dashed[0], gapSize: dashed[1] })
+                     : new THREE.LineBasicMaterial({ color: color, transparent: opacity !== undefined, opacity: opacity === undefined ? 1 : opacity });
+    var obj = new THREE.LineSegments(geo, mat);
+    if (dashed) obj.computeLineDistances();
+    return obj;
+  }
+  function sizePoints() {
+    if (!three) return;
+    var cam = three.camera, h = three.renderer.domElement.height, G = D3.B.G;
+    var cellPx = h / ((cam.top - cam.bottom) / cam.zoom);
+    three.mats.forEach(function (m) { m.uniforms.uSize.value = Math.max(2.5, Math.min(cellPx * m.userData.scale, 22)); });
+  }
+  function render3() { if (three) three.renderer.render(three.scene, three.camera); }
+
+  function buildScene() {
+    if (!three) return;
+    if (three.group) {
+      three.scene.remove(three.group);
+      three.group.traverse(function (o) { if (o.geometry) o.geometry.dispose(); if (o.material) o.material.dispose(); });
+    }
+    three.mats = [];
+    var g = new THREE.Group(), B = D3.B, G = B.G, q = D3.q, cw = B.cw, h0 = G / 2, P = S3.net !== 'C';
+    var col = { ink: new THREE.Color(tok('--ink')), accent: new THREE.Color(tok('--accent')), slip: new THREE.Color(tok('--slip')),
+                grid: new THREE.Color(tok('--grid-strong')), faint: new THREE.Color(tok('--grid')), jit: new THREE.Color(tok('--jit')),
+                lo: new THREE.Color(tok('--ramp-lo')), hi: new THREE.Color(tok('--ramp-hi')), rule: new THREE.Color(tok('--rule')) };
+    var z0 = S3.z0, z1 = S3.z0 + S3.th, slab = S3.slab;
+    /* cube outline */
+    var o = [], E = [[0, 0, 0], [G, 0, 0], [G, G, 0], [0, G, 0], [0, 0, G], [G, 0, G], [G, G, G], [0, G, G]];
+    [[0, 1], [1, 2], [2, 3], [3, 0], [4, 5], [5, 6], [6, 7], [7, 4], [0, 4], [1, 5], [2, 6], [3, 7]].forEach(function (e) {
+      o.push(E[e[0]][0] - h0, E[e[0]][1] - h0, E[e[0]][2] - h0, E[e[1]][0] - h0, E[e[1]][1] - h0, E[e[1]][2] - h0); });
+    g.add(lineObj(o, col.grid));
+    /* grid */
+    if (S3.grid) {
+      var gl = [], gs = [], i;
+      if (slab) {
+        var zz = z0 - h0;
+        for (i = 0; i <= G; i++) {
+          var arr = (B.k >= 2 && i % q === 0) ? gs : gl;
+          arr.push(i - h0, -h0, zz, i - h0, G - h0, zz, -h0, i - h0, zz, G - h0, i - h0, zz);
+        }
+      } else {
+        for (i = 0; i <= G; i++) {
+          var a2 = (B.k >= 2 && i % q === 0) ? gs : gl, u = i - h0;
+          a2.push(u, -h0, -h0, u, h0, -h0, -h0, u, -h0, h0, u, -h0);
+          a2.push(u, -h0, -h0, u, -h0, h0, -h0, -h0, u, h0, -h0, u);
+          a2.push(-h0, u, -h0, -h0, u, h0, -h0, -h0, u, -h0, h0, u);
+        }
+      }
+      if (gl.length) g.add(lineObj(gl, col.faint));
+      if (gs.length) g.add(lineObj(gs, col.grid));
+    }
+    /* points */
+    var pos = [], cols = [], N = B.N, X = B.X, c3 = new THREE.Color();
+    for (var j = 0; j < N; j++) {
+      var nz = Math.floor(X[2][j] / cw);
+      if (slab && (nz < z0 || nz >= z1)) continue;
+      var x = X[0][j] / cw, y = X[1][j] / cw, z = X[2][j] / cw, f;
+      if (P) f = slab ? (S3.th > 1 ? (nz - z0) / Math.max(1, S3.th - 1) : 1) : z / G;
+      else f = (((X[0][j] % cw) / cw));       /* column nets: the common height phi / q^2 */
+      c3.copy(col.lo).lerp(col.hi, 0.25 + 0.75 * f);
+      pos.push(x - h0, y - h0, z - h0); cols.push(c3.r, c3.g, c3.b);
+    }
+    g.add(pointsObj(pos, cols, false, 0.3));
+    /* lattice images, jitter and slips: one-layer slab of P */
+    if (S3.net === 'P' && slab && S3.lattice && S3.th === 1) {
+      var rp = [], rc = [], jl = [], sl = [], M = D3.net.M;
+      for (var ix = 0; ix < G; ix++) for (var iy = 0; iy < G; iy++) {
+        var idx = NC.cellIndex(B, [ix, iy, z0]), pj = B.cell[idx];
+        var L = [ix + D3.r[0][idx] / q, iy + D3.r[1][idx] / q, z0 + D3.r[2][idx] / q];
+        rp.push(L[0] - h0, L[1] - h0, L[2] - h0); rc.push(col.accent.r, col.accent.g, col.accent.b);
+        jl.push(L[0] - h0, L[1] - h0, L[2] - h0, X[0][pj] / cw - h0, X[1][pj] / cw - h0, X[2][pj] / cw - h0);
+        for (var d = 0; d < 2; d++) {
+          var n2 = [ix, iy, z0]; n2[d] += 1;
+          if (n2[d] >= G || n2[d] % q === 0) continue;          /* carry lines are drawn with the grid */
+          var b = NC.cellIndex(B, n2), smooth = true;
+          for (var c = 0; c < 2; c++) if (D3.r[c][b] - D3.r[c][idx] !== M[c][d]) smooth = false;
+          if (smooth) continue;
+          var zt = z1 - h0 + 0.01;
+          if (d === 0) sl.push(ix + 1 - h0, iy - h0, zt, ix + 1 - h0, iy + 1 - h0, zt);
+          else sl.push(ix - h0, iy + 1 - h0, zt, ix + 1 - h0, iy + 1 - h0, zt);
+        }
+      }
+      g.add(lineObj(jl, col.jit));
+      g.add(pointsObj(rp, rc, true, 0.3));
+      if (sl.length) g.add(lineObj(sl, col.slip, [0.22, 0.14]));
+    }
+    /* closest pair */
+    if (S3.pair && D3.md.pair) {
+      var pr = D3.md.pair, A = [X[0][pr.i] / cw - h0, X[1][pr.i] / cw - h0, X[2][pr.i] / cw - h0];
+      var Bp = [A[0] + pr.D[0] / cw, A[1] + pr.D[1] / cw, A[2] + pr.D[2] / cw];
+      g.add(lineObj(A.concat(Bp), col.accent));
+      g.add(pointsObj(A.concat(Bp), [col.accent.r, col.accent.g, col.accent.b, col.accent.r, col.accent.g, col.accent.b], false, 0.55));
+    }
+    three.group = g; three.scene.add(g);
+    sizePoints(); render3();
+  }
+
+  function resize3() {
+    if (!three) return;
+    var host = $('#plot3d'), w = host.clientWidth, h = host.clientHeight;
+    if (!w || !h) return;
+    three.renderer.setSize(w, h, false);
+    three.renderer.domElement.style.width = '100%'; three.renderer.domElement.style.height = '100%';
+    var G = D3.B.G, hh = (S3.slab && S3.view === 'top' ? 0.56 : 0.9) * G, asp = w / h, cam = three.camera;
+    cam.left = -hh * asp; cam.right = hh * asp; cam.top = hh; cam.bottom = -hh; cam.near = 0.1; cam.far = G * 12;
+    cam.updateProjectionMatrix(); sizePoints(); render3();
+  }
+
+  function setView(v) {
+    S3.view = v;
+    document.querySelectorAll('[data-view]').forEach(function (b) { b.setAttribute('aria-pressed', String(b.getAttribute('data-view') === v)); });
+    if (!three) return;
+    var G = D3.B.G, Dd = G * 4, target = new THREE.Vector3(0, 0, 0);
+    if (S3.slab) target.z = S3.z0 + S3.th / 2 - G / 2;
+    var dir = v === 'top' ? new THREE.Vector3(0, -0.0001, 1) : v === 'diag' ? new THREE.Vector3(1, 1, 1) : new THREE.Vector3(1.0, -1.55, 0.95);
+    dir.normalize();
+    three.camera.position.copy(target).addScaledVector(dir, Dd);
+    three.camera.zoom = 1;
+    three.controls.target.copy(target);
+    three.controls.update();
+    resize3();
+  }
+
+  function syncControls3() {
+    pressed($('#net3seg'), 'data-net', S3.net);
+    var list = S3.net !== 'C' ? QP : QC, iq = S3.net !== 'C' ? S3.iP : S3.iC;
+    $('#q3').max = list.length - 1; $('#q3').value = iq; $('#q3v').textContent = list[iq];
+    var G = D3.B.G;
+    $('#z3').max = G - S3.th; $('#z3').value = S3.z0; $('#z3v').textContent = S3.z0; $('#th3v').textContent = S3.th; $('#th3').value = S3.th;
+    $('#slabctl').hidden = !S3.slab;
+    var latOn = S3.net === 'P' && S3.slab && S3.th === 1;
+    $('#lat3').disabled = !latOn; $('#lat3lab').className = latOn ? '' : 'off';
+    $('#gopair').disabled = !S3.slab;
+  }
+
+  function update3(recompute, keepView) {
+    if (recompute) compute3D();
+    syncControls3(); read3D();
+    if (three) { buildScene(); if (!keepView) setView(S3.view); else resize3(); }
+  }
+
+  $('#net3seg').addEventListener('click', function (e) {
+    var b = e.target.closest('button'); if (!b) return; S3.net = b.getAttribute('data-net');
+    S3.view = S3.net === 'C' && !S3.slab ? 'diag' : S3.view; update3(true);
+  });
+  $('#q3').addEventListener('input', function (e) { if (S3.net !== 'C') S3.iP = +e.target.value; else S3.iC = +e.target.value; update3(true); });
+  $('#slab3').addEventListener('change', function (e) { S3.slab = e.target.checked; if (!S3.slab && S3.view === 'top') S3.view = S3.net === 'C' ? 'diag' : 'oblique'; if (S3.slab) S3.view = 'top'; update3(false); });
+  $('#grid3').addEventListener('change', function (e) { S3.grid = e.target.checked; update3(false, true); });
+  $('#lat3').addEventListener('change', function (e) { S3.lattice = e.target.checked; update3(false, true); });
+  $('#pair3').addEventListener('change', function (e) { S3.pair = e.target.checked; update3(false, true); });
+  $('#z3').addEventListener('input', function (e) { S3.z0 = +e.target.value; update3(false); });
+  $('#th3').addEventListener('input', function (e) { S3.th = +e.target.value; S3.z0 = Math.min(S3.z0, D3.B.G - S3.th); update3(false); });
+  document.querySelectorAll('[data-view]').forEach(function (b) { b.addEventListener('click', function () { setView(b.getAttribute('data-view')); }); });
+  $('#gopair').addEventListener('click', function () { S3.z0 = pairLayer(); update3(false); });
+
+  compute3D();
+  three = initThree();
+  if (!three) $('#hint3').hidden = true;
+  update3(false);
+  if (window.ResizeObserver) new ResizeObserver(function () { resize3(); }).observe($('#plot3d'));
+  themeFns.push(function () { if (three) buildScene(); });
+
+  /* ================================================================ section 3: holonomy */
+  var QH = []; for (var qh = 5; qh <= 97; qh++) if (qh % 2 && qh % 3) QH.push(qh);
+  $('#qh').max = QH.length - 1;
+  var SH = { i: QH.indexOf(11) };
+  $('#qh').value = SH.i;
+  var NS = 'http://www.w3.org/2000/svg';
+  function el(name, attrs, parent, text) {
+    var e = document.createElementNS(NS, name);
+    for (var a in attrs) e.setAttribute(a, attrs[a]);
+    if (text !== undefined) e.textContent = text;
+    if (parent) parent.appendChild(e);
+    return e;
+  }
+  function frac3(n3) {                 /* n3/3 as a reduced fraction string */
+    if (n3 % 3 === 0) return String(n3 / 3).replace('-', '−');
+    return (n3 < 0 ? '−' : '') + Math.abs(n3) + '/3';
+  }
+  var THIRDS = { '-2': '−2/3', '-1': '−1/3', '0': '0', '1': '+1/3', '2': '+2/3' };
+  var colMinCache = {};
+  function drawHolo() {
+    var q = QH[SH.i], th = NC.colTheory(q), qq = q * q, svg = $('#holo');
+    $('#qhv').textContent = q;
+    while (svg.firstChild) svg.removeChild(svg.firstChild);
+    var x0 = 64, x1 = 586, y0 = 18, y1 = 312;
+    function X(t) { return x0 + (x1 - x0) * t / q; }
+    function Y(v) { return y0 + (y1 - y0) * (1 - v) / 2; }
+    [-2, -1, 0, 1, 2].forEach(function (k3) {
+      var yy = Y(k3 / 3);
+      el('line', { x1: x0, x2: x1, y1: yy, y2: yy, style: k3 === 0 ? 'stroke:var(--grid-strong);stroke-width:1.2;stroke-dasharray:5 3' : 'stroke:var(--grid);stroke-width:1' }, svg);
+      el('text', { x: x0 - 8, y: yy + 4, 'text-anchor': 'end', style: 'fill:var(--muted);font:12px var(--mono)' }, svg, THIRDS[String(k3)]);
+    });
+    el('line', { x1: x0, x2: x0, y1: y0, y2: y1, style: 'stroke:var(--rule)' }, svg);
+    var ticks = [0, q]; if (q > 10) ticks.splice(1, 0, Math.round(q / 2));
+    ticks.forEach(function (t) {
+      el('line', { x1: X(t), x2: X(t), y1: y1, y2: y1 + 4, style: 'stroke:var(--muted)' }, svg);
+      el('text', { x: X(t), y: y1 + 18, 'text-anchor': 'middle', style: 'fill:var(--muted);font:12px var(--mono)' }, svg, String(t));
+    });
+    el('text', { x: (x0 + x1) / 2, y: y1 + 40, 'text-anchor': 'middle', style: 'fill:var(--muted);font:13px var(--sans)' }, svg, 'step t along the cycle');
+    el('text', { x: 14, y: (y0 + y1) / 2, 'text-anchor': 'middle', transform: 'rotate(-90 14 ' + (y0 + y1) / 2 + ')', style: 'fill:var(--muted);font:13px var(--sans)' }, svg, 'height − t·q²/3, in periods q²');
+    var styles = ['stroke:var(--muted);stroke-width:1.6;stroke-dasharray:4 3', 'stroke:var(--ink);stroke-width:1.6', 'stroke:var(--accent);stroke-width:1.9'];
+    var fills = ['var(--muted)', 'var(--ink)', 'var(--accent)'];
+    var rowsT = [], ends = {};
+    for (var i = 0; i < 3; i++) {
+      var cy = NC.cycle(q, i), pts = [], dpts = [];
+      for (var t = 0; t <= q; t++) {
+        pts.push(X(t).toFixed(2) + ',' + Y((3 * cy.H[t] - t * qq) / (3 * qq)).toFixed(2));
+        dpts.push(X(t).toFixed(2) + ',' + Y(t * th.w[i] / (3 * q)).toFixed(2));
+      }
+      el('polyline', { points: dpts.join(' '), fill: 'none', style: styles[i].replace(/stroke-width:[\d.]+(;stroke-dasharray:[\d ]+)?/, 'stroke-width:1;stroke-dasharray:1 2.5') }, svg);
+      el('polyline', { points: pts.join(' '), fill: 'none', style: styles[i] + ';stroke-linejoin:round' }, svg);
+      if (q <= 47) pts.forEach(function (p) { var xy = p.split(','); el('circle', { cx: xy[0], cy: xy[1], r: 2.1, style: 'fill:' + fills[i] }, svg); });
+      var endH = cy.H[q] / qq, wraps = 0;
+      cy.xs.forEach(function (x) { if (3 * x - qq < th.eps3[i]) wraps++; });
+      ends[th.w[i]] = (ends[th.w[i]] || []).concat([i]);
+      rowsT.push('<tr><td>e<sub>' + SUBS[i] + '</sub></td><td>' + frac3(th.w[i]) + '</td><td>' + th.r[i] + ' (' + wraps + ')</td><td>' + frac3(th.eps3[i]) + '</td><td>' + endH + '</td></tr>');
+    }
+    Object.keys(ends).forEach(function (w) {
+      var yy = Y(+w / 3), xa = x1 + 8;
+      el('line', { x1: xa, x2: xa, y1: Y(0), y2: yy + (+w > 0 ? 6 : -6), style: 'stroke:var(--accent);stroke-width:1.6' }, svg);
+      el('path', { d: 'M' + (xa - 4) + ',' + (yy + (+w > 0 ? 7 : -7)) + ' L' + xa + ',' + yy + ' L' + (xa + 4) + ',' + (yy + (+w > 0 ? 7 : -7)) + ' Z', style: 'fill:var(--accent)' }, svg);
+      el('text', { x: xa + 9, y: yy + 4, style: 'fill:var(--accent);font:12px var(--mono)' }, svg, THIRDS[w]);
+    });
+    $('#holotab').innerHTML = '<thead><tr><th>cycle</th><th>leftover</th><th>wraps r</th><th>excess ε</th><th>end</th></tr></thead><tbody>' + rowsT.join('') + '</tbody>';
+    var eta = th.eta3 / 3, rows = [
+      ['largest step excess η', frac3(th.eta3)],
+      ['first-order deficit η/<i>q</i>', trunc(eta / q, 4)],
+      ['δ<i>N</i>' + sup('1/3') + ', closed form', trunc(th.c), true]
+    ];
+    if (q * q * q <= 100000) {
+      if (!(q in colMinCache)) colMinCache[q] = NC.minDist(NC.build(NC.colNet(q), q), true).c;
+      rows.push(['δ<i>N</i>' + sup('1/3') + ', computed on all ' + q + sup(3) + ' points', trunc(colMinCache[q])]);
+    }
+    dl($('#readh'), rows);
+  }
+  $('#qh').addEventListener('input', function (e) { SH.i = +e.target.value; drawHolo(); });
+  drawHolo();
+})();
+</script>

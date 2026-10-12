@@ -1,1 +1,15 @@
 .lake/
+__pycache__/
+*.pyc
+.DS_Store
+checks_out/
+blueprint/web/
+blueprint/lean_decls
+blueprint/src/*.paux
+_site/
+paper/scripts/bin/
+paper/*.aux
+paper/*.log
+paper/*.out
+comparator_*.log
+comparator_*.result

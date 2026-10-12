@@ -1,0 +1,57 @@
+# GitHub Pages: the blueprint (leanblueprint / plasTeX) and the interactive explainers as one site,
+# https://lgruen.github.io/separated-nets-lean/ (landing page, /paper.pdf, /blueprint/, /explainers/).
+#
+# It runs ONLY when started by hand (workflow_dispatch): no push, schedule or pull-request trigger.
+# To enable (repository owner, once): Settings -> Pages -> Build and deployment -> Source: "GitHub Actions";
+# then Actions -> "Pages" -> "Run workflow" (branch main). Re-run it by hand after each release.
+#
+# The blueprint is built from the committed blueprint/src (no regeneration, no Lean build: the check that every
+# \lean{} name resolves, scripts/check_blueprint_decls.py, needs the full `lake build` and is run before a release).
+name: Pages
+
+on:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+
+concurrency:
+  group: pages
+  cancel-in-progress: false
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@08c6903cd8c0fde910a37f88322edcfb5dd907a8 # v5.0.0
+
+      - name: Install uv
+        uses: astral-sh/setup-uv@v6
+
+      - name: Graphviz (for the dependency graph)
+        run: sudo apt-get update && sudo apt-get install -y graphviz libgraphviz-dev
+
+      - name: Web blueprint (plasTeX, committed sources)
+        run: scripts/build_blueprint.sh --no-gen
+
+      - name: Assemble the site (blueprint, explainers, paper PDF, landing page)
+        run: site/build_site.sh _site
+
+      - name: Upload Pages artifact
+        uses: actions/upload-pages-artifact@v3
+        with:
+          path: _site
+
+  deploy:
+    needs: build
+    runs-on: ubuntu-latest
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    steps:
+      - name: Deploy to GitHub Pages
+        id: deployment
+        uses: actions/deploy-pages@v4

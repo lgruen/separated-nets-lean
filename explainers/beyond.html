@@ -1,0 +1,773 @@
+<title>Beyond the Cube</title>
+<style>
+@import url('https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500&family=IBM+Plex+Sans:wght@400;500;600&family=Source+Serif+4:ital,opsz,wght@0,8..60,400;0,8..60,600;1,8..60,400&display=swap');
+/* Layout: one reading column (68ch) for prose; figure rows break wider, plot left and an instrument panel right; everything stacks to one column on phones. */
+:root {
+  --bg: #f5f6f8;
+  --surface: #ffffff;
+  --ink: #15191f;
+  --muted: #586271;
+  --rule: #d5dae1;
+  --grid: #e6e9ee;
+  --grid-strong: #b9c1cc;
+  --accent: #2b6cb0;
+  --accent-soft: rgba(43, 108, 176, 0.13);
+  --on-accent: #ffffff;
+  --slip: #c0561d;
+  --jit: #8792a2;
+  --chip: #eef1f5;
+  --ramp-lo: #8ea3bb;
+  --ramp-hi: #12284a;
+  --serif: 'Source Serif 4', 'Source Serif Pro', Georgia, 'Times New Roman', serif;
+  --sans: 'IBM Plex Sans', system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif;
+  --mono: 'IBM Plex Mono', ui-monospace, 'SF Mono', Menlo, Consolas, monospace;
+}
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    --bg: #0e1116; --surface: #151a21; --ink: #e4e8ee; --muted: #98a3b2; --rule: #2a313c;
+    --grid: #1e242d; --grid-strong: #3a4452; --accent: #6aa8ea; --accent-soft: rgba(106, 168, 234, 0.17);
+    --on-accent: #0b1220; --slip: #f09a52; --jit: #6d7888; --chip: #1f2630; --ramp-lo: #4b5c72; --ramp-hi: #dce8f6;
+    color-scheme: dark;
+  }
+}
+:root[data-theme="dark"] {
+  --bg: #0e1116; --surface: #151a21; --ink: #e4e8ee; --muted: #98a3b2; --rule: #2a313c;
+  --grid: #1e242d; --grid-strong: #3a4452; --accent: #6aa8ea; --accent-soft: rgba(106, 168, 234, 0.17);
+  --on-accent: #0b1220; --slip: #f09a52; --jit: #6d7888; --chip: #1f2630; --ramp-lo: #4b5c72; --ramp-hi: #dce8f6;
+  color-scheme: dark;
+}
+* { box-sizing: border-box; }
+body { background: var(--bg); color: var(--ink); font-family: var(--serif); font-size: 17px; line-height: 1.58; margin: 0; }
+.page { max-width: 1100px; margin-inline: auto; padding-inline: clamp(16px, 4vw, 40px); padding-block: 40px 72px; }
+.prose { max-width: 68ch; }
+p { margin-block: 0 0.85em; }
+i, .m { font-style: italic; }
+sub, sup { font-size: 0.72em; line-height: 0; }
+.eyebrow { font-family: var(--mono); font-size: 12.5px; letter-spacing: 0.08em; text-transform: uppercase; color: var(--muted); margin: 0 0 10px; }
+h1 { font-weight: 600; font-size: clamp(2rem, 5.2vw, 3.1rem); line-height: 1.08; letter-spacing: -0.012em; margin: 0 0 14px; text-wrap: balance; }
+h2 { font-weight: 600; font-size: clamp(1.45rem, 3.2vw, 1.85rem); line-height: 1.2; margin: 0; text-wrap: balance; }
+h3 { font-family: var(--sans); font-weight: 600; font-size: 13px; letter-spacing: 0.06em; text-transform: uppercase; color: var(--muted); margin: 0 0 8px; }
+.lede { font-size: 1.12rem; color: var(--ink); }
+.byline { font-family: var(--sans); font-size: 14px; color: var(--muted); }
+a { color: var(--accent); }
+:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+
+/* digit ruler */
+.ruler { margin-block: 28px 8px; display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 14px; }
+.ruler .lead { grid-column: 1 / -1; font-family: var(--mono); font-size: clamp(15px, 2.6vw, 20px); display: flex; flex-wrap: wrap; align-items: baseline; gap: 6px; }
+.ruler .lead .grp { padding: 2px 8px 4px; border-bottom: 3px solid; }
+.ruler .lead .g1 { border-color: var(--ink); }
+.ruler .lead .g2 { border-color: var(--accent); color: var(--accent); }
+.ruler .lead .g3 { border-color: var(--jit); color: var(--muted); border-bottom-style: dashed; }
+.step { border-top: 3px solid var(--ink); padding-top: 10px; min-width: 0; font-size: 15.5px; }
+.step.s2 { border-color: var(--accent); }
+.step.s3 { border-color: var(--jit); border-top-style: dashed; }
+.step b { font-family: var(--sans); font-weight: 600; font-size: 14px; display: block; margin-bottom: 4px; }
+@media (max-width: 760px) { .ruler { grid-template-columns: minmax(0, 1fr); } }
+
+section { margin-top: 64px; }
+.sechead { display: flex; align-items: baseline; gap: 14px; margin-bottom: 14px; }
+.secno { font-family: var(--mono); font-size: 15px; color: var(--accent); border: 1px solid var(--accent); border-radius: 3px; padding: 1px 7px; flex: none; }
+.refs { display: flex; flex-wrap: wrap; gap: 6px 8px; margin: 2px 0 0; font-family: var(--sans); font-size: 13px; color: var(--muted); align-items: baseline; }
+.ref { font-family: var(--mono); font-size: 12px; color: var(--ink); background: var(--chip); border: 1px solid var(--rule); border-radius: 3px; padding: 1px 6px; white-space: nowrap; }
+.ref span { font-family: var(--sans); color: var(--muted); margin-left: 4px; }
+
+.fig { display: grid; grid-template-columns: minmax(0, 1fr) minmax(250px, 310px); gap: 24px; align-items: start; margin-block: 22px 6px; }
+@media (max-width: 860px) { .fig { grid-template-columns: minmax(0, 1fr); } }
+.plot { position: relative; width: 100%; max-width: 100%; aspect-ratio: 1 / 1; background: var(--surface); border: 1px solid var(--rule); border-radius: 4px; overflow: hidden; }
+.plot canvas { display: block; width: 100%; height: 100%; max-width: 100%; touch-action: manipulation; }
+.plot .hint { position: absolute; left: 10px; bottom: 8px; font-family: var(--sans); font-size: 12px; color: var(--muted); pointer-events: none; background: var(--surface); padding: 1px 4px; border-radius: 2px; }
+.plot .fallback { position: absolute; inset: 0; display: grid; place-items: center; padding: 24px; text-align: center; font-family: var(--sans); color: var(--muted); }
+.panel { font-family: var(--sans); font-size: 14px; display: flex; flex-direction: column; gap: 18px; min-width: 0; }
+.ctl { display: flex; flex-direction: column; gap: 6px; }
+.ctl .row { display: flex; justify-content: space-between; align-items: baseline; gap: 8px; }
+.ctl .val { font-family: var(--mono); font-variant-numeric: tabular-nums; }
+input[type=range] { width: 100%; accent-color: var(--accent); margin: 0; }
+.checks { display: flex; flex-direction: column; gap: 7px; }
+.checks label { display: flex; gap: 8px; align-items: center; cursor: pointer; }
+.checks input { accent-color: var(--accent); width: 16px; height: 16px; margin: 0; }
+.checks label.off { color: var(--muted); cursor: default; }
+.seg { display: flex; flex-wrap: wrap; gap: 6px; }
+.btn { font: 500 13px/1.2 var(--sans); padding: 7px 10px; border: 1px solid var(--rule); background: var(--surface); color: var(--ink); border-radius: 4px; cursor: pointer; }
+.btn:hover { border-color: var(--grid-strong); }
+.btn[aria-pressed="true"] { border-color: var(--accent); color: var(--accent); background: var(--accent-soft); }
+.btn:disabled { color: var(--muted); cursor: default; opacity: 0.6; }
+select { font: 14px var(--sans); color: var(--ink); background: var(--surface); border: 1px solid var(--rule); border-radius: 4px; padding: 6px 8px; width: 100%; }
+dl.read { display: grid; grid-template-columns: minmax(0, 1fr) auto; gap: 5px 12px; margin: 0; padding-top: 12px; border-top: 1px solid var(--rule); }
+dl.read dt { color: var(--muted); min-width: 0; }
+dl.read dd { margin: 0; font-family: var(--mono); font-variant-numeric: tabular-nums; text-align: right; }
+dl.read dd.em { color: var(--accent); font-weight: 500; }
+.note { font-size: 12.5px; color: var(--muted); line-height: 1.45; }
+.legend { display: flex; flex-wrap: wrap; gap: 6px 14px; font-family: var(--sans); font-size: 12.5px; color: var(--muted); margin-top: 8px; }
+.legend span { display: inline-flex; align-items: center; gap: 6px; }
+.legend span .lt { display: inline; }
+.sw { display: inline-block; width: 18px; height: 10px; position: relative; }
+.sw.pt::after { content: ''; position: absolute; left: 5px; top: 1px; width: 8px; height: 8px; border-radius: 50%; background: var(--ink); }
+.sw.ring::after { content: ''; position: absolute; left: 4px; top: 0; width: 8px; height: 8px; border-radius: 50%; border: 1.5px solid var(--accent); }
+.sw.slip { border-top: 2px dashed var(--slip); top: 4px; height: 2px; }
+.sw.jit { border-top: 1.5px solid var(--jit); top: 4px; height: 2px; }
+.sw.carry { border-top: 1.5px solid var(--grid-strong); top: 4px; height: 2px; }
+.sw.pair { border-top: 2.5px solid var(--accent); top: 4px; height: 2px; }
+.sw.rl1, .sw.rl2, .sw.rl3 { width: 4px; height: 14px; border-left: 3px solid var(--ink); }
+.sw.rl2 { border-left-color: var(--accent); }
+.sw.rl3 { border-left: 3px dashed var(--jit); }
+
+/* digit inspector */
+.insp { border-top: 1px solid var(--rule); padding-top: 12px; display: flex; flex-direction: column; gap: 8px; }
+.drow { display: flex; align-items: center; gap: 6px; flex-wrap: wrap; font-family: var(--mono); font-size: 13px; }
+.drow .lab { width: 2.6em; color: var(--muted); }
+.digits { display: inline-flex; flex-wrap: wrap; gap: 2px; }
+.d { min-width: 1.55em; text-align: center; padding: 1px 2px; border-radius: 3px; background: var(--chip); font-variant-numeric: tabular-nums; }
+.d.geo { background: var(--accent); color: var(--on-accent); }
+.d.jit { background: transparent; color: var(--muted); outline: 1px dashed var(--rule); outline-offset: -1px; }
+.formula { font-family: var(--mono); font-size: 12.5px; line-height: 1.6; }
+.formula .r { color: var(--accent); font-weight: 500; }
+
+/* holonomy chart */
+.chartwrap { background: var(--surface); border: 1px solid var(--rule); border-radius: 4px; padding: 10px 8px 4px; }
+.chartwrap svg { display: block; width: 100%; height: auto; max-width: 100%; }
+.tablewrap { overflow-x: auto; }
+table.dir { border-collapse: collapse; font-family: var(--sans); font-size: 13px; width: 100%; }
+table.dir th, table.dir td { padding: 4px 6px; text-align: right; border-bottom: 1px solid var(--rule); white-space: nowrap; }
+table.dir th:first-child, table.dir td:first-child { text-align: left; }
+table.dir td { font-family: var(--mono); font-variant-numeric: tabular-nums; }
+table.dir th { font-weight: 500; color: var(--muted); }
+
+/* worked example */
+.wk-ctl { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 16px 20px; margin-block: 22px 4px; align-items: end; }
+@media (max-width: 860px) { .wk-ctl { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
+@media (max-width: 480px) { .wk-ctl { grid-template-columns: minmax(0, 1fr); } }
+.wk-irow { display: flex; gap: 8px; }
+.wk-irow input { font: 14px var(--mono); width: 7.5em; min-width: 0; padding: 6px 8px; color: var(--ink); background: var(--surface); border: 1px solid var(--rule); border-radius: 4px; }
+ol.steps { list-style: none; padding: 0; margin: 18px 0 0; }
+ol.steps > li { display: grid; grid-template-columns: 10.5rem minmax(0, 1fr); gap: 8px 20px; border-top: 1px solid var(--rule); padding-block: 18px; }
+@media (max-width: 760px) { ol.steps > li { grid-template-columns: minmax(0, 1fr); } }
+.sh { font-family: var(--sans); font-weight: 600; font-size: 15px; }
+.stn { display: block; font-family: var(--mono); font-weight: 400; font-size: 12px; color: var(--accent); letter-spacing: 0.06em; text-transform: uppercase; }
+.sb { min-width: 0; font-size: 15.5px; }
+.sb p { max-width: 68ch; }
+.scrollx { overflow-x: auto; max-width: 100%; }
+.coords { display: flex; flex-wrap: wrap; gap: 18px 32px; align-items: flex-start; }
+.coordblk { min-width: 0; max-width: 100%; }
+.coordblk h4 { font-family: var(--sans); font-size: 13px; font-weight: 600; margin: 0 0 4px; }
+table.gm { border-collapse: separate; border-spacing: 2px; font-family: var(--mono); font-size: 13px; font-variant-numeric: tabular-nums; }
+table.gm th, table.gm td { padding: 1px 5px; text-align: center; white-space: nowrap; }
+table.gm thead th { color: var(--muted); font-weight: 400; font-size: 11.5px; }
+table.gm td.ent { background: var(--chip); border-radius: 2px; min-width: 1.7em; }
+table.gm td.lab { text-align: left; color: var(--muted); font-size: 11.5px; border-left: 3px solid var(--ink); }
+table.gm tr.georow td.lab { border-left-color: var(--accent); }
+table.gm tr.jitrow td.lab { border-left: 3px dashed var(--jit); }
+table.gm td.res { font-weight: 500; }
+table.gm tr.georow td.res { color: var(--accent); }
+table.gm tr.jitrow td.res { color: var(--muted); }
+table.gm tbody tr { cursor: default; }
+table.gm tbody tr:focus-visible { outline: 2px solid var(--accent); outline-offset: 0; }
+table.gm tr.hot td.ent { background: var(--accent-soft); }
+table.gm tr.hot td.ent.z { background: var(--chip); color: var(--muted); }
+table.gm th.vh { color: var(--ink); }
+.expand { font-family: var(--mono); font-size: 12.5px; margin-top: 6px; line-height: 1.5; overflow-wrap: anywhere; }
+.chipline { display: flex; flex-wrap: wrap; gap: 4px 10px; align-items: center; font-family: var(--mono); font-size: 13px; }
+.grpd { display: inline-flex; gap: 2px; padding-bottom: 3px; border-bottom: 3px solid var(--ink); }
+.grpd.g2 { border-color: var(--accent); }
+.grpd.g3 { border-bottom: 3px dashed var(--jit); }
+.vlab { display: inline-flex; flex-direction: column; align-items: center; font-family: var(--mono); }
+.vlab small { font-size: 10.5px; color: var(--muted); }
+table.lat { border-collapse: collapse; font-family: var(--mono); font-size: 13px; font-variant-numeric: tabular-nums; }
+table.lat th, table.lat td { padding: 4px 9px; text-align: right; border-bottom: 1px solid var(--rule); white-space: nowrap; }
+table.lat th { font-family: var(--sans); font-weight: 500; font-size: 12.5px; color: var(--muted); }
+table.lat td:first-child, table.lat th:first-child { text-align: left; }
+table.lat td.em { color: var(--accent); font-weight: 500; }
+.verdict { font-family: var(--sans); font-size: 14px; padding: 8px 12px; border-left: 3px solid var(--accent); background: var(--accent-soft); margin-block: 10px; max-width: 68ch; }
+.codebar { display: flex; gap: 12px; align-items: center; margin-bottom: 8px; }
+pre.code { font-family: var(--mono); font-size: 12.5px; line-height: 1.5; background: var(--surface); border: 1px solid var(--rule); border-radius: 4px; padding: 12px 14px; margin: 0; overflow-x: auto; max-width: 100%; color: var(--ink); }
+
+footer { margin-top: 72px; padding-top: 18px; border-top: 1px solid var(--rule); font-size: 15px; }
+footer ol { padding-left: 1.3em; margin: 6px 0 0; }
+footer li { margin-bottom: 3px; }
+
+/* pages 2 and 3: navigation between the pages, digit editors, small charts */
+.pagenav { display: flex; flex-wrap: wrap; gap: 4px 20px; font-family: var(--sans); font-size: 13.5px; margin: 0 0 26px; padding-bottom: 10px; border-bottom: 1px solid var(--rule); }
+.pagenav a { color: var(--muted); text-decoration: none; }
+.pagenav a:hover { color: var(--accent); }
+.pagenav a[aria-current="page"] { color: var(--ink); font-weight: 600; }
+.pagenav .pn { font-family: var(--mono); color: var(--accent); margin-right: 6px; }
+.dgrid { display: flex; flex-direction: column; gap: 6px; }
+.drow2 { display: flex; align-items: center; gap: 4px; flex-wrap: wrap; font-family: var(--mono); font-size: 13px; }
+.drow2 .lab { width: 2.4em; color: var(--muted); }
+.dchip { font: 500 13px/1 var(--mono); min-width: 2em; padding: 6px 4px; border: 1px solid var(--rule); background: var(--surface); color: var(--ink); border-radius: 3px; cursor: pointer; font-variant-numeric: tabular-nums; }
+.dchip:hover { border-color: var(--grid-strong); }
+.dchip.nz { border-color: var(--accent); color: var(--accent); background: var(--accent-soft); }
+.dchip.gd { box-shadow: inset 0 -3px 0 var(--accent); }
+.dhead { display: flex; gap: 4px; font-family: var(--mono); font-size: 11px; color: var(--muted); padding-left: calc(2.4em + 4px); }
+.dhead span { min-width: 2em; text-align: center; }
+.sw.ring2::after { content: ''; position: absolute; left: 4px; top: 0; width: 8px; height: 8px; border-radius: 50%; border: 1.5px solid var(--jit); }
+.sw.lone { border-top: 3px solid var(--slip); top: 3px; height: 3px; }
+.sw.lock { border-top: 3px solid var(--accent); top: 3px; height: 3px; }
+.sw.band { background: var(--accent-soft); border: 1px solid var(--accent); top: 1px; height: 8px; }
+.sw.dot2::after { content: ''; position: absolute; left: 5px; top: 1px; width: 8px; height: 8px; border-radius: 50%; border: 1.5px solid var(--ink); background: var(--surface); }
+.plot.wide { aspect-ratio: 16 / 10; }
+.heatwrap { position: relative; }
+.small { font-size: 13px; }
+[hidden] { display: none !important; }
+</style>
+
+<main class="page">
+  <header>
+    <nav class="pagenav" aria-label="Explainer pages">
+      <a href="anatomy.html"><span class="pn">1</span>How the nets are built</a>
+      <a href="shifts.html"><span class="pn">2</span>Digital shifts</a>
+      <a href="beyond.html" aria-current="page"><span class="pn">3</span>Beyond the cube</a>
+    </nav>
+    <p class="eyebrow">Interactive companion &middot; page 3</p>
+    <h1>Beyond the cube</h1>
+    <div class="prose">
+      <p class="lede">A point set with one point in each cube of a grid cannot do much better than the grid itself, and in the column picture of page 1 it cannot beat it at all. This page shows why, and the two ways the paper gets past the cube value 1 with only <i>q</i><sup>3</sup> points: two coordinates that share a digit, and three coordinates whose wraps are locked together. A last section does the same in dimension five with a half-integer layer.</p>
+      <p class="byline">Leonhard Gruenschloss &middot; every point is computed in your browser from the paper's generator rows, with exact integer arithmetic &middot; labels such as <span class="ref">prop:wnet</span> name the matching statement in the paper</p>
+    </div>
+  </header>
+
+  <!-- ===================================================== 1. the column ceiling -->
+  <section id="ceiling" aria-labelledby="h-ceiling">
+    <div class="sechead"><span class="secno">1</span><h2 id="h-ceiling">Why columns cannot beat the cube</h2></div>
+    <div class="prose">
+      <p>In a column point set every point sits on the diagonal of its cell, at a height that depends on its column. Two neighbouring columns are close when their heights differ by about 2/3 of a period: then their points are only &radic;(2/3) cells apart. If <i>g</i> is how far the height steps stay from 2/3 of a period, the minimum distance is &delta;<i>N</i><sup>1/3</sup> = &radic;(2/3 + 3<i>g</i><sup>2</sup>), measured in periods.</p>
+      <p>To beat the cube value 1 you need <i>g</i> &gt; 1/3, so every step would have to lie strictly between 0 and 1/3 of a period. But three steps, along <i>e<sub>x</sub></i>, then <i>e<sub>y</sub></i>, then <i>e<sub>z</sub></i>, lead back to the same column, so they add up to a whole number of periods, and three numbers between 0 and 1/3 cannot do that. The cube &#8484;<sup>3</sup> (steps 0) and its half-turn about (1,1,1) (steps 1/3) sit exactly on the ceiling. Move the first two steps and watch the third follow.</p>
+    </div>
+    <div class="refs">In the paper: <span class="ref">thm:colmin</span><span class="ref">cor:colceil</span><span class="ref">thm:O<span>column optimum</span></span><span class="ref">def:col</span></div>
+    <div class="fig">
+      <div>
+        <div class="chartwrap"><svg id="ceil" viewBox="0 0 520 440" role="img" aria-label="Three height steps on the circle of one period, and the band around the worst step"></svg></div>
+        <div class="legend" aria-hidden="true" style="margin-top:8px">
+          <span><i class="sw band"></i><span class="lt">within <i>g</i> of the worst step 2/3</span></span><span><svg width="22" height="8"><line x1="1" y1="4" x2="21" y2="4" style="stroke:var(--accent);stroke-width:2.4"/></svg><span class="lt">the three steps, end to end</span></span>
+        </div>
+      </div>
+      <div class="panel">
+        <div class="ctl">
+          <span id="cmlab">Steps</span>
+          <div class="seg" role="group" aria-labelledby="cmlab" id="cmseg">
+            <button class="btn" type="button" data-cm="free" aria-pressed="true">Choose them</button>
+            <button class="btn" type="button" data-cm="col" aria-pressed="false">From a column net</button>
+          </div>
+        </div>
+        <div class="ctl" id="cfree">
+          <div class="row"><label for="ca">Step along <i>e<sub>x</sub></i>, periods</label><span class="val" id="cav"></span></div>
+          <input type="range" id="ca" min="0" max="119" step="1" value="22">
+          <div class="row"><label for="cb">Step along <i>e<sub>y</sub></i>, periods</label><span class="val" id="cbv"></span></div>
+          <input type="range" id="cb" min="0" max="119" step="1" value="47">
+        </div>
+        <div class="ctl" id="ccol" hidden>
+          <label for="cq">Column net &#119966;<sub><i>q</i></sub>, base</label>
+          <select id="cq"></select>
+          <button class="btn" type="button" id="cnext">Another column</button>
+        </div>
+        <dl class="read" id="readC"></dl>
+      </div>
+    </div>
+  </section>
+
+  <!-- ===================================================== 2. two escapes -->
+  <section id="escapes" aria-labelledby="h-escapes">
+    <div class="sechead"><span class="secno">2</span><h2 id="h-escapes">Two escapes at <i>m</i> = 3: shared and locked wraps</h2></div>
+    <div class="prose">
+      <p>In the two-coset net &#119983;<sub><i>p</i></sub>, <i>y</i> and <i>z</i> read the same geometric digit, so they always wrap together, while <i>x</i> reads <i>h</i>(<i>n<sub>y</sub></i> + <i>n<sub>z</sub></i>) with <i>h</i> &equiv; &minus;1/2: neighbouring cells alternate between two heights half a cell apart. The slabs <i>n<sub>x</sub></i> = const are puckered square grids, sheared by 1/8 from one slab to the next, and the two kinds of contact balance at the squared length 33/32. A coordinate that can wrap alone cannot move by 1 + &alpha; with a small &alpha; &ne; 0 along its own axis, because where it wraps alone the same step moves it by &alpha; only. So the free coordinate <i>x</i> moves by exactly one cell along <i>e<sub>x</sub></i>, up to the jitter.</p>
+      <p>In the rank-one net &#119986;<sub><i>p</i></sub>, <i>z</i> reads a digit &zeta; and <i>x</i> and <i>y</i> both read 2&zeta;. So <i>z</i> wraps only where <i>x</i> and <i>y</i> wrap too: all three wraps are locked. That buys room for a drift: the step along <i>e<sub>z</sub></i> is (4&epsilon;, 4&epsilon;, 1 + 2&epsilon;) with &epsilon; = &rho;/(2<i>p</i>) close to 1/48, longer than one cell, and where <i>z</i> wraps it is still long because <i>x</i> and <i>y</i> wrap with it. The slab view puts the coordinate in question vertical, joins each point to the one in the next cell up, and colours the steps by how the second digits wrap. The third option shifts the second digit of <i>z</i> by 1, which unlocks the wraps (page 2, section 4).</p>
+    </div>
+    <div class="refs">In the paper: <span class="ref">prop:twocoset</span><span class="ref">prop:wnet</span><span class="ref">lem:wwrap</span><span class="ref">tab:wcontacts</span><span class="ref">rem:glue</span><span class="ref">fig:wnet</span><span class="ref">rem:wshift</span></div>
+    <div class="fig">
+      <div>
+        <div class="plot" id="plotS"><canvas id="cS" tabindex="0" aria-label="A slab of the net seen from the side, with the steps to the next cell drawn"></canvas><div class="hint" id="hintS"></div></div>
+        <div class="legend" aria-hidden="true">
+          <span><i class="sw pt"></i><span class="lt">point</span></span><span><svg width="22" height="8"><line x1="1" y1="4" x2="21" y2="4" style="stroke:var(--jit);stroke-width:1.2"/></svg><span class="lt">step, no wrap of the vertical coordinate</span></span><span><i class="sw lock"></i><span class="lt">vertical coordinate wraps together with others</span></span><span><i class="sw lone"></i><span class="lt">vertical coordinate wraps alone</span></span><span><i class="sw band"></i><span class="lt">cells raised by about 1/2 (&#119983;)</span></span>
+        </div>
+      </div>
+      <div class="panel">
+        <div class="ctl">
+          <span id="snlab">Net</span>
+          <div class="seg" role="group" aria-labelledby="snlab" id="snseg">
+            <button class="btn" type="button" data-sn="T" aria-pressed="false">&#119983;<sub><i>p</i></sub>, free <i>x</i></button>
+            <button class="btn" type="button" data-sn="W" aria-pressed="true">&#119986;<sub><i>p</i></sub>, locked <i>z</i></button>
+            <button class="btn" type="button" data-sn="Ws" aria-pressed="false">&#119986;<sub><i>p</i></sub>, <i>z</i> shifted</button>
+          </div>
+        </div>
+        <div class="ctl">
+          <label for="sp">Prime <i>p</i></label>
+          <select id="sp"></select>
+        </div>
+        <div class="ctl">
+          <div class="row"><label for="ss" id="sslab">Slab</label><span class="val" id="ssv">0</span></div>
+          <input type="range" id="ss" min="0" max="100" step="1" value="0">
+          <div class="row"><label for="sh">Window, horizontal</label><span class="val" id="shv">0</span></div>
+          <input type="range" id="sh" min="0" max="100" step="1" value="0">
+          <div class="row"><label for="sv">Window, vertical</label><span class="val" id="svv">0</span></div>
+          <input type="range" id="sv" min="0" max="100" step="1" value="0">
+        </div>
+        <dl class="read" id="readS"></dl>
+        <div class="tablewrap"><table class="dir" id="stepsS"></table></div>
+        <p class="note" id="selS" aria-live="polite">Click a point to read its step.</p>
+      </div>
+    </div>
+
+    <div class="fig" style="margin-top:34px">
+      <div>
+        <div class="chartwrap"><svg id="twchart" viewBox="0 0 640 360" role="img" aria-label="Exact separation of the two-coset and rank-one nets against p, with the proven bounds and limits"></svg></div>
+        <div class="legend" aria-hidden="true" style="margin-top:8px">
+          <span><svg width="22" height="10"><circle cx="11" cy="5" r="3.2" style="fill:var(--accent)"/></svg><span class="lt">&#119986;<sub><i>p</i></sub>, exact</span></span>
+          <span><svg width="22" height="10"><circle cx="11" cy="5" r="3.2" style="fill:var(--surface);stroke:var(--ink);stroke-width:1.3"/></svg><span class="lt">&#119983;<sub><i>p</i></sub>, exact</span></span>
+          <span><svg width="22" height="8"><line x1="1" y1="4" x2="21" y2="4" style="stroke:var(--accent);stroke-width:1.4;stroke-dasharray:5 3"/></svg><span class="lt">proven lower bound for &#119986;<sub><i>p</i></sub> (<i>p</i> &ge; 53)</span></span>
+          <span><svg width="22" height="8"><line x1="1" y1="4" x2="21" y2="4" style="stroke:var(--ink);stroke-width:1.2;stroke-dasharray:5 3"/></svg><span class="lt">proven lower bound for &#119983;<sub><i>p</i></sub> (<i>p</i> &ge; 41)</span></span>
+          <span><svg width="22" height="8"><line x1="1" y1="4" x2="21" y2="4" style="stroke:var(--muted);stroke-width:1;stroke-dasharray:1 3"/></svg><span class="lt">limits &radic;281/16, &radic;66/8 and the cube value 1</span></span>
+        </div>
+      </div>
+      <div class="panel">
+        <p class="note" style="margin:0" id="twnote" aria-live="polite">Computing the exact values, one prime at a time.</p>
+        <dl class="read" id="readTW"></dl>
+      </div>
+    </div>
+  </section>
+
+  <!-- ===================================================== 3. the family optimum -->
+  <section id="family" aria-labelledby="h-family">
+    <div class="sechead"><span class="secno">3</span><h2 id="h-family">How far the locked layer can go</h2></div>
+    <div class="prose">
+      <p>Without the third digits, the value of &#119986;<sub><i>p</i></sub> is set by two contacts: the diagonal contact, whose squared length <i>q<sub>a</sub></i>(&epsilon;) = 5/4 &minus; 9&epsilon; + 81&epsilon;<sup>2</sup> falls as the drift &epsilon; grows, and the step along <i>e<sub>z</sub></i>, with <i>q<sub>b</sub></i>(&epsilon;) = 1 + 4&epsilon; + 36&epsilon;<sup>2</sup>, which rises. They balance at &epsilon;* = (13 &minus; 2&radic;31)/90, where both equal &mu;*<sup>2</sup>. Among all rank-one layers with image (2, 2, 1), &mu;* is the least upper bound of the value without the third digits, and since &epsilon;* is irrational no prime attains it; &#119986;<sub><i>p</i></sub> aims at &epsilon; = 1/48, just past the balance, and its limit &radic;281/16 lies just below &mu;*.</p>
+    </div>
+    <div class="refs">In the paper: <span class="ref">tab:wcontacts</span><span class="ref">prop:wfamily</span><span class="ref">rem:wstar</span></div>
+    <div class="fig">
+      <div>
+        <div class="chartwrap"><svg id="qchart" viewBox="0 0 640 340" role="img" aria-label="The lengths of the two contacts against the drift epsilon"></svg></div>
+        <div class="legend" aria-hidden="true" style="margin-top:8px">
+          <span><svg width="22" height="8"><line x1="1" y1="4" x2="21" y2="4" style="stroke:var(--accent);stroke-width:2"/></svg><span class="lt">&radic;<i>q<sub>a</sub></i>, diagonal contact</span></span>
+          <span><svg width="22" height="8"><line x1="1" y1="4" x2="21" y2="4" style="stroke:var(--ink);stroke-width:2"/></svg><span class="lt">&radic;<i>q<sub>b</sub></i>, step along <i>e<sub>z</sub></i></span></span>
+          <span><svg width="22" height="8"><line x1="1" y1="4" x2="21" y2="4" style="stroke:var(--slip);stroke-width:1.6"/></svg><span class="lt">&epsilon; = &rho;/(2<i>p</i>) of the chosen prime</span></span>
+        </div>
+      </div>
+      <div class="panel">
+        <div class="ctl">
+          <div class="row"><label for="fp">Prime <i>p</i></label><span class="val" id="fpv"></span></div>
+          <input type="range" id="fp" min="0" max="10" step="1" value="0">
+        </div>
+        <dl class="read" id="readF"></dl>
+      </div>
+    </div>
+  </section>
+
+  <!-- ===================================================== 4. dimension five -->
+  <section id="five" aria-labelledby="h-five">
+    <div class="sechead"><span class="secno">4</span><h2 id="h-five">Dimension five: a half-integer layer</h2></div>
+    <div class="prose">
+      <p>In dimension five the net &#119980;*<sub><i>p</i></sub> uses a layer whose entries are all half-integers, read modulo <i>p</i> through 1/2 &equiv; (<i>p</i> + 1)/2. Up to the drift and the jitter, the point of cell <i>n</i> then sits at <i>n</i> or at <i>n</i> + (1/2, &hellip;, 1/2), according to the parity of <i>n</i><sub>1</sub> + &hellip; + <i>n</i><sub>5</sub>: locally the packing <i>D</i><sub>5</sub><sup>+</sup>, with one point per unit cube and minimum &radic;5/2 = 1.118&hellip;. The slab shows one plane of cells; the colour gives the parity.</p>
+      <p>Odd sums of half-integers can never be whole, so every step to a neighbouring cell with an odd number of moving coordinates keeps all five coordinates about half a cell long. The drift shortens them a little: &delta;<i>N</i><sup>1/5</sup> &asymp; (&radic;5/2)(1 &minus; 17/(5<i>p</i>)). The paper certifies &delta;<i>N</i><sup>1/5</sup> &gt; 1 for every prime <i>p</i> &ge; 37 with a relaxation that allows every wrap of the first two offset digits. The browser computes exact distances only while <i>N</i> = <i>p</i><sup>5</sup> stays small; beyond that the chart shows the certified bound.</p>
+    </div>
+    <div class="refs">In the paper: <span class="ref">prop:half5</span><span class="ref">lem:R2<span>two-digit relaxation</span></span><span class="ref">prop:Hk</span><span class="ref">rem:accounting</span><span class="ref">thm:D</span><span class="ref">fig:half5</span></div>
+    <div class="fig">
+      <div>
+        <div class="plot" id="plotQ"><canvas id="cQ" aria-label="One plane of cells of the five-dimensional net, coloured by parity"></canvas></div>
+        <div class="legend" aria-hidden="true">
+          <span><i class="sw pt"></i><span class="lt">even sum of the cell digits</span></span><span><svg width="22" height="10"><circle cx="11" cy="5" r="3.4" style="fill:var(--accent)"/></svg><span class="lt">odd sum</span></span>
+        </div>
+      </div>
+      <div class="panel">
+        <div class="ctl">
+          <span id="qplab">Prime <i>p</i></span>
+          <div class="seg" role="group" aria-labelledby="qplab" id="qpseg">
+            <button class="btn" type="button" data-qp="7" aria-pressed="false">7</button>
+            <button class="btn" type="button" data-qp="11" aria-pressed="true">11</button>
+            <button class="btn" type="button" data-qp="13" aria-pressed="false">13</button>
+            <button class="btn" type="button" data-qp="17" aria-pressed="false">17</button>
+          </div>
+        </div>
+        <div class="ctl">
+          <div class="row"><label for="qz">Cell digits <i>n</i><sub>3</sub>, <i>n</i><sub>4</sub>, <i>n</i><sub>5</sub> of the plane</label><span class="val" id="qzv"></span></div>
+          <input type="range" id="qz" min="0" max="10" step="1" value="0" aria-label="n3">
+          <input type="range" id="qw" min="0" max="10" step="1" value="0" aria-label="n4">
+          <input type="range" id="qv" min="0" max="10" step="1" value="0" aria-label="n5">
+        </div>
+        <dl class="read" id="readQ"></dl>
+        <p class="note" id="qdiff"></p>
+      </div>
+    </div>
+    <div class="chartwrap" style="margin-top:22px"><svg id="h5chart" viewBox="0 0 900 340" role="img" aria-label="Separation of the five-dimensional net against p: exact values for small p, the certified bound from p = 29"></svg></div>
+    <div class="legend" aria-hidden="true" style="margin-top:8px">
+      <span><svg width="22" height="10"><circle cx="11" cy="5" r="3.2" style="fill:var(--accent)"/></svg><span class="lt">exact, computed in your browser</span></span>
+      <span><svg width="22" height="8"><line x1="1" y1="4" x2="21" y2="4" style="stroke:var(--ink);stroke-width:1.6"/></svg><span class="lt">certified lower bound LB<sub>2</sub>(<i>p</i>), primes 29 to 199</span></span>
+      <span><svg width="22" height="8"><line x1="1" y1="4" x2="21" y2="4" style="stroke:var(--muted);stroke-width:1.2;stroke-dasharray:5 3"/></svg><span class="lt">proven upper bound &radic;5/2 + 4&radic;5/<i>p</i> (<i>p</i> &gt; 32)</span></span>
+      <span><svg width="22" height="8"><line x1="1" y1="4" x2="21" y2="4" style="stroke:var(--muted);stroke-width:1;stroke-dasharray:1 3"/></svg><span class="lt">1 and the limit &radic;5/2</span></span>
+    </div>
+  </section>
+
+  <footer>
+    <div class="prose">
+      <h3>How this page is checked</h3>
+      <p>All nets are built by <code>netcore.js</code>, which the three pages share. A Python reference rebuilds &#119983;<sub><i>p</i></sub>, &#119986;<sub><i>p</i></sub> and &#119980;*<sub><i>p</i></sub> from the generator rows printed in the paper and compares point sets, the net property (Niederreiter's rank test and direct box counts), and exact minimum distances, both with an independent kernel and with the paper's own precomputed values. The bounds and the relaxation LB<sub>2</sub> are recomputed from the paper's formulas and from its scripts. Distances are on the torus; decimals are truncated, except upper bounds, which are rounded up.</p>
+    </div>
+  </footer>
+</main>
+
+<script src="netcore.js"></script>
+<script>
+(function () {
+  'use strict';
+  var NC = NetCore;
+  function $(s) { return document.querySelector(s); }
+  function tok(name) { return getComputedStyle(document.documentElement).getPropertyValue(name).trim(); }
+  function trunc(x, d) { d = d === undefined ? 4 : d; var p = Math.pow(10, d); return (Math.floor(x * p + 1e-9) / p).toFixed(d); }
+  function ceilD(x, d) { d = d === undefined ? 4 : d; var p = Math.pow(10, d); return (Math.ceil(x * p - 1e-9) / p).toFixed(d); }
+  function neg(x) { return x < 0 ? '−' + (-x) : String(x); }
+  function sgnTrunc(x, d) { return (x < 0 ? '−' : '') + trunc(Math.abs(x), d); }
+  function sup(x) { return '<sup>' + x + '</sup>'; }
+  var SUBS = ['x', 'y', 'z'];
+  var themeFns = [];
+  function themeChanged() { themeFns.forEach(function (f) { f(); }); }
+  try { matchMedia('(prefers-color-scheme: dark)').addEventListener('change', themeChanged); } catch (e) {}
+  new MutationObserver(themeChanged).observe(document.documentElement, { attributes: true, attributeFilter: ['data-theme'] });
+  function dl(el, rows) { el.innerHTML = rows.map(function (r) { return '<dt>' + r[0] + '</dt><dd' + (r[2] ? ' class="em"' : '') + '>' + r[1] + '</dd>'; }).join(''); }
+  function pressed(group, attr, val) { group.querySelectorAll('button').forEach(function (b) { b.setAttribute('aria-pressed', String(b.getAttribute(attr) === String(val))); }); }
+  function canvasCtx(cv) {
+    var wrap = cv.parentNode, dpr = Math.min(window.devicePixelRatio || 1, 2), W = wrap.clientWidth, H = wrap.clientHeight;
+    if (!W || !H) return null;
+    cv.width = Math.round(W * dpr); cv.height = Math.round(H * dpr);
+    var g = cv.getContext('2d'); g.setTransform(dpr, 0, 0, dpr, 0, 0);
+    return { g: g, W: W, H: H };
+  }
+  var NS = 'http://www.w3.org/2000/svg';
+  function el(name, attrs, parent, text) { var e = document.createElementNS(NS, name); for (var a in attrs) e.setAttribute(a, attrs[a]); if (text !== undefined) e.textContent = text; if (parent) parent.appendChild(e); return e; }
+  function clear(svg) { while (svg.firstChild) svg.removeChild(svg.firstChild); }
+  var MUTED = 'fill:var(--muted);font:12px var(--mono)';
+
+  /* ================================================================ section 1: the column ceiling */
+  var QC = []; for (var qq = 5; qq <= 61; qq++) if (qq % 2 && qq % 3) QC.push(qq);
+  $('#cq').innerHTML = QC.map(function (q) { return '<option value="' + q + '">' + q + '</option>'; }).join('');
+  var SC = { mode: 'free', a: 22, b: 47, q: 11, n: [0, 0, 0] };
+  function drawCeil() {
+    var svg = $('#ceil'); clear(svg);
+    var cx = 260, cy = 220, R0 = 150, r, g, sum, rows;
+    if (SC.mode === 'free') {
+      var cc = NC.colCeil(SC.a / 120, SC.b / 120);
+      r = cc.r; g = cc.g; sum = cc.sum;
+      rows = [['steps, periods', r.map(function (x) { return trunc(x, 3); }).join(', ')], ['sum', trunc(sum + 1e-9, 0) + ' period' + (Math.round(sum) === 1 ? '' : 's')],
+              ['<i>g</i>, least distance from 2/3', trunc(g, 4), true], ['&radic;(2/3 + 3<i>g</i>' + sup(2) + ') for these steps', trunc(cc.c, 4)]];
+      $('#cav').textContent = trunc(SC.a / 120, 3); $('#cbv').textContent = trunc(SC.b / 120, 3);
+    } else {
+      var q = SC.q, tri = NC.colTriangle(q, SC.n), qq2 = q * q;
+      r = tri.steps.map(function (x) { return x / qq2; }); sum = tri.sum / qq2;
+      var gTri = Math.min.apply(null, r.map(function (x) { var d = Math.abs(x - 2 / 3); return Math.min(d, 1 - d); }));
+      g = gTri;
+      rows = [['column <i>n</i>', '(' + SC.n.join(', ') + ')'], ['steps, units of <i>q</i>' + sup(2) + ' = ' + qq2, tri.steps.join(', ')], ['sum', tri.sum + ' = ' + (tri.sum / qq2) + ' × ' + qq2],
+              ['<i>g</i> of this triangle, periods', trunc(gTri, 4)], ['<i>g</i> over all columns and directions', trunc(tri.g3 / (3 * qq2), 4)],
+              ['δ<i>N</i>' + sup('1/3') + ' of 𝒞<sub>' + q + '</sub> = √(2/3 + 3<i>g</i>' + sup(2) + '), thm:col', trunc(Math.sqrt(tri.d2) / qq2, 4), true]];
+    }
+    dl($('#readC'), rows);
+    function pt(rad, f) { var a = 2 * Math.PI * f; return [cx + rad * Math.sin(a), cy - rad * Math.cos(a)]; }
+    function arcPath(rad, f0, f1) {
+      if (f1 - f0 >= 0.9999) { var p0 = pt(rad, f0), pm = pt(rad, f0 + 0.5); return 'M' + p0 + ' A' + rad + ',' + rad + ' 0 1 1 ' + pm + ' A' + rad + ',' + rad + ' 0 1 1 ' + p0; }
+      var a = pt(rad, f0), b = pt(rad, f1); return 'M' + a[0] + ',' + a[1] + ' A' + rad + ',' + rad + ' 0 ' + (f1 - f0 > 0.5 ? 1 : 0) + ' 1 ' + b[0] + ',' + b[1];
+    }
+    el('circle', { cx: cx, cy: cy, r: R0, style: 'fill:none;stroke:var(--grid-strong);stroke-width:1' }, svg);
+    if (g > 0) el('path', { d: arcPath(R0, 2 / 3 - g, 2 / 3 + g), style: 'fill:none;stroke:var(--accent-soft);stroke-width:26' }, svg);
+    el('path', { d: arcPath(R0, 2 / 3 - g, 2 / 3 + g), style: 'fill:none;stroke:var(--accent);stroke-width:1;stroke-dasharray:3 3' }, svg);
+    [[0, '0: cube'], [1 / 3, '1/3: turned cube'], [2 / 3, '2/3: worst']].forEach(function (m) {
+      var a = pt(R0 - 8, m[0]), b = pt(R0 + 8, m[0]), t = pt(R0 + 30, m[0]);
+      el('line', { x1: a[0], y1: a[1], x2: b[0], y2: b[1], style: 'stroke:var(--ink);stroke-width:1.4' }, svg);
+      el('text', { x: t[0], y: t[1] + 4, 'text-anchor': m[0] === 0 ? 'middle' : (m[0] < 0.5 ? 'start' : 'end'), style: 'fill:var(--ink);font:12px var(--sans)' }, svg, m[1]);
+    });
+    var f = 0, radii = [R0 - 30, R0 - 52, R0 - 74];
+    for (var i = 0; i < 3; i++) {
+      var f0 = f, f1 = f + r[i];
+      var turns = Math.floor(f0), a0 = f0 - turns, a1 = f1 - turns;
+      el('path', { d: arcPath(radii[i], a0, Math.max(a1, a0 + 1e-6)), style: 'fill:none;stroke:var(--accent);stroke-width:' + (2.4 - i * 0.3) }, svg);
+      var e = pt(radii[i], a1), lab = pt(radii[i] - 14, a1);
+      el('circle', { cx: e[0], cy: e[1], r: 3.4, style: 'fill:var(--accent)' }, svg);
+      el('text', { x: lab[0], y: lab[1] + 4, 'text-anchor': 'middle', style: 'fill:var(--accent);font:12px var(--mono)' }, svg, 'e' + SUBS[i]);
+      f = f1;
+    }
+    el('text', { x: cx, y: cy - 6, 'text-anchor': 'middle', style: 'fill:var(--ink);font:13px var(--sans)' }, svg, 'one period of height');
+    el('text', { x: cx, y: cy + 12, 'text-anchor': 'middle', style: 'fill:var(--muted);font:12px var(--sans)' }, svg, 'the three steps close after ' + Math.round(sum) + ' turn' + (Math.round(sum) === 1 ? '' : 's'));
+  }
+  $('#cmseg').addEventListener('click', function (e) {
+    var b = e.target.closest('button'); if (!b) return; SC.mode = b.getAttribute('data-cm'); pressed($('#cmseg'), 'data-cm', SC.mode);
+    $('#cfree').hidden = SC.mode !== 'free'; $('#ccol').hidden = SC.mode === 'free'; drawCeil();
+  });
+  $('#ca').addEventListener('input', function (e) { SC.a = +e.target.value; drawCeil(); });
+  $('#cb').addEventListener('input', function (e) { SC.b = +e.target.value; drawCeil(); });
+  $('#cq').addEventListener('change', function (e) { SC.q = +e.target.value; SC.n = [0, 0, 0]; drawCeil(); });
+  $('#cnext').addEventListener('click', function () { SC.n = [0, 1, 2].map(function () { return Math.floor(Math.random() * SC.q); }); drawCeil(); });
+  $('#cq').value = SC.q;
+  drawCeil();
+
+  /* ================================================================ section 2: slab views of T_p and W_p */
+  var PR = NC.primesIn(11, 101), cache = {};
+  function getNet(kind, p) {
+    var key = kind + p;
+    if (!cache[key]) {
+      var B = NC.build(kind === 'T' ? NC.twoCoset(p) : NC.wNet(p), p);
+      if (kind === 'Ws') B = NC.shiftNet(B, [[0, 0, 0], [0, 0, 0], [0, 1, 0]]);
+      cache[key] = { B: B, md: null, groups: null };
+    }
+    return cache[key];
+  }
+  function mdOf(kind, p) { var c = getNet(kind, p); if (!c.md) c.md = NC.minDistFast(c.B); return c.md; }
+  var SS = { net: 'W', p: 53, slab: 0, h0: 0, v0: 0, sel: null };
+  function axes() { return SS.net === 'T' ? { v: 0, h: 1, s: 2 } : { v: 2, h: 0, s: 1 }; }
+  function fillPrimes() {
+    var list = PR.filter(function (p) { return SS.net !== 'T' || p !== 23; });
+    if (list.indexOf(SS.p) < 0) SS.p = 53;
+    $('#sp').innerHTML = list.map(function (p) { return '<option value="' + p + '"' + (p === SS.p ? ' selected' : '') + '>' + p + ' (' + p * p * p + ' points)</option>'; }).join('');
+  }
+  function win() { return Math.min(SS.p, 14); }
+  function drawSlab() {
+    var cx = canvasCtx($('#cS')); if (!cx) return;
+    var g = cx.g, W = cx.W, H = cx.H, C = getNet(SS.net, SS.p), B = C.B, p = SS.p, cw = B.cw, ax = axes(), w = win(), pad = 14, sc = (Math.min(W, H) - 2 * pad) / w;
+    var col = { surface: tok('--surface'), grid: tok('--grid'), ink: tok('--ink'), accent: tok('--accent'), soft: tok('--accent-soft'), slip: tok('--slip'), jit: tok('--jit') };
+    g.fillStyle = col.surface; g.fillRect(0, 0, W, H);
+    function px(x) { return pad + x * sc; }
+    function py(y) { return pad + (w - y) * sc; }
+    var i, j, n = [0, 0, 0];
+    if (SS.net === 'T') {
+      g.fillStyle = col.soft;
+      for (i = 0; i < w; i++) for (j = 0; j < w; j++) { var ny = (SS.h0 + i) % p, nz = SS.slab; if ((ny + nz) % 2) g.fillRect(px(i), py(j + 1), sc, sc); }
+    }
+    g.strokeStyle = col.grid; g.lineWidth = 1; g.beginPath();
+    for (i = 0; i <= w; i++) { g.moveTo(px(i), py(0)); g.lineTo(px(i), py(w)); g.moveTo(px(0), py(i)); g.lineTo(px(w), py(i)); }
+    g.stroke();
+    g.save(); g.beginPath(); g.rect(pad, pad, w * sc, w * sc); g.clip();
+    var dots = [];
+    for (i = 0; i < w; i++) for (j = 0; j < w; j++) {
+      n[ax.h] = (SS.h0 + i) % p; n[ax.v] = (SS.v0 + j) % p; n[ax.s] = SS.slab;
+      var idx = B.cell[NC.cellIndex(B, n)], lh = i + (B.X[ax.h][idx] % cw) / cw, lv = j + (B.X[ax.v][idx] % cw) / cw;
+      var st = NC.axisStep(B, n, ax.v), k = st.key, vw = k[ax.v] === '1', others = k.split('').some(function (c2, c) { return c !== ax.v && c2 === '1'; });
+      var x2 = lh + st.D[ax.h] / cw, y2 = lv + st.D[ax.v] / cw;
+      g.strokeStyle = vw ? (others ? col.accent : col.slip) : col.jit; g.lineWidth = vw ? 2.4 : 1.1;
+      g.beginPath(); g.moveTo(px(lh), py(lv)); g.lineTo(px(x2), py(y2)); g.stroke();
+      if (vw && !others) { g.beginPath(); g.arc(px(lh), py(lv), 7, 0, 2 * Math.PI); g.stroke(); }
+      dots.push({ x: lh, y: lv, n: n.slice(), st: st });
+    }
+    var rr = Math.max(2, Math.min(4.5, sc * 0.11));
+    g.fillStyle = col.ink; g.beginPath();
+    dots.forEach(function (d) { g.moveTo(px(d.x) + rr, py(d.y)); g.arc(px(d.x), py(d.y), rr, 0, 2 * Math.PI); });
+    g.fill();
+    if (SS.sel) { var sd = dots.filter(function (d) { return d.n.join() === SS.sel.join(); })[0]; if (sd) { g.strokeStyle = col.accent; g.lineWidth = 2; g.beginPath(); g.arc(px(sd.x), py(sd.y), rr + 4, 0, 2 * Math.PI); g.stroke(); } }
+    g.restore();
+    SS.dots = dots; SS.map = { px: px, py: py };
+    $('#hintS').textContent = SUBS[ax.h] + ' →, ' + SUBS[ax.v] + ' ↑; slab ' + SUBS[ax.s] + ' = ' + SS.slab + ' (cell units)';
+  }
+  function readSlab() {
+    var p = SS.p, C = getNet(SS.net, p), md = mdOf(SS.net, p), ax = axes();
+    if (!C.groups) C.groups = NC.axisSteps(C.B, ax.v);
+    var rows = [['δ<i>N</i>' + sup('1/3') + ', exact', trunc(md.c), true]];
+    if (SS.net === 'T') {
+      var tb = NC.twoCosetBounds(p);
+      if (tb.lb !== undefined) rows.push(['proven lower bound (2)', trunc(tb.lb)]);
+      rows.push(['upper bound from the pair of (3)', ceilD(tb.ub)]); rows.push(['limit √66/8', trunc(tb.limit)]);
+    } else {
+      var wb = NC.wBounds(p), net = NC.wNet(p);
+      rows.push(['drift ε = ρ/(2<i>p</i>), ρ = ' + net.rho, trunc(net.eps, 5)]);
+      rows.push(['step along <i>e<sub>z</sub></i>, no wrap: (4ε, 4ε, 1 + 2ε)', '(' + [4 * net.eps, 4 * net.eps, 1 + 2 * net.eps].map(function (x) { return trunc(x, 3); }).join(', ') + ')']);
+      if (SS.net === 'W' && wb.lb !== undefined) { rows.push(['proven lower bound (2)', trunc(wb.lb)]); rows.push(['upper bound from the pair of (3)', ceilD(wb.ub)]); }
+      rows.push(['limit √281/16', trunc(wb.limit)]);
+    }
+    dl($('#readS'), rows);
+    var names = function (k) {
+      var w = []; for (var c = 0; c < 3; c++) if (k[c] === '1') w.push(SUBS[c]);
+      return w.length ? w.join(', ') + ' wrap' + (w.length === 1 ? 's' : '') : 'no wrap';
+    };
+    $('#stepsS').innerHTML = '<thead><tr><th>steps along <i>e<sub>' + SUBS[ax.v] + '</sub></i>: second digits</th><th>cells</th><th>shortest</th></tr></thead><tbody>' + C.groups.map(function (gr) {
+      var lone = gr.key[ax.v] === '1' && gr.key.split('').filter(function (c) { return c === '1'; }).length === 1;
+      return '<tr><td' + (lone ? ' style="color:var(--slip)"' : '') + '>' + names(gr.key) + '</td><td>' + gr.count + '</td><td>' + trunc(gr.minLen, 3) + '</td></tr>';
+    }).join('') + '</tbody>';
+  }
+  function updateSlab() {
+    pressed($('#snseg'), 'data-sn', SS.net); fillPrimes();
+    var p = SS.p, ax = axes();
+    ['ss', 'sh', 'sv'].forEach(function (id) { $('#' + id).max = p - 1; });
+    SS.slab = Math.min(SS.slab, p - 1); SS.h0 = Math.min(SS.h0, p - 1); SS.v0 = Math.min(SS.v0, p - 1);
+    $('#ss').value = SS.slab; $('#sh').value = SS.h0; $('#sv').value = SS.v0;
+    $('#sslab').textContent = 'Slab: cell digit of ' + SUBS[ax.s];
+    $('#ssv').textContent = SS.slab; $('#shv').textContent = SS.h0; $('#svv').textContent = SS.v0;
+    drawSlab(); readSlab(); readTW();
+  }
+  $('#snseg').addEventListener('click', function (e) {
+    var b = e.target.closest('button'); if (!b) return; SS.net = b.getAttribute('data-sn'); SS.sel = null;
+    if (SS.net === 'Ws') { var C = getNet('Ws', SS.p), gr = NC.axisSteps(C.B, 2).filter(function (x) { return x.key === '001'; })[0]; C.groups = null; if (gr) { SS.slab = gr.n[1]; SS.h0 = Math.max(0, gr.n[0] - 6); SS.v0 = Math.max(0, gr.n[2] - 6); } }
+    updateSlab();
+  });
+  $('#sp').addEventListener('change', function (e) { SS.p = +e.target.value; SS.sel = null; updateSlab(); });
+  [['ss', 'slab'], ['sh', 'h0'], ['sv', 'v0']].forEach(function (a) { $('#' + a[0]).addEventListener('input', function (e) { SS[a[1]] = +e.target.value; $('#' + a[0] + 'v').textContent = SS[a[1]]; drawSlab(); }); });
+  $('#cS').addEventListener('click', function (e) {
+    if (!SS.dots) return;
+    var rect = e.target.getBoundingClientRect(), mx = e.clientX - rect.left, my = e.clientY - rect.top, best = Infinity, arg = null;
+    SS.dots.forEach(function (d) { var dx = SS.map.px(d.x) - mx, dy = SS.map.py(d.y) - my, q = dx * dx + dy * dy; if (q < best) { best = q; arg = d; } });
+    if (!arg || best > 600) return;
+    SS.sel = arg.n; var st = arg.st, cw = getNet(SS.net, SS.p).B.cw, ax = axes();
+    var w = []; for (var c = 0; c < 3; c++) if (st.key[c] === '1') w.push(SUBS[c]);
+    $('#selS').innerHTML = 'Cell (' + arg.n.join(', ') + '): the step to the next cell along <i>e<sub>' + SUBS[ax.v] + '</sub></i> is (' + st.D.map(function (x) { return sgnTrunc(x / cw, 3); }).join(', ') + ') in cell units, length ' + trunc(st.len, 3) + '; second digits that wrap: ' + (w.length ? w.join(', ') : 'none') + '.';
+    drawSlab();
+  });
+
+  /* the chart of T_p and W_p against p */
+  var TW = { T: {}, W: {} };
+  function drawTW() {
+    var svg = $('#twchart'); clear(svg);
+    var x0 = 62, x1 = 560, y0 = 14, y1 = 300, ylo = 0.84, yhi = 1.07;
+    function X(p) { return x0 + (x1 - x0) * p / 200; }
+    function Y(v) { return y1 - (y1 - y0) * (v - ylo) / (yhi - ylo); }
+    for (var v = 0.85; v <= 1.0701; v += 0.05) {
+      el('line', { x1: x0, x2: x1, y1: Y(v), y2: Y(v), style: 'stroke:var(--grid);stroke-width:1' }, svg);
+      el('text', { x: x0 - 8, y: Y(v) + 4, 'text-anchor': 'end', style: MUTED }, svg, v.toFixed(2));
+    }
+    [0, 50, 100, 150, 200].forEach(function (p) { el('text', { x: X(p), y: y1 + 18, 'text-anchor': 'middle', style: MUTED }, svg, String(p)); });
+    el('text', { x: (x0 + x1) / 2, y: y1 + 40, 'text-anchor': 'middle', style: 'fill:var(--muted);font:13px var(--sans)' }, svg, 'prime p');
+    el('text', { x: 14, y: (y0 + y1) / 2, 'text-anchor': 'middle', transform: 'rotate(-90 14 ' + (y0 + y1) / 2 + ')', style: 'fill:var(--muted);font:13px var(--sans)' }, svg, 'δN^(1/3)');
+    var wb = NC.wBounds(53), tb = NC.twoCosetBounds(41);
+    [[1, 'cube value 1'], [tb.limit, '√66/8'], [wb.limit, '√281/16']].forEach(function (L, i) {
+      el('line', { x1: x0, x2: x1, y1: Y(L[0]), y2: Y(L[0]), style: 'stroke:var(--muted);stroke-width:1;stroke-dasharray:1 3' }, svg);
+      el('text', { x: x1 + 6, y: Y(L[0]) + (i === 2 ? -2 : 4), style: 'fill:var(--muted);font:12px var(--sans)' }, svg, L[1]);
+    });
+    function curve(f, pa, style) {
+      var pts = [];
+      for (var p = pa; p <= 200; p += 1) { var v2 = f(p); if (v2 !== undefined && v2 >= ylo) pts.push(X(p).toFixed(1) + ',' + Y(v2).toFixed(1)); }
+      el('polyline', { points: pts.join(' '), fill: 'none', style: style }, svg);
+    }
+    curve(function (p) { return NC.wBounds(p).lb; }, 53, 'stroke:var(--accent);stroke-width:1.4;stroke-dasharray:5 3');
+    curve(function (p) { return NC.twoCosetBounds(p).lb; }, 41, 'stroke:var(--ink);stroke-width:1.2;stroke-dasharray:5 3');
+    Object.keys(TW.T).forEach(function (p) { var v3 = TW.T[p]; if (v3 >= ylo) el('circle', { cx: X(+p), cy: Y(v3), r: 3.2, style: 'fill:var(--surface);stroke:var(--ink);stroke-width:1.3' }, svg); });
+    Object.keys(TW.W).forEach(function (p) { var v4 = TW.W[p]; if (v4 >= ylo) el('circle', { cx: X(+p), cy: Y(v4), r: 3.2, style: 'fill:var(--accent)' }, svg); });
+    el('line', { x1: X(SS.p), x2: X(SS.p), y1: y0, y2: y1, style: 'stroke:var(--slip);stroke-width:1' }, svg);
+  }
+  function readTW() {
+    var p = SS.p, rows = [['selected prime <i>p</i>', String(p)]];
+    if (TW.W[p] !== undefined) rows.push(['𝒲<sub><i>p</i></sub>, exact', trunc(TW.W[p]), true]);
+    if (TW.T[p] !== undefined) rows.push(['𝒯<sub><i>p</i></sub>, exact', trunc(TW.T[p])]);
+    var ab = Object.keys(TW.W).filter(function (q) { return TW.W[q] > 1; }).map(Number);
+    if (ab.length) rows.push(['smallest computed prime with 𝒲<sub><i>p</i></sub> above 1', String(Math.min.apply(null, ab))]);
+    dl($('#readTW'), rows);
+    drawTW();
+  }
+  (function fillTW() {
+    var jobs = [];
+    PR.forEach(function (p) { jobs.push(['W', p]); if (p !== 23) jobs.push(['T', p]); });
+    var i = 0;
+    (function next() {
+      if (i >= jobs.length) { $('#twnote').textContent = 'Exact values at every prime from 11 to 101, computed in your browser; the bounds continue to 200.'; return; }
+      var j = jobs[i++];
+      var ck = cache[j[0] + j[1]];
+      if (ck && ck.md) TW[j[0]][j[1]] = ck.md.c;
+      else { var md = NC.minDistFast(NC.build(j[0] === 'T' ? NC.twoCoset(j[1]) : NC.wNet(j[1]), j[1])); TW[j[0]][j[1]] = md.c; if (ck) ck.md = md; }
+      $('#twnote').textContent = 'Computing the exact values, one prime at a time: ' + i + ' of ' + jobs.length + ' nets.';
+      if (i % 2 === 0 || i === jobs.length) readTW();
+      setTimeout(next, 0);
+    })();
+  })();
+
+  /* ================================================================ section 3: the two contacts */
+  var FP = NC.primesIn(53, 997);
+  $('#fp').max = FP.length - 1;
+  var SFP = { i: FP.indexOf(101) };
+  function drawQ() {
+    var p = FP[SFP.i], net = NC.wNet(p), e = net.eps, svg = $('#qchart'); clear(svg);
+    $('#fp').value = SFP.i; $('#fpv').textContent = p;
+    var x0 = 62, x1 = 620, y0 = 14, y1 = 280, ex = 0.05, ylo = 0.98, yhi = 1.14;
+    function X(v) { return x0 + (x1 - x0) * v / ex; }
+    function Y(v) { return y1 - (y1 - y0) * (v - ylo) / (yhi - ylo); }
+    for (var v = 1.0; v <= 1.1401; v += 0.02) {
+      el('line', { x1: x0, x2: x1, y1: Y(v), y2: Y(v), style: 'stroke:var(--grid);stroke-width:1' }, svg);
+      el('text', { x: x0 - 8, y: Y(v) + 4, 'text-anchor': 'end', style: MUTED }, svg, v.toFixed(2));
+    }
+    [0, 0.01, 0.02, 0.03, 0.04, 0.05].forEach(function (t) { el('text', { x: X(t), y: y1 + 18, 'text-anchor': 'middle', style: MUTED }, svg, t.toFixed(2)); });
+    el('text', { x: (x0 + x1) / 2, y: y1 + 40, 'text-anchor': 'middle', style: 'fill:var(--muted);font:13px var(--sans)' }, svg, 'drift ε');
+    [[NC.qa, 'stroke:var(--accent);stroke-width:2'], [NC.qb, 'stroke:var(--ink);stroke-width:2']].forEach(function (c) {
+      var pts = []; for (var t = 0; t <= ex + 1e-12; t += ex / 200) { var y = Math.sqrt(c[0](t)); if (y <= yhi) pts.push(X(t).toFixed(1) + ',' + Y(y).toFixed(1)); }
+      el('polyline', { points: pts.join(' '), fill: 'none', style: c[1] }, svg);
+    });
+    var es = NC.EPS_STAR, ms = NC.MU_STAR;
+    el('line', { x1: X(es), x2: X(es), y1: Y(ms), y2: y1, style: 'stroke:var(--muted);stroke-width:1;stroke-dasharray:1 3' }, svg);
+    el('circle', { cx: X(es), cy: Y(ms), r: 4, style: 'fill:var(--surface);stroke:var(--ink);stroke-width:1.4' }, svg);
+    el('text', { x: X(es) - 8, y: Y(ms) - 10, 'text-anchor': 'end', style: 'fill:var(--ink);font:12px var(--sans)' }, svg, 'balance ε*, μ*');
+    el('line', { x1: X(1 / 48), x2: X(1 / 48), y1: y0, y2: y1, style: 'stroke:var(--muted);stroke-width:1;stroke-dasharray:4 3' }, svg);
+    el('text', { x: X(1 / 48) + 4, y: y0 + 12, style: 'fill:var(--muted);font:12px var(--sans)' }, svg, '1/48');
+    if (e <= ex) {
+      var v2 = NC.wNoJitter(p);
+      el('line', { x1: X(e), x2: X(e), y1: y0, y2: y1, style: 'stroke:var(--slip);stroke-width:1.6' }, svg);
+      if (v2 !== null) el('circle', { cx: X(e), cy: Y(v2), r: 4.5, style: 'fill:var(--slip)' }, svg);
+    }
+    var rows = [['ε = ρ/(2<i>p</i>), ρ = ' + net.rho, trunc(e, 5)], ['√<i>q<sub>a</sub></i>(ε), diagonal contact', trunc(Math.sqrt(NC.qa(e)))], ['√<i>q<sub>b</sub></i>(ε), step along <i>e<sub>z</sub></i>', trunc(Math.sqrt(NC.qb(e)))]];
+    var nj = NC.wNoJitter(p);
+    if (nj !== null) rows.push(['value without the third digits, √min', trunc(nj), true]);
+    if (p <= 101 && TW.W[p] !== undefined) rows.push(['δ<i>N</i>' + sup('1/3') + ', exact (with the third digits)', trunc(TW.W[p])]);
+    rows.push(['proven lower bound, prop:wnet(2)', trunc(NC.wBounds(p).lb)]);
+    rows.push(['ε*', trunc(es, 5)], ['μ*', trunc(ms)], ['√281/16', trunc(NC.wBounds(p).limit)]);
+    dl($('#readF'), rows);
+  }
+  $('#fp').addEventListener('input', function (e) { SFP.i = +e.target.value; drawQ(); });
+
+  /* ================================================================ section 4: Q*_p */
+  var SQ = { p: 11, z: 0, w: 0, v: 0 }, QC5 = {};
+  function q5(p) { if (!QC5[p]) { var B = NC.build(NC.half5(p), p); QC5[p] = { B: B, md: NC.minDistFast(B) }; } return QC5[p]; }
+  function drawQplane() {
+    var cx = canvasCtx($('#cQ')); if (!cx) return;
+    var g = cx.g, W = cx.W, H = cx.H, p = SQ.p, Q = q5(p), B = Q.B, cw = B.cw, pad = 12, sc = (Math.min(W, H) - 2 * pad) / p, i, j;
+    g.fillStyle = tok('--surface'); g.fillRect(0, 0, W, H);
+    g.strokeStyle = tok('--grid'); g.lineWidth = 1; g.beginPath();
+    for (i = 0; i <= p; i++) { g.moveTo(pad + i * sc, pad); g.lineTo(pad + i * sc, pad + p * sc); g.moveTo(pad, pad + i * sc); g.lineTo(pad + p * sc, pad + i * sc); }
+    g.stroke();
+    var r = Math.max(2, Math.min(5, sc * 0.13)), ink = tok('--ink'), acc = tok('--accent');
+    for (i = 0; i < p; i++) for (j = 0; j < p; j++) {
+      var n = [i, j, SQ.z, SQ.w, SQ.v], idx = B.cell[NC.cellIndex(B, n)], par = (i + j + SQ.z + SQ.w + SQ.v) % 2;
+      var x = B.X[0][idx] / cw, y = B.X[1][idx] / cw;
+      g.fillStyle = par ? acc : ink; g.beginPath(); g.arc(pad + x * sc, pad + (p - y) * sc, r, 0, 2 * Math.PI); g.fill();
+    }
+  }
+  function readQ() {
+    var Q = q5(SQ.p);
+    $('#qzv').textContent = SQ.z + ', ' + SQ.w + ', ' + SQ.v;
+    dl($('#readQ'), [['Points <i>N</i> = <i>p</i>' + sup(5), String(Q.B.N)], ['δ<i>N</i>' + sup('1/5') + ', exact', trunc(Q.md.c), true], ['closest pairs', String(Q.md.count)],
+                      ]);
+    $('#qdiff').textContent = 'A closest pair differs by (' + Q.md.pair.D.map(function (x) { return sgnTrunc(x / Q.B.cw, 2); }).join(', ') + ') in cell units.';
+  }
+  function drawH5() {
+    var svg = $('#h5chart'); clear(svg);
+    var x0 = 62, x1 = 820, y0 = 14, y1 = 280, ylo = 0.5, yhi = 1.2;
+    function X(p) { return x0 + (x1 - x0) * p / 200; }
+    function Y(v) { return y1 - (y1 - y0) * (v - ylo) / (yhi - ylo); }
+    for (var v = 0.5; v <= 1.2001; v += 0.1) {
+      el('line', { x1: x0, x2: x1, y1: Y(v), y2: Y(v), style: 'stroke:var(--grid);stroke-width:1' }, svg);
+      el('text', { x: x0 - 8, y: Y(v) + 4, 'text-anchor': 'end', style: MUTED }, svg, v.toFixed(1));
+    }
+    [0, 25, 50, 75, 100, 125, 150, 175, 200].forEach(function (p) { el('text', { x: X(p), y: y1 + 18, 'text-anchor': 'middle', style: MUTED }, svg, String(p)); });
+    el('text', { x: (x0 + x1) / 2, y: y1 + 40, 'text-anchor': 'middle', style: 'fill:var(--muted);font:13px var(--sans)' }, svg, 'prime p');
+    el('text', { x: 14, y: (y0 + y1) / 2, 'text-anchor': 'middle', transform: 'rotate(-90 14 ' + (y0 + y1) / 2 + ')', style: 'fill:var(--muted);font:13px var(--sans)' }, svg, 'δN^(1/5)');
+    [[1, '1'], [Math.sqrt(5) / 2, '√5/2']].forEach(function (L) {
+      el('line', { x1: x0, x2: x1, y1: Y(L[0]), y2: Y(L[0]), style: 'stroke:var(--muted);stroke-width:1;stroke-dasharray:1 3' }, svg);
+      el('text', { x: x1 + 6, y: Y(L[0]) + 4, style: 'fill:var(--muted);font:12px var(--sans)' }, svg, L[1]);
+    });
+    var lb = NC.primesIn(29, 199).map(function (p) { return [p, NC.half5LB2(p).lb]; });
+    el('polyline', { points: lb.map(function (a) { return X(a[0]).toFixed(1) + ',' + Y(a[1]).toFixed(1); }).join(' '), fill: 'none', style: 'stroke:var(--ink);stroke-width:1.6' }, svg);
+    lb.forEach(function (a) { el('circle', { cx: X(a[0]), cy: Y(a[1]), r: 2, style: 'fill:var(--ink)' }, svg); });
+    var ub = NC.primesIn(37, 199).map(function (p) { return [p, NC.half5Upper(p)]; }).filter(function (a) { return a[1] <= yhi; });
+    if (ub.length) el('polyline', { points: ub.map(function (a) { return X(a[0]).toFixed(1) + ',' + Y(a[1]).toFixed(1); }).join(' '), fill: 'none', style: 'stroke:var(--muted);stroke-width:1.2;stroke-dasharray:5 3' }, svg);
+    var first = lb.filter(function (a) { return a[1] > 1; })[0], before = lb.filter(function (a) { return a[0] < first[0]; }).pop();
+    el('circle', { cx: X(first[0]), cy: Y(first[1]), r: 6, style: 'fill:none;stroke:var(--slip);stroke-width:1.6' }, svg);
+    el('text', { x: X(first[0]) + 10, y: Y(first[1]) + 22, style: 'fill:var(--slip);font:12px var(--sans)' }, svg, 'LB₂(' + first[0] + ') = ' + trunc(first[1]) + ' > 1; LB₂(' + before[0] + ') = ' + trunc(before[1]));
+    Object.keys(QC5).forEach(function (p) { var c = QC5[p].md.c; el('circle', { cx: X(+p), cy: Y(c), r: 3.6, style: 'fill:var(--accent)' }, svg); });
+  }
+  function updateQ() {
+    pressed($('#qpseg'), 'data-qp', SQ.p);
+    ['qz', 'qw', 'qv'].forEach(function (id) { $('#' + id).max = SQ.p - 1; });
+    SQ.z = Math.min(SQ.z, SQ.p - 1); SQ.w = Math.min(SQ.w, SQ.p - 1); SQ.v = Math.min(SQ.v, SQ.p - 1);
+    drawQplane(); readQ(); drawH5();
+  }
+  $('#qpseg').addEventListener('click', function (e) {
+    var b = e.target.closest('button'); if (!b) return; var p = +b.getAttribute('data-qp');
+    if (!QC5[p] && p >= 17) { $('#readQ').innerHTML = '<dt>computing ' + Math.pow(p, 5) + ' points</dt><dd>…</dd>'; setTimeout(function () { SQ.p = p; updateQ(); }, 30); return; }
+    SQ.p = p; updateQ();
+  });
+  [['qz', 'z'], ['qw', 'w'], ['qv', 'v']].forEach(function (a) { $('#' + a[0]).addEventListener('input', function (e) { SQ[a[1]] = +e.target.value; drawQplane(); readQ(); }); });
+  q5(7); q5(13);
+
+  updateSlab(); drawQ(); updateQ();
+  if (window.ResizeObserver) {
+    new ResizeObserver(function () { drawSlab(); }).observe($('#plotS'));
+    new ResizeObserver(function () { drawQplane(); }).observe($('#plotQ'));
+  }
+  themeFns.push(drawSlab, drawQplane);
+})();
+</script>

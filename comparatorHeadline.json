@@ -1,0 +1,17 @@
+{
+  "challenge_module": "Headline.Challenge",
+  "solution_module": "Headline.Solution",
+  "theorem_names": [
+    "Z3NetA.theoremA",
+    "Z3NetA.ustarCols_spec",
+    "Z3NetA.gamma_spec",
+    "Z3NetA.net_wellDefined"
+  ],
+  "definition_names": [],
+  "permitted_axioms": [
+    "propext",
+    "Quot.sound",
+    "Classical.choice"
+  ],
+  "enable_nanoda": true
+}

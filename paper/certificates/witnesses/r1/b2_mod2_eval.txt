@@ -1,0 +1,7 @@
+b=2 m=11 c=0.55232  gsep=0.39685 (v*=9223372036854775807, #min=1)   floor_if_cert_here=0.39685  [nf=0 comb=0 0.01s]
+b=2 m=14 c=0.51336  gsep=0.39685 (v*=4, #min=1608)   floor_if_cert_here=0.39685  [nf=4 comb=52 0.00s]
+b=2 m=17 c=0.51336  gsep=0.39685 (v*=4, #min=12864)   floor_if_cert_here=0.39685  [nf=4 comb=52 0.01s]
+b=2 m=20 c=0.51336  gsep=0.42092 (v*=18, #min=17408)   floor_if_cert_here=0.42092  [nf=16 comb=736 0.02s]
+b=2 m=23 c=0.50854  gsep=0.42092 (v*=18, #min=139264)   floor_if_cert_here=0.42092  [nf=16 comb=736 0.09s]
+b=2 m=26 c=0.50854  gsep=0.48095 (v*=94, #min=32768)   floor_if_cert_here=0.48095  [nf=256 comb=36592 0.50s]
+b=2 m=29 c=0.50854  gsep=0.48095 (v*=94, #min=262144)   floor_if_cert_here=0.48095  [nf=256 comb=36592 1.86s]

@@ -1,0 +1,124 @@
+version: "v0.4"
+
+project:
+  name: "Low-discrepancy quasi-uniform digital nets in every dimension (statement library)"
+  description: >-
+    Lean 4 / Mathlib formalization of the manuscript "Low-discrepancy quasi-uniform digital nets in every
+    dimension" (version 1). One statement library (QUNets/Statements/*.lean, one file per part of the paper,
+    616 statements, each with sorry), the roots Challenge.lean and Solution.lean, and one Comparator
+    configuration, comparator.json, with all 616 theorems. Every theorem, proposition, lemma and corollary of
+    the paper is formalized, with the exceptions listed in COVERAGE_GAPS.md (finite computations checked by
+    scripts, two classical theorems used as explicit hypotheses, one sentence of rem:projlines). The headline
+    result, Theorem A (thm:A), is also a separate Palomar entry: Headline/Challenge.lean, comparatorHeadline.json,
+    metadata palomar/headline/formalization.yaml. This file describes the library; it is not a Palomar
+    submission by itself.
+  authors:
+    - {name: "Leonhard Gruenschloss", orcid: "0009-0004-6476-2191"}
+  responsible_maintainers:
+    - {name: "Leonhard Gruenschloss", orcid: "0009-0004-6476-2191"}
+  license: "MIT"
+
+classification:
+  arxiv: [math.NT, math.NA]
+  # Proposed MSC 2020 set (identical in the Hexagon and Zenodo metadata); the author confirms it at the deposit.
+  msc2020: [11K38, 65C05, 11K45, 52C17, 11H06, 94B05, 68V20]
+
+sources:
+  - title: "Low-discrepancy quasi-uniform digital nets in every dimension (version 1)"
+    authors:
+      - {name: "Leonhard Gruenschloss", orcid: "0009-0004-6476-2191"}
+    type: paper
+    id: "HEXAGON_ID_TBD"
+    location: "paper/core.tex in https://github.com/lgruen/separated-nets-lean (archived at Zenodo, ZENODO_DOI_TBD)"
+    relationship: formalizes
+    note: >-
+      Results are cited by their LaTeX labels, never by number. STATEMENTS_INDEX.md maps every compared theorem
+      to its labels; the blueprint (blueprint/) presents the paper's results with links to the Lean declarations.
+  - title: "Point sets and sequences with small discrepancy (Monatsh. Math. 104 (1987) 273-337)"
+    authors: ["Harald Niederreiter"]
+    type: paper
+    relationship: background
+    note: "The t = 0 criterion via box matrices (lem:nie); the Lean proof of the net property is self-contained."
+  - title: "On the quasi-uniformity properties of quasi-Monte Carlo point sets and sequences, Part II: digital nets and sequences (Math. Comp. 2026; arXiv:2501.18226)"
+    authors: ["Josef Dick", "Takashi Goda", "Kosuke Suzuki"]
+    type: paper
+    relationship: background
+    note: "The definitions of [DGS2] used in sec:dgs (quasi-uniformity, well-separated families) are formalized in Z3Net/DGSDefs.lean (namespace Z3NetDGS)."
+
+related_formalizations:
+  - id: "github.com/lennrt/palomar-formalizations (zenodo-22264675/palomar)"
+    relationship: other
+    note: >-
+      Different mathematics (two-dimensional even-order Grünschloß-Keller permutation nets). The project layout
+      follows its Palomar template, and the centred residue cres is adapted from its GKEvenNet.cres (MIT
+      licence; here with an integer argument).
+
+status:
+  scope: >-
+    All 616 compared theorems of comparator.json are proved, symbolic in the dimension, the base and the
+    resolution where the paper is; finite certificates are checked by decide in the kernel. Comparator accepts
+    all 616 with the Lean kernel and NanoDa (COMPARATOR_RESULTS.md). Classical theorems not in Mathlib enter as
+    explicit hypotheses: PNTpsi (Z3NetU.U_growth_pnt, U_bound_growth_pnt; rem:Us), HajosProp and KellerProp and
+    the packing bounds for s = 2, 3 (Z3NetF.cube_*; prop:cube).
+  sorry_count: 0
+  sorry_in_definitions: 0
+  axioms: [propext, Classical.choice, Quot.sound]
+  main_results:
+    - {declaration: "Z3NetA.thmA", file: "Solution.lean", sorry_count: 0, axioms: [propext, Classical.choice, Quot.sound], comparator_config: "comparator.json"}
+    - {declaration: "Z3NetDGS.dgs_family_all", file: "Solution.lean", sorry_count: 0, axioms: [propext, Classical.choice, Quot.sound], comparator_config: "comparator.json"}
+    - {declaration: "Z3NetKN.cor_allm", file: "Solution.lean", sorry_count: 0, axioms: [propext, Classical.choice, Quot.sound], comparator_config: "comparator.json"}
+    - {declaration: "Z3NetB23.base23_everyshift", file: "Solution.lean", sorry_count: 0, axioms: [propext, Classical.choice, Quot.sound], comparator_config: "comparator.json"}
+    - {declaration: "Z3NetC.col_net", file: "Solution.lean", sorry_count: 0, axioms: [propext, Classical.choice, Quot.sound], comparator_config: "comparator.json"}
+
+automation:
+  methods:
+    - method: agent
+      models: ["Anthropic Claude Opus 5.5"]
+      framework: "AI agents for statement drafting, proof development, and review"
+      tool_setup: >-
+        Lean v4.35.0-rc3 with Mathlib v4.35.0-rc3; finite computations by kernel reduction (decide +kernel), no
+        native_decide; Comparator (leanprover/comparator) with the Lean kernel and NanoDa; Python checkers
+        outside Lean (scripts/, paper/scripts/).
+    - method: manual
+      models: []
+      framework: "n/a"
+      tool_setup: >-
+        Author review of the formal statements against the manuscript. The headline statement (thm:A,
+        Z3NetA.theoremA, palomar/headline/formalization.yaml) was reviewed and signed off by the author on
+        2026-10-12. REVIEW_SCOPE_TBD (the scope of the author's review of the other library statements).
+  spend_usd: "not tracked"
+  notes: >-
+    The constructions, proofs and Lean formalization were produced by AI systems (Anthropic Claude Opus 5.5; some early exploratory results used Claude Fable 5.1) under the author's direction. The author selected the problems, steered the research and reviewed the formal statements, but has not verified every proof by hand. AI systems are not listed as authors; responsibility for the deposit rests with the author.
+
+fidelity:
+  divergences: |-
+    - The statements were drafted from the paper's text and checked against it by AI-assisted review passes;
+      encodings (integer-scaled distances with real forms, Mathlib matrix inverses, explicit constants for O(.)
+      terms, existential statements for nets the paper builds by explicit moves) are noted in the docstrings of
+      QUNets/Statements/*.lean, statement by statement.
+    - Classical theorems as explicit hypotheses: PNTpsi (rem:Us), HajosProp, KellerProp (s <= 7) and the optimal
+      packing bounds for s = 2, 3 (prop:cube).
+    - Not formalized: the finite computations listed in COVERAGE_GAPS.md (checked by the scripts of
+      paper/scripts/), the parallel-lines sentence of rem:projlines, and statements that follow from cited
+      theorems (Niederreiter's discrepancy bound, the range optimality of q, Wigert's divisor bound).
+
+review:
+  status: "agent-reviewed"
+  reviewers: []
+  notes: >-
+    Every statement was checked against the source by AI-assisted passes (Anthropic Claude), acting as automated
+    assistants rather than reviewers of record. Hash checks (scripts/check_statement_identity.py,
+    scripts/check_headline_identity.py) confirm that the statements and the constants they reach are identical
+    in the Challenge and Solution environments. The author signed off the headline statement (thm:A) on
+    2026-10-12. No independent human peer review has been performed.
+
+alignment:
+  namespace: "Z3Net"
+  note: >-
+    The per-theorem map (Lean name -> paper labels) is STATEMENTS_INDEX.md; the blueprint (blueprint/src,
+    generated from paper/core.tex) attaches the Lean names to each result of the paper.
+
+acknowledgements: >-
+  Lean and Mathlib. The centred-residue helper cres is adapted from Lennart Rudolph's MIT-licensed Palomar
+  formalization of the even-order Grünschloß-Keller nets (github.com/lennrt/palomar-formalizations), whose layout
+  this project also follows.

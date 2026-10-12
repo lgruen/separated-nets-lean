@@ -1,0 +1,98 @@
+{
+ "comment": "s = 4 deficit-two design over Z[1/2] on the places (inf, 0, 1, 2) in this coordinate order (Section sec:dim4ex); copied from `as_push/designs_K.json` (research repository) key '4' (audited in the research notes). F = [F_0, F_1, F_2], first offset row on levels k-1, k-2, k-3; F_n[c][d], row c, column d.",
+ "places": [
+  "inf",
+  "0",
+  "1",
+  "2"
+ ],
+ "lam": [
+  "1",
+  "1",
+  "1",
+  "1"
+ ],
+ "F": [
+  [
+   [
+    -2,
+    -2,
+    -1,
+    -2
+   ],
+   [
+    1,
+    -2,
+    1,
+    1
+   ],
+   [
+    1,
+    -2,
+    -2,
+    2
+   ],
+   [
+    1,
+    -1,
+    -1,
+    -1
+   ]
+  ],
+  [
+   [
+    0,
+    3,
+    1,
+    1
+   ],
+   [
+    0,
+    1,
+    -2,
+    -1
+   ],
+   [
+    -1,
+    1,
+    0,
+    -3
+   ],
+   [
+    -2,
+    1,
+    0,
+    0
+   ]
+  ],
+  [
+   [
+    0,
+    -2,
+    -1,
+    0
+   ],
+   [
+    0,
+    0,
+    1,
+    -1
+   ],
+   [
+    0,
+    0,
+    0,
+    0
+   ],
+   [
+    1,
+    0,
+    1,
+    0
+   ]
+  ]
+ ],
+ "ring": "Z[1/2]",
+ "K": 2,
+ "max_partial_sum": 2
+}

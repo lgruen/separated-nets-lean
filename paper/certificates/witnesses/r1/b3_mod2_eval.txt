@@ -1,0 +1,5 @@
+b=3 m=8 c=0.39071  gsep=0.23112 (v*=9223372036854775807, #min=1)   floor_if_cert_here=0.23112  [nf=0 comb=0 0.01s]
+b=3 m=11 c=0.39071  gsep=0.23112 (v*=1, #min=25974)   floor_if_cert_here=0.23112  [nf=1 comb=13 0.01s]
+b=3 m=14 c=0.39071  gsep=0.35304 (v*=21, #min=139968)   floor_if_cert_here=0.35304  [nf=27 comb=1260 0.12s]
+b=3 m=17 c=0.39071  gsep=0.35304 (v*=21, #min=3779136)   floor_if_cert_here=0.35304  [nf=27 comb=1260 1.13s]
+b=3 m=20 c=0.39071  gsep=0.36768 (v*=205, #min=11337408)   floor_if_cert_here=0.36768  [nf=729 comb=107541 10.09s]

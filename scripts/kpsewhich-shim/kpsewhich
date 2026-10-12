@@ -1,0 +1,13 @@
+#!/bin/sh
+# Minimal kpsewhich stand-in for plasTeX on machines without TeX Live (V14 stage S1).
+# plasTeX resolves \input through the external `kpsewhich`; without it the blueprint's
+# macro files are "not found". Searches $TEXINPUTS and the current directory for the last
+# argument (also with `.tex` appended). Used by scripts/build_blueprint.sh only when no real
+# kpsewhich is on PATH.
+for a in "$@"; do f="$a"; done
+IFS=:
+for d in ${TEXINPUTS:-} .; do
+  [ -z "$d" ] && continue
+  for c in "$d/$f" "$d/$f.tex"; do [ -f "$c" ] && { echo "$c"; exit 0; }; done
+done
+exit 1

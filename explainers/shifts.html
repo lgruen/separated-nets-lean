@@ -1,0 +1,930 @@
+<title>Shifted Digits</title>
+<style>
+@import url('https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500&family=IBM+Plex+Sans:wght@400;500;600&family=Source+Serif+4:ital,opsz,wght@0,8..60,400;0,8..60,600;1,8..60,400&display=swap');
+/* Layout: one reading column (68ch) for prose; figure rows break wider, plot left and an instrument panel right; everything stacks to one column on phones. */
+:root {
+  --bg: #f5f6f8;
+  --surface: #ffffff;
+  --ink: #15191f;
+  --muted: #586271;
+  --rule: #d5dae1;
+  --grid: #e6e9ee;
+  --grid-strong: #b9c1cc;
+  --accent: #2b6cb0;
+  --accent-soft: rgba(43, 108, 176, 0.13);
+  --on-accent: #ffffff;
+  --slip: #c0561d;
+  --jit: #8792a2;
+  --chip: #eef1f5;
+  --ramp-lo: #8ea3bb;
+  --ramp-hi: #12284a;
+  --serif: 'Source Serif 4', 'Source Serif Pro', Georgia, 'Times New Roman', serif;
+  --sans: 'IBM Plex Sans', system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif;
+  --mono: 'IBM Plex Mono', ui-monospace, 'SF Mono', Menlo, Consolas, monospace;
+}
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    --bg: #0e1116; --surface: #151a21; --ink: #e4e8ee; --muted: #98a3b2; --rule: #2a313c;
+    --grid: #1e242d; --grid-strong: #3a4452; --accent: #6aa8ea; --accent-soft: rgba(106, 168, 234, 0.17);
+    --on-accent: #0b1220; --slip: #f09a52; --jit: #6d7888; --chip: #1f2630; --ramp-lo: #4b5c72; --ramp-hi: #dce8f6;
+    color-scheme: dark;
+  }
+}
+:root[data-theme="dark"] {
+  --bg: #0e1116; --surface: #151a21; --ink: #e4e8ee; --muted: #98a3b2; --rule: #2a313c;
+  --grid: #1e242d; --grid-strong: #3a4452; --accent: #6aa8ea; --accent-soft: rgba(106, 168, 234, 0.17);
+  --on-accent: #0b1220; --slip: #f09a52; --jit: #6d7888; --chip: #1f2630; --ramp-lo: #4b5c72; --ramp-hi: #dce8f6;
+  color-scheme: dark;
+}
+* { box-sizing: border-box; }
+body { background: var(--bg); color: var(--ink); font-family: var(--serif); font-size: 17px; line-height: 1.58; margin: 0; }
+.page { max-width: 1100px; margin-inline: auto; padding-inline: clamp(16px, 4vw, 40px); padding-block: 40px 72px; }
+.prose { max-width: 68ch; }
+p { margin-block: 0 0.85em; }
+i, .m { font-style: italic; }
+sub, sup { font-size: 0.72em; line-height: 0; }
+.eyebrow { font-family: var(--mono); font-size: 12.5px; letter-spacing: 0.08em; text-transform: uppercase; color: var(--muted); margin: 0 0 10px; }
+h1 { font-weight: 600; font-size: clamp(2rem, 5.2vw, 3.1rem); line-height: 1.08; letter-spacing: -0.012em; margin: 0 0 14px; text-wrap: balance; }
+h2 { font-weight: 600; font-size: clamp(1.45rem, 3.2vw, 1.85rem); line-height: 1.2; margin: 0; text-wrap: balance; }
+h3 { font-family: var(--sans); font-weight: 600; font-size: 13px; letter-spacing: 0.06em; text-transform: uppercase; color: var(--muted); margin: 0 0 8px; }
+.lede { font-size: 1.12rem; color: var(--ink); }
+.byline { font-family: var(--sans); font-size: 14px; color: var(--muted); }
+a { color: var(--accent); }
+:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+
+/* digit ruler */
+.ruler { margin-block: 28px 8px; display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 14px; }
+.ruler .lead { grid-column: 1 / -1; font-family: var(--mono); font-size: clamp(15px, 2.6vw, 20px); display: flex; flex-wrap: wrap; align-items: baseline; gap: 6px; }
+.ruler .lead .grp { padding: 2px 8px 4px; border-bottom: 3px solid; }
+.ruler .lead .g1 { border-color: var(--ink); }
+.ruler .lead .g2 { border-color: var(--accent); color: var(--accent); }
+.ruler .lead .g3 { border-color: var(--jit); color: var(--muted); border-bottom-style: dashed; }
+.step { border-top: 3px solid var(--ink); padding-top: 10px; min-width: 0; font-size: 15.5px; }
+.step.s2 { border-color: var(--accent); }
+.step.s3 { border-color: var(--jit); border-top-style: dashed; }
+.step b { font-family: var(--sans); font-weight: 600; font-size: 14px; display: block; margin-bottom: 4px; }
+@media (max-width: 760px) { .ruler { grid-template-columns: minmax(0, 1fr); } }
+
+section { margin-top: 64px; }
+.sechead { display: flex; align-items: baseline; gap: 14px; margin-bottom: 14px; }
+.secno { font-family: var(--mono); font-size: 15px; color: var(--accent); border: 1px solid var(--accent); border-radius: 3px; padding: 1px 7px; flex: none; }
+.refs { display: flex; flex-wrap: wrap; gap: 6px 8px; margin: 2px 0 0; font-family: var(--sans); font-size: 13px; color: var(--muted); align-items: baseline; }
+.ref { font-family: var(--mono); font-size: 12px; color: var(--ink); background: var(--chip); border: 1px solid var(--rule); border-radius: 3px; padding: 1px 6px; white-space: nowrap; }
+.ref span { font-family: var(--sans); color: var(--muted); margin-left: 4px; }
+
+.fig { display: grid; grid-template-columns: minmax(0, 1fr) minmax(250px, 310px); gap: 24px; align-items: start; margin-block: 22px 6px; }
+@media (max-width: 860px) { .fig { grid-template-columns: minmax(0, 1fr); } }
+.plot { position: relative; width: 100%; max-width: 100%; aspect-ratio: 1 / 1; background: var(--surface); border: 1px solid var(--rule); border-radius: 4px; overflow: hidden; }
+.plot canvas { display: block; width: 100%; height: 100%; max-width: 100%; touch-action: manipulation; }
+.plot .hint { position: absolute; left: 10px; bottom: 8px; font-family: var(--sans); font-size: 12px; color: var(--muted); pointer-events: none; background: var(--surface); padding: 1px 4px; border-radius: 2px; }
+.plot .fallback { position: absolute; inset: 0; display: grid; place-items: center; padding: 24px; text-align: center; font-family: var(--sans); color: var(--muted); }
+.panel { font-family: var(--sans); font-size: 14px; display: flex; flex-direction: column; gap: 18px; min-width: 0; }
+.ctl { display: flex; flex-direction: column; gap: 6px; }
+.ctl .row { display: flex; justify-content: space-between; align-items: baseline; gap: 8px; }
+.ctl .val { font-family: var(--mono); font-variant-numeric: tabular-nums; }
+input[type=range] { width: 100%; accent-color: var(--accent); margin: 0; }
+.checks { display: flex; flex-direction: column; gap: 7px; }
+.checks label { display: flex; gap: 8px; align-items: center; cursor: pointer; }
+.checks input { accent-color: var(--accent); width: 16px; height: 16px; margin: 0; }
+.checks label.off { color: var(--muted); cursor: default; }
+.seg { display: flex; flex-wrap: wrap; gap: 6px; }
+.btn { font: 500 13px/1.2 var(--sans); padding: 7px 10px; border: 1px solid var(--rule); background: var(--surface); color: var(--ink); border-radius: 4px; cursor: pointer; }
+.btn:hover { border-color: var(--grid-strong); }
+.btn[aria-pressed="true"] { border-color: var(--accent); color: var(--accent); background: var(--accent-soft); }
+.btn:disabled { color: var(--muted); cursor: default; opacity: 0.6; }
+select { font: 14px var(--sans); color: var(--ink); background: var(--surface); border: 1px solid var(--rule); border-radius: 4px; padding: 6px 8px; width: 100%; }
+dl.read { display: grid; grid-template-columns: minmax(0, 1fr) auto; gap: 5px 12px; margin: 0; padding-top: 12px; border-top: 1px solid var(--rule); }
+dl.read dt { color: var(--muted); min-width: 0; }
+dl.read dd { margin: 0; font-family: var(--mono); font-variant-numeric: tabular-nums; text-align: right; }
+dl.read dd.em { color: var(--accent); font-weight: 500; }
+.note { font-size: 12.5px; color: var(--muted); line-height: 1.45; }
+.legend { display: flex; flex-wrap: wrap; gap: 6px 14px; font-family: var(--sans); font-size: 12.5px; color: var(--muted); margin-top: 8px; }
+.legend span { display: inline-flex; align-items: center; gap: 6px; }
+.legend span .lt { display: inline; }
+.sw { display: inline-block; width: 18px; height: 10px; position: relative; }
+.sw.pt::after { content: ''; position: absolute; left: 5px; top: 1px; width: 8px; height: 8px; border-radius: 50%; background: var(--ink); }
+.sw.ring::after { content: ''; position: absolute; left: 4px; top: 0; width: 8px; height: 8px; border-radius: 50%; border: 1.5px solid var(--accent); }
+.sw.slip { border-top: 2px dashed var(--slip); top: 4px; height: 2px; }
+.sw.jit { border-top: 1.5px solid var(--jit); top: 4px; height: 2px; }
+.sw.carry { border-top: 1.5px solid var(--grid-strong); top: 4px; height: 2px; }
+.sw.pair { border-top: 2.5px solid var(--accent); top: 4px; height: 2px; }
+.sw.rl1, .sw.rl2, .sw.rl3 { width: 4px; height: 14px; border-left: 3px solid var(--ink); }
+.sw.rl2 { border-left-color: var(--accent); }
+.sw.rl3 { border-left: 3px dashed var(--jit); }
+
+/* digit inspector */
+.insp { border-top: 1px solid var(--rule); padding-top: 12px; display: flex; flex-direction: column; gap: 8px; }
+.drow { display: flex; align-items: center; gap: 6px; flex-wrap: wrap; font-family: var(--mono); font-size: 13px; }
+.drow .lab { width: 2.6em; color: var(--muted); }
+.digits { display: inline-flex; flex-wrap: wrap; gap: 2px; }
+.d { min-width: 1.55em; text-align: center; padding: 1px 2px; border-radius: 3px; background: var(--chip); font-variant-numeric: tabular-nums; }
+.d.geo { background: var(--accent); color: var(--on-accent); }
+.d.jit { background: transparent; color: var(--muted); outline: 1px dashed var(--rule); outline-offset: -1px; }
+.formula { font-family: var(--mono); font-size: 12.5px; line-height: 1.6; }
+.formula .r { color: var(--accent); font-weight: 500; }
+
+/* holonomy chart */
+.chartwrap { background: var(--surface); border: 1px solid var(--rule); border-radius: 4px; padding: 10px 8px 4px; }
+.chartwrap svg { display: block; width: 100%; height: auto; max-width: 100%; }
+.tablewrap { overflow-x: auto; }
+table.dir { border-collapse: collapse; font-family: var(--sans); font-size: 13px; width: 100%; }
+table.dir th, table.dir td { padding: 4px 6px; text-align: right; border-bottom: 1px solid var(--rule); white-space: nowrap; }
+table.dir th:first-child, table.dir td:first-child { text-align: left; }
+table.dir td { font-family: var(--mono); font-variant-numeric: tabular-nums; }
+table.dir th { font-weight: 500; color: var(--muted); }
+
+/* worked example */
+.wk-ctl { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 16px 20px; margin-block: 22px 4px; align-items: end; }
+@media (max-width: 860px) { .wk-ctl { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
+@media (max-width: 480px) { .wk-ctl { grid-template-columns: minmax(0, 1fr); } }
+.wk-irow { display: flex; gap: 8px; }
+.wk-irow input { font: 14px var(--mono); width: 7.5em; min-width: 0; padding: 6px 8px; color: var(--ink); background: var(--surface); border: 1px solid var(--rule); border-radius: 4px; }
+ol.steps { list-style: none; padding: 0; margin: 18px 0 0; }
+ol.steps > li { display: grid; grid-template-columns: 10.5rem minmax(0, 1fr); gap: 8px 20px; border-top: 1px solid var(--rule); padding-block: 18px; }
+@media (max-width: 760px) { ol.steps > li { grid-template-columns: minmax(0, 1fr); } }
+.sh { font-family: var(--sans); font-weight: 600; font-size: 15px; }
+.stn { display: block; font-family: var(--mono); font-weight: 400; font-size: 12px; color: var(--accent); letter-spacing: 0.06em; text-transform: uppercase; }
+.sb { min-width: 0; font-size: 15.5px; }
+.sb p { max-width: 68ch; }
+.scrollx { overflow-x: auto; max-width: 100%; }
+.coords { display: flex; flex-wrap: wrap; gap: 18px 32px; align-items: flex-start; }
+.coordblk { min-width: 0; max-width: 100%; }
+.coordblk h4 { font-family: var(--sans); font-size: 13px; font-weight: 600; margin: 0 0 4px; }
+table.gm { border-collapse: separate; border-spacing: 2px; font-family: var(--mono); font-size: 13px; font-variant-numeric: tabular-nums; }
+table.gm th, table.gm td { padding: 1px 5px; text-align: center; white-space: nowrap; }
+table.gm thead th { color: var(--muted); font-weight: 400; font-size: 11.5px; }
+table.gm td.ent { background: var(--chip); border-radius: 2px; min-width: 1.7em; }
+table.gm td.lab { text-align: left; color: var(--muted); font-size: 11.5px; border-left: 3px solid var(--ink); }
+table.gm tr.georow td.lab { border-left-color: var(--accent); }
+table.gm tr.jitrow td.lab { border-left: 3px dashed var(--jit); }
+table.gm td.res { font-weight: 500; }
+table.gm tr.georow td.res { color: var(--accent); }
+table.gm tr.jitrow td.res { color: var(--muted); }
+table.gm tbody tr { cursor: default; }
+table.gm tbody tr:focus-visible { outline: 2px solid var(--accent); outline-offset: 0; }
+table.gm tr.hot td.ent { background: var(--accent-soft); }
+table.gm tr.hot td.ent.z { background: var(--chip); color: var(--muted); }
+table.gm th.vh { color: var(--ink); }
+.expand { font-family: var(--mono); font-size: 12.5px; margin-top: 6px; line-height: 1.5; overflow-wrap: anywhere; }
+.chipline { display: flex; flex-wrap: wrap; gap: 4px 10px; align-items: center; font-family: var(--mono); font-size: 13px; }
+.grpd { display: inline-flex; gap: 2px; padding-bottom: 3px; border-bottom: 3px solid var(--ink); }
+.grpd.g2 { border-color: var(--accent); }
+.grpd.g3 { border-bottom: 3px dashed var(--jit); }
+.vlab { display: inline-flex; flex-direction: column; align-items: center; font-family: var(--mono); }
+.vlab small { font-size: 10.5px; color: var(--muted); }
+table.lat { border-collapse: collapse; font-family: var(--mono); font-size: 13px; font-variant-numeric: tabular-nums; }
+table.lat th, table.lat td { padding: 4px 9px; text-align: right; border-bottom: 1px solid var(--rule); white-space: nowrap; }
+table.lat th { font-family: var(--sans); font-weight: 500; font-size: 12.5px; color: var(--muted); }
+table.lat td:first-child, table.lat th:first-child { text-align: left; }
+table.lat td.em { color: var(--accent); font-weight: 500; }
+.verdict { font-family: var(--sans); font-size: 14px; padding: 8px 12px; border-left: 3px solid var(--accent); background: var(--accent-soft); margin-block: 10px; max-width: 68ch; }
+.codebar { display: flex; gap: 12px; align-items: center; margin-bottom: 8px; }
+pre.code { font-family: var(--mono); font-size: 12.5px; line-height: 1.5; background: var(--surface); border: 1px solid var(--rule); border-radius: 4px; padding: 12px 14px; margin: 0; overflow-x: auto; max-width: 100%; color: var(--ink); }
+
+footer { margin-top: 72px; padding-top: 18px; border-top: 1px solid var(--rule); font-size: 15px; }
+footer ol { padding-left: 1.3em; margin: 6px 0 0; }
+footer li { margin-bottom: 3px; }
+
+/* pages 2 and 3: navigation between the pages, digit editors, small charts */
+.pagenav { display: flex; flex-wrap: wrap; gap: 4px 20px; font-family: var(--sans); font-size: 13.5px; margin: 0 0 26px; padding-bottom: 10px; border-bottom: 1px solid var(--rule); }
+.pagenav a { color: var(--muted); text-decoration: none; }
+.pagenav a:hover { color: var(--accent); }
+.pagenav a[aria-current="page"] { color: var(--ink); font-weight: 600; }
+.pagenav .pn { font-family: var(--mono); color: var(--accent); margin-right: 6px; }
+.dgrid { display: flex; flex-direction: column; gap: 6px; }
+.drow2 { display: flex; align-items: center; gap: 4px; flex-wrap: wrap; font-family: var(--mono); font-size: 13px; }
+.drow2 .lab { width: 2.4em; color: var(--muted); }
+.dchip { font: 500 13px/1 var(--mono); min-width: 2em; padding: 6px 4px; border: 1px solid var(--rule); background: var(--surface); color: var(--ink); border-radius: 3px; cursor: pointer; font-variant-numeric: tabular-nums; }
+.dchip:hover { border-color: var(--grid-strong); }
+.dchip.nz { border-color: var(--accent); color: var(--accent); background: var(--accent-soft); }
+.dchip.gd { box-shadow: inset 0 -3px 0 var(--accent); }
+.dhead { display: flex; gap: 4px; font-family: var(--mono); font-size: 11px; color: var(--muted); padding-left: calc(2.4em + 4px); }
+.dhead span { min-width: 2em; text-align: center; }
+.sw.ring2::after { content: ''; position: absolute; left: 4px; top: 0; width: 8px; height: 8px; border-radius: 50%; border: 1.5px solid var(--jit); }
+.sw.lone { border-top: 3px solid var(--slip); top: 3px; height: 3px; }
+.sw.lock { border-top: 3px solid var(--accent); top: 3px; height: 3px; }
+.sw.band { background: var(--accent-soft); border: 1px solid var(--accent); top: 1px; height: 8px; }
+.sw.dot2::after { content: ''; position: absolute; left: 5px; top: 1px; width: 8px; height: 8px; border-radius: 50%; border: 1.5px solid var(--ink); background: var(--surface); }
+.plot.wide { aspect-ratio: 16 / 10; }
+.heatwrap { position: relative; }
+.small { font-size: 13px; }
+[hidden] { display: none !important; }
+</style>
+
+<main class="page">
+  <header>
+    <nav class="pagenav" aria-label="Explainer pages">
+      <a href="anatomy.html"><span class="pn">1</span>How the nets are built</a>
+      <a href="shifts.html" aria-current="page"><span class="pn">2</span>Digital shifts</a>
+      <a href="beyond.html"><span class="pn">3</span>Beyond the cube</a>
+    </nav>
+    <p class="eyebrow">Interactive companion &middot; page 2</p>
+    <h1>Digital shifts and the question of Dick, Goda and Suzuki</h1>
+    <div class="prose">
+      <p class="lede">Dick, Goda and Suzuki asked for digital nets that are well separated at every size, and they allow a digital shift: a random constant added to every digit. This page shows what a shift does to the nets of the paper, why most of the separation bounds survive every shift, and which constructions are fragile.</p>
+      <p class="byline">Leonhard Gruenschloss &middot; every point is computed in your browser from the paper's generator matrices, with exact integer arithmetic &middot; labels such as <span class="ref">prop:shift</span> name the matching statement in the paper</p>
+    </div>
+  </header>
+
+  <!-- ===================================================== 1. what a shift is -->
+  <section id="what" aria-labelledby="h-what">
+    <div class="sechead"><span class="secno">1</span><h2 id="h-what">Adding digits without carrying</h2></div>
+    <div class="prose">
+      <p>A digital shift adds a fixed digit to each digit of each coordinate, modulo <i>q</i>, and throws the carries away. In base 5, the coordinate 0.34 shifted by 0.21 becomes 0.00, not 0.10 as ordinary addition would give. Each coordinate gets its own shift digits, one per digit position.</p>
+      <p>Without carries, a shift sends every elementary box to another box of the same shape: the first <i>d</i> digits of a coordinate are only relabelled. So a net with one point in every box keeps that property, whatever the shift. A digital shift is the simplest of Owen's nested scrambles, which all preserve the net property (Owen, 1995). It is the digital counterpart of the random shift of Cranley and Patterson. Click a point to see its digits; click a shift digit to raise it by one.</p>
+    </div>
+    <div class="refs">In the paper: <span class="ref">def:dshift</span><span class="ref">lem:shift<span>shifted graph forms</span></span><span class="ref">rem:lowdisc</span></div>
+
+    <div class="fig">
+      <div>
+        <div class="plot" id="plot1"><canvas id="c1" tabindex="0" aria-label="A small net before and after a digital shift"></canvas><div class="hint" id="hint1"></div></div>
+        <div class="legend" aria-hidden="true">
+          <span><i class="sw ring2"></i><span class="lt">before the shift</span></span><span><i class="sw pt"></i><span class="lt">after the shift</span></span><span><i class="sw jit"></i><span class="lt">where each point moved</span></span><span><i class="sw ring"></i><span class="lt">selected point</span></span>
+        </div>
+      </div>
+      <div class="panel">
+        <div class="ctl">
+          <span id="m1lab">Net</span>
+          <div class="seg" role="group" aria-labelledby="m1lab" id="m1seg">
+            <button class="btn" type="button" data-mode="2D" aria-pressed="true">2D net of page 1</button>
+            <button class="btn" type="button" data-mode="3D" aria-pressed="false">3D column net</button>
+          </div>
+        </div>
+        <div class="ctl" id="q1ctl">
+          <label for="q1">Base and size</label>
+          <select id="q1"></select>
+        </div>
+        <div class="ctl">
+          <span>Shift digits <span class="note">(underlined: the digit after the cell digits)</span></span>
+          <div class="dgrid" id="tau1"></div>
+          <div class="seg"><button class="btn" type="button" id="rand1">Random shift</button><button class="btn" type="button" id="zero1">No shift</button></div>
+        </div>
+        <div class="ctl" id="view1ctl" hidden>
+          <span id="v1lab">View</span>
+          <div class="seg" role="group" aria-labelledby="v1lab">
+            <button class="btn" type="button" data-v1="diag">Along (1,1,1)</button>
+            <button class="btn" type="button" data-v1="oblique">Oblique</button>
+          </div>
+        </div>
+        <dl class="read" id="read1"></dl>
+        <div class="insp" id="insp1" aria-live="polite"></div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ===================================================== 2. why the bounds survive -->
+  <section id="survive" aria-labelledby="h-survive">
+    <div class="sechead"><span class="secno">2</span><h2 id="h-survive">Why the bounds survive every shift</h2></div>
+    <div class="prose">
+      <p>The separation proofs never look at a single point. They look at two points in nearby cells and at the change of each digit between them. That change is an integer between &minus;<i>q</i> and <i>q</i>, and its remainder modulo <i>q</i> is fixed by the cell step alone. Only two integers have that remainder: &sigma; and &sigma; &minus; <i>q</i>, the second one when the digit wraps around. The proofs already take the worse of the two.</p>
+      <p>A shift adds the same constant to a digit at both points. The remainder of the change stays the same; the shift only decides at which cells the digit wraps, so which of the two values occurs. Since the bound covers both values, it holds for every shift. In the paper's terms, a shifted graph form has offsets &Phi;<i>n</i> + &gamma; with a constant &gamma;, and every proof uses only differences, in which &gamma; cancels.</p>
+      <p>Try it on the net &#119979;<sub>2,<i>q</i></sub> of page 1: shift its eighteen digits however you like, and the exact separation stays above the bound <i>c</i>(<i>q</i>) of the theorem. The table follows the closest pair of the shifted net digit by digit.</p>
+    </div>
+    <div class="refs">In the paper: <span class="ref">lem:shift</span><span class="ref">prop:shift</span><span class="ref">thm:main</span><span class="ref">rem:ppshift<span>per-prime nets</span></span><span class="ref">cor:allmshift</span></div>
+
+    <div class="fig">
+      <div>
+        <div class="chartwrap"><svg id="strip" viewBox="0 0 640 300" role="img" aria-label="Exact separation of the net under random digital shifts, against the proven bound"></svg></div>
+        <div class="legend" aria-hidden="true" style="margin-top:8px">
+          <span><svg width="22" height="8"><circle cx="11" cy="4" r="3" style="fill:var(--accent)"/></svg><span class="lt">one random shift</span></span>
+          <span><svg width="22" height="8"><line x1="1" y1="4" x2="21" y2="4" style="stroke:var(--slip);stroke-width:1.6;stroke-dasharray:4 3"/></svg><span class="lt">proven bound <i>c</i>(<i>q</i>)</span></span>
+          <span><svg width="22" height="8"><line x1="1" y1="4" x2="21" y2="4" style="stroke:var(--muted);stroke-width:1.2"/></svg><span class="lt">without a shift</span></span>
+        </div>
+        <div class="scrollx" style="margin-top:16px"><table class="lat" id="pairtab"></table></div>
+      </div>
+      <div class="panel">
+        <div class="ctl">
+          <div class="row"><label for="q2">Base <i>q</i></label><span class="val" id="q2v">5</span></div>
+          <input type="range" id="q2" min="4" max="7" step="1" value="5">
+        </div>
+        <div class="ctl">
+          <span>Shift digits <span class="note">(digit 3 is the geometric digit)</span></span>
+          <div class="dgrid" id="tau2"></div>
+          <div class="seg"><button class="btn" type="button" id="rand2">Random shift</button><button class="btn" type="button" id="zero2">No shift</button></div>
+        </div>
+        <dl class="read" id="read2"></dl>
+        <div class="ctl">
+          <button class="btn" type="button" id="sample2">Try 40 random shifts</button>
+          <span class="note" id="sample2note" aria-live="polite">Each dot is the exact separation of one shifted net. Click a dot to load its shift.</span>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ===================================================== 3. column nets -->
+  <section id="columns" aria-labelledby="h-columns">
+    <div class="sechead"><span class="secno">3</span><h2 id="h-columns">Column nets: three ways a shift can act</h2></div>
+    <div class="prose">
+      <p>In the column net &#119966;<sub><i>q</i></sub> of page 1 all three coordinates read the same second and third digit, so every point sits on the diagonal of its cell. A shift with equal digits in the three coordinates at these two positions keeps that structure and leaves the minimum distance exactly as it was. If only the second digits agree, the distance can change, but &delta;<i>N</i><sup>1/3</sup> stays above 1 &minus; (7<i>q</i> &minus; 3)/(&radic;3 <i>q</i><sup>2</sup>), close to the cube value 1.</p>
+      <p>If the second digits differ, the three coordinates no longer wrap at the same cells. The ring shows, for one step direction, the values of the shared digit at which each coordinate wraps: its wrap window. A shift turns each window by that coordinate's own shift digit. Where one coordinate wraps alone, the step along its axis shrinks, and the value falls to about 1/&radic;3. A lower bound still holds for every shift, so the family stays well separated, only with a smaller constant.</p>
+    </div>
+    <div class="refs">In the paper: <span class="ref">prop:colfree</span><span class="ref">prop:colshift</span><span class="ref">rem:shiftshared<span>wrap windows</span></span><span class="ref">cor:allmshift</span><span class="ref">thm:col</span></div>
+
+    <div class="fig">
+      <div>
+        <div class="chartwrap"><svg id="ring" viewBox="0 0 520 440" role="img" aria-label="Wrap windows of the three coordinates on the ring of values of the shared digit"></svg></div>
+        <div class="legend" aria-hidden="true" style="margin-top:8px">
+          <span><i class="sw band"></i><span class="lt">coordinate wraps on this step</span></span><span><i class="sw lone"></i><span class="lt">value where one coordinate wraps alone along its own axis</span></span>
+        </div>
+      </div>
+      <div class="panel">
+        <div class="ctl">
+          <label for="q3">Base <i>q</i> (coprime to 6)</label>
+          <select id="q3"></select>
+        </div>
+        <div class="ctl">
+          <span>Shift digits (first, second, third)</span>
+          <div class="dgrid" id="tau3"></div>
+          <div class="seg">
+            <button class="btn" type="button" data-preset="1">Equal 2nd and 3rd</button>
+            <button class="btn" type="button" data-preset="2">Equal 2nd only</button>
+            <button class="btn" type="button" data-preset="3">Unequal 2nd</button>
+            <button class="btn" type="button" data-preset="0">No shift</button>
+          </div>
+        </div>
+        <div class="ctl">
+          <span id="ax3lab">Step along</span>
+          <div class="seg" role="group" aria-labelledby="ax3lab" id="ax3seg">
+            <button class="btn" type="button" data-ax="0" aria-pressed="true"><i>e<sub>x</sub></i></button>
+            <button class="btn" type="button" data-ax="1" aria-pressed="false"><i>e<sub>y</sub></i></button>
+            <button class="btn" type="button" data-ax="2" aria-pressed="false"><i>e<sub>z</sub></i></button>
+          </div>
+        </div>
+        <div class="verdict" id="case3" style="margin:0"></div>
+        <dl class="read" id="read3"></dl>
+      </div>
+    </div>
+  </section>
+
+  <!-- ===================================================== 4. W_p -->
+  <section id="locked" aria-labelledby="h-locked">
+    <div class="sechead"><span class="secno">4</span><h2 id="h-locked">A fragile lock</h2></div>
+    <div class="prose">
+      <p>The net &#119986;<sub><i>p</i></sub> of page 3 beats the cube value 1 because its wraps are locked: <i>z</i> reads a digit &zeta;, and <i>x</i> and <i>y</i> both read 2&zeta; mod <i>p</i>, so <i>z</i> wraps only where <i>x</i> and <i>y</i> wrap too. A shift of the second digits by (<i>t</i>, <i>t</i>, <i>t</i>&prime;) gives <i>x</i> and <i>y</i> the digit 2&zeta; + <i>t</i> &minus; 2<i>t</i>&prime; after a translation of the cells. If <i>t</i> &equiv; 2<i>t</i>&prime;, this is the same lock. If <i>t</i> &equiv; 2<i>t</i>&prime; + 1, the digit wraps one step earlier, which allows the same wrap patterns, so the proven bound still holds (for <i>p</i> &ge; 53).</p>
+      <p>Every other shift lets <i>z</i> wrap alone at some cells, and there the step along <i>e<sub>z</sub></i> shrinks to about (4&epsilon;, 4&epsilon;, 2&epsilon;). The map on the left tries every shift of the second digits for a small prime. That only these two lines keep the lock is a computed observation, not a theorem.</p>
+    </div>
+    <div class="refs">In the paper: <span class="ref">rem:wshift</span><span class="ref">prop:wnet</span><span class="ref">lem:wwrap</span><span class="ref">fig:wnet<span>panel (c)</span></span></div>
+
+    <div class="fig">
+      <div>
+        <div class="plot heatwrap" id="plot4"><canvas id="c4" tabindex="0" aria-label="Exact separation of W_p for every shift of the second digits"></canvas><div class="fallback" id="heatoff" hidden></div></div>
+        <p class="note" style="margin-top:8px">Columns: the shift <i>t</i> of the second digit of <i>x</i> and <i>y</i>. Rows: the shift <i>t</i>&prime; of <i>z</i>. Colour: the exact &delta;<i>N</i><sup>1/3</sup> of the shifted net, from pale (near 0) to full blue (near 1). Click a square to select that shift.</p>
+        <p class="note" id="heatsum" aria-live="polite"></p>
+      </div>
+      <div class="panel">
+        <div class="ctl">
+          <label for="p4">Prime <i>p</i></label>
+          <select id="p4"></select>
+        </div>
+        <div class="ctl">
+          <div class="row"><label for="t4">Shift <i>t</i> of the second digit of <i>x</i>, <i>y</i></label><span class="val" id="t4v">0</span></div>
+          <input type="range" id="t4" min="0" max="16" step="1" value="1">
+          <div class="row"><label for="tz4">Shift <i>t</i>&prime; of the second digit of <i>z</i></label><span class="val" id="tz4v">0</span></div>
+          <input type="range" id="tz4" min="0" max="16" step="1" value="0">
+        </div>
+        <div class="checks"><label><input type="checkbox" id="third4"> Also shift the third digits (random)</label></div>
+        <div class="verdict" id="verdict4" style="margin:0"></div>
+        <dl class="read" id="read4"></dl>
+        <div class="tablewrap"><table class="dir" id="steps4"></table></div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ===================================================== 5. bases 2 and 3 -->
+  <section id="small" aria-labelledby="h-small">
+    <div class="sechead"><span class="secno">5</span><h2 id="h-small">Bases two and three: every shift at once</h2></div>
+    <div class="prose">
+      <p>In bases 2 and 3 the nets of the paper come from a lift that adds three digits at a time, and their bounds come from finite certificates instead of the lattice picture. For these, the worst shift can be computed exactly. Take two points whose digits differ by <i>d</i>. A nonzero digit of weight <i>b</i><sup><i>k</i></sup> changes the coordinate by <i>d<sub>k</sub>b<sup>k</sup></i>, or by (<i>d<sub>k</sub></i> &minus; <i>b</i>)<i>b<sup>k</sup></i> when that digit wraps, and a shift can choose the wraps freely, digit by digit and coordinate by coordinate. The worst case &mu;(<i>d</i>) is the distance from <i>d</i> to the nearest sum of the numbers <i>b</i><sup><i>k</i>+1</sup>, one for each wrapped digit.</p>
+      <p>So the smallest separation over all shifts is a minimum over the differences of points of &Sigma; &mu;(&Delta;<sub><i>c</i></sub>)<sup>2</sup>, a minimum weight of a code. It drops to almost nothing when some difference reads 0&hellip;01&hellip;1 in every coordinate: a shift can put both points on a carry chain, such as 0.00111 and 0.01000 in base 2: their digits differ by 0.01111, their values by one unit in the last place. These carry chains are why the every-shift certificates of the paper vanish at some resolutions and appear at others.</p>
+    </div>
+    <div class="refs">In the paper: <span class="ref">lem:shiftcert</span><span class="ref">rem:shiftparity</span><span class="ref">thm:base23<span>part (3)</span></span><span class="ref">tab:base23</span></div>
+
+    <div class="fig">
+      <div class="panel" style="gap:14px">
+        <h3 style="margin:0">The worst wrap of one digit difference</h3>
+        <div class="ctl">
+          <span id="b5lab">Base</span>
+          <div class="seg" role="group" aria-labelledby="b5lab" id="b5seg">
+            <button class="btn" type="button" data-b="2" aria-pressed="true">2</button>
+            <button class="btn" type="button" data-b="3" aria-pressed="false">3</button>
+          </div>
+        </div>
+        <div class="ctl">
+          <span>Digit difference <i>d</i>, most significant first (click to change)</span>
+          <div class="dgrid" id="d5"></div>
+          <div class="seg"><button class="btn" type="button" id="chain5">0&hellip;01&hellip;1</button><button class="btn" type="button" id="rand5">Random</button></div>
+        </div>
+        <dl class="read" id="read5a"></dl>
+      </div>
+      <div class="panel">
+        <h3 style="margin:0">The worst shift of a whole net</h3>
+        <div class="ctl">
+          <label for="n5">Net &#119979;<sub><i>k</i>,<i>b</i></sub> of page 1</label>
+          <select id="n5">
+            <option value="1,2">k = 1, base 2: 8 points</option>
+            <option value="2,2">k = 2, base 2: 64 points</option>
+            <option value="3,2">k = 3, base 2: 512 points</option>
+            <option value="1,3" selected>k = 1, base 3: 27 points</option>
+            <option value="2,3">k = 2, base 3: 729 points</option>
+          </select>
+        </div>
+        <dl class="read" id="read5b"></dl>
+        <div class="formula" id="delta5"></div>
+        <div class="ctl"><button class="btn" type="button" id="brute5">Try every shift</button><span class="note" id="brute5note" aria-live="polite"></span></div>
+      </div>
+    </div>
+  </section>
+
+  <footer>
+    <div class="prose">
+      <h3>How this page is checked</h3>
+      <p>All nets are built by <code>netcore.js</code>, the same file page 1 uses. A Python reference rebuilds every net from the paper's generator rows, applies the shifts digit by digit, and compares point sets and exact minimum distances with an independent kernel; the column nets and the shifted nets &#119986;<sub><i>p</i></sub> are also checked against the paper's own C++ program for shifted nets. The bounds printed here are recomputed from the paper's formulas. Distances are on the torus, and decimals are truncated.</p>
+      <h3>References</h3>
+      <ol>
+        <li>J. Dick, T. Goda, K. Suzuki, On the quasi-uniformity properties of quasi-Monte Carlo point sets and sequences, Part II: digital nets and sequences, Math. Comp. (2026).</li>
+        <li>A. B. Owen, Randomly permuted (t,m,s)-nets and (t,s)-sequences, in: Monte Carlo and Quasi-Monte Carlo Methods in Scientific Computing, Springer, 1995, 299&ndash;317.</li>
+        <li>R. Cranley, T. N. L. Patterson, Randomization of number theoretic methods for multiple integration, SIAM J. Numer. Anal. 13 (1976) 904&ndash;914.</li>
+      </ol>
+    </div>
+  </footer>
+</main>
+
+<script src="netcore.js"></script>
+<script>
+(function () {
+  'use strict';
+  var NC = NetCore;
+  function $(s) { return document.querySelector(s); }
+  function tok(name) { return getComputedStyle(document.documentElement).getPropertyValue(name).trim(); }
+  function trunc(x, d) { d = d === undefined ? 4 : d; var p = Math.pow(10, d); return (Math.floor(x * p + 1e-9) / p).toFixed(d); }
+  function ceil4(x) { return (Math.ceil(x * 1e4 - 1e-9) / 1e4).toFixed(4); }
+  function neg(x) { return x < 0 ? '−' + (-x) : String(x); }
+  function sup(x) { return '<sup>' + x + '</sup>'; }
+  var SUBS = ['x', 'y', 'z'];
+  var themeFns = [];
+  function themeChanged() { themeFns.forEach(function (f) { f(); }); }
+  try { matchMedia('(prefers-color-scheme: dark)').addEventListener('change', themeChanged); } catch (e) {}
+  new MutationObserver(themeChanged).observe(document.documentElement, { attributes: true, attributeFilter: ['data-theme'] });
+  function dl(el, rows) { el.innerHTML = rows.map(function (r) { return '<dt>' + r[0] + '</dt><dd' + (r[2] ? ' class="em"' : '') + '>' + r[1] + '</dd>'; }).join(''); }
+  function pressed(group, attr, val) { group.querySelectorAll('button').forEach(function (b) { b.setAttribute('aria-pressed', String(b.getAttribute(attr) === String(val))); }); }
+  function canvasCtx(cv) {
+    var wrap = cv.parentNode, dpr = Math.min(window.devicePixelRatio || 1, 2), W = wrap.clientWidth, H = wrap.clientHeight;
+    if (!W || !H) return null;
+    cv.width = Math.round(W * dpr); cv.height = Math.round(H * dpr);
+    var g = cv.getContext('2d'); g.setTransform(dpr, 0, 0, dpr, 0, 0);
+    return { g: g, W: W, H: H };
+  }
+  function colors() {
+    return { surface: tok('--surface'), grid: tok('--grid'), strong: tok('--grid-strong'), ink: tok('--ink'), accent: tok('--accent'),
+             soft: tok('--accent-soft'), slip: tok('--slip'), jit: tok('--jit'), muted: tok('--muted'), lo: tok('--ramp-lo'), hi: tok('--ramp-hi') };
+  }
+  function randInt(n) { return Math.floor(Math.random() * n); }
+  var schedule = (function () { var t = {}; return function (key, fn, ms) { clearTimeout(t[key]); t[key] = setTimeout(fn, ms || 0); }; })();
+
+  /* digit editor: rows of chips, one per coordinate; click raises a digit by 1 mod q, arrow keys move it */
+  function digitEditor(el, s, m, q, tau, geo, onChange, names) {
+    var html = '<div class="dhead">';
+    for (var j = 0; j < m; j++) html += '<span>' + (j + 1) + '</span>';
+    html += '</div>';
+    for (var c = 0; c < s; c++) {
+      html += '<div class="drow2"><span class="lab">' + (names ? names[c] : SUBS[c]) + '</span>';
+      for (j = 0; j < m; j++) html += '<button type="button" class="dchip' + (tau[c][j] ? ' nz' : '') + (j === geo ? ' gd' : '') + '" data-c="' + c + '" data-j="' + j + '" aria-label="shift digit ' + (j + 1) + ' of ' + (names ? names[c] : SUBS[c]) + ', ' + tau[c][j] + '">' + tau[c][j] + '</button>';
+      html += '</div>';
+    }
+    el.innerHTML = html;
+    el.querySelectorAll('.dchip').forEach(function (b) {
+      var c = +b.getAttribute('data-c'), j = +b.getAttribute('data-j');
+      b.addEventListener('click', function () { tau[c][j] = (tau[c][j] + 1) % q; onChange(); });
+      b.addEventListener('keydown', function (e) {
+        if (e.key === 'ArrowUp' || e.key === 'ArrowDown') { e.preventDefault(); tau[c][j] = (tau[c][j] + (e.key === 'ArrowUp' ? 1 : q - 1)) % q; onChange(); var nb = el.querySelector('[data-c="' + c + '"][data-j="' + j + '"]'); if (nb) nb.focus(); }
+      });
+    });
+  }
+  function randomTau(s, m, q) { var t = []; for (var c = 0; c < s; c++) { var r = []; for (var j = 0; j < m; j++) r.push(randInt(q)); t.push(r); } return t; }
+
+  /* a small orthographic 3D view on a canvas: drag to turn */
+  function View3(cv, redraw) {
+    var v = this; v.cv = cv; v.yaw = Math.PI / 4; v.pitch = Math.atan(1 / Math.SQRT2); v.redraw = redraw;
+    var drag = null;
+    cv.addEventListener('pointerdown', function (e) { drag = { x: e.clientX, y: e.clientY, yaw: v.yaw, pitch: v.pitch }; cv.setPointerCapture(e.pointerId); });
+    cv.addEventListener('pointermove', function (e) {
+      if (!drag) return;
+      v.yaw = drag.yaw - (e.clientX - drag.x) * 0.01;
+      v.pitch = Math.max(-1.5, Math.min(1.5, drag.pitch + (e.clientY - drag.y) * 0.01));
+      redraw();
+    });
+    cv.addEventListener('pointerup', function () { drag = null; });
+    cv.addEventListener('pointercancel', function () { drag = null; });
+    cv.addEventListener('keydown', function (e) {
+      var d = { ArrowLeft: [0.08, 0], ArrowRight: [-0.08, 0], ArrowUp: [0, -0.08], ArrowDown: [0, 0.08] }[e.key];
+      if (!d) return; e.preventDefault(); v.yaw += d[0]; v.pitch = Math.max(-1.5, Math.min(1.5, v.pitch + d[1])); redraw();
+    });
+  }
+  View3.prototype.project = function (x, y, z) {   /* x, y, z in [0,1]; returns screen offsets in units of the cube */
+    var cy = Math.cos(this.yaw), sy = Math.sin(this.yaw), cp = Math.cos(this.pitch), sp = Math.sin(this.pitch);
+    x -= 0.5; y -= 0.5; z -= 0.5;
+    var x1 = cy * x - sy * y, y1 = sy * x + cy * y;
+    return [x1, z * cp - y1 * sp, y1 * cp + z * sp];
+  };
+
+  /* ================================================================ section 1 */
+  var S1 = { mode: '2D', opt: 0, tau: null, sel: null };
+  var OPT2 = [[5, 1], [3, 2], [5, 2], [7, 1], [7, 2], [3, 1]], OPT3 = [5, 7];
+  var D1 = null, view1 = null;
+  function net1() {
+    if (S1.mode === '2D') { var o = OPT2[S1.opt]; return { net: NC.hammersley2D(o[1], 'rotated'), q: o[0] }; }
+    var q = OPT3[S1.opt]; return { net: NC.colNet(q), q: q };
+  }
+  function compute1(newNet) {
+    var nq = net1(), B = NC.build(nq.net, nq.q);
+    if (newNet || !S1.tau) S1.tau = NC.zeroShift(B.s, B.m);
+    var S = NC.shiftNet(B, S1.tau);
+    D1 = { B: B, S: S, q: nq.q, box: NC.boxCheck(S), md: NC.minDistFast(S), md0: NC.minDistFast(B) };
+    if (S1.sel === null || S1.sel >= B.N || newNet) S1.sel = B.cell[Math.floor(B.cell.length / 2)];
+  }
+  function fillOpts1() {
+    var sel = $('#q1');
+    if (S1.mode === '2D') sel.innerHTML = OPT2.map(function (o, i) { var N = Math.pow(o[0], 2 * o[1]); return '<option value="' + i + '">base ' + o[0] + ', ' + N + ' points (' + o[1] + ' cell digit' + (o[1] > 1 ? 's' : '') + ')</option>'; }).join('');
+    else sel.innerHTML = OPT3.map(function (q, i) { return '<option value="' + i + '">base ' + q + ', ' + q * q * q + ' points</option>'; }).join('');
+    sel.value = S1.opt;
+  }
+  function draw1() {
+    var cx = canvasCtx($('#c1')); if (!cx) return;
+    var g = cx.g, W = cx.W, H = cx.H, col = colors(), B = D1.B, S = D1.S, Wn = B.W, i;
+    g.fillStyle = col.surface; g.fillRect(0, 0, W, H);
+    if (S1.mode === '2D') {
+      var G = B.G, pad = 12, sc = (Math.min(W, H) - 2 * pad);
+      var px = function (x) { return pad + x * sc; }, py = function (y) { return pad + (1 - y) * sc; };
+      g.strokeStyle = col.grid; g.lineWidth = 1; g.beginPath();
+      for (i = 0; i <= G; i++) { g.moveTo(px(i / G), py(0)); g.lineTo(px(i / G), py(1)); g.moveTo(px(0), py(i / G)); g.lineTo(px(1), py(i / G)); }
+      g.stroke();
+      var r = Math.max(1.6, Math.min(5, 0.22 * sc / G));
+      g.strokeStyle = col.jit; g.lineWidth = 0.8; g.beginPath();
+      for (i = 0; i < B.N; i++) { g.moveTo(px(B.X[0][i] / Wn), py(B.X[1][i] / Wn)); g.lineTo(px(S.X[0][i] / Wn), py(S.X[1][i] / Wn)); }
+      g.stroke();
+      g.strokeStyle = col.jit; g.lineWidth = 1; g.beginPath();
+      for (i = 0; i < B.N; i++) { var a = px(B.X[0][i] / Wn), b = py(B.X[1][i] / Wn); g.moveTo(a + r, b); g.arc(a, b, r, 0, 2 * Math.PI); }
+      g.stroke();
+      g.fillStyle = col.ink; g.beginPath();
+      for (i = 0; i < B.N; i++) { var a2 = px(S.X[0][i] / Wn), b2 = py(S.X[1][i] / Wn); g.moveTo(a2 + r, b2); g.arc(a2, b2, r, 0, 2 * Math.PI); }
+      g.fill();
+      var k = S1.sel;
+      g.strokeStyle = col.accent; g.lineWidth = 2;
+      [[B.X[0][k], B.X[1][k]], [S.X[0][k], S.X[1][k]]].forEach(function (p) { g.beginPath(); g.arc(px(p[0] / Wn), py(p[1] / Wn), r + 3, 0, 2 * Math.PI); g.stroke(); });
+      $('#hint1').textContent = 'Click a point to inspect it';
+    } else {
+      var v = view1, s3 = Math.min(W, H) * 0.56, cx0 = W / 2, cy0 = H / 2;
+      var P = function (x, y, z) { var p = v.project(x, y, z); return [cx0 + p[0] * s3, cy0 - p[1] * s3]; };
+      g.strokeStyle = col.strong; g.lineWidth = 1; g.beginPath();
+      var E = [[0, 0, 0], [1, 0, 0], [1, 1, 0], [0, 1, 0], [0, 0, 1], [1, 0, 1], [1, 1, 1], [0, 1, 1]];
+      [[0, 1], [1, 2], [2, 3], [3, 0], [4, 5], [5, 6], [6, 7], [7, 4], [0, 4], [1, 5], [2, 6], [3, 7]].forEach(function (e) { var a = P.apply(null, E[e[0]]), b = P.apply(null, E[e[1]]); g.moveTo(a[0], a[1]); g.lineTo(b[0], b[1]); });
+      g.stroke();
+      var rr = Math.max(1.8, Math.min(4, s3 / (B.G * 7)));
+      g.strokeStyle = col.jit; g.lineWidth = 0.8; g.beginPath();
+      for (i = 0; i < B.N; i++) { var a3 = P(B.X[0][i] / Wn, B.X[1][i] / Wn, B.X[2][i] / Wn), b3 = P(S.X[0][i] / Wn, S.X[1][i] / Wn, S.X[2][i] / Wn); g.moveTo(a3[0], a3[1]); g.lineTo(b3[0], b3[1]); }
+      g.stroke();
+      g.beginPath();
+      for (i = 0; i < B.N; i++) { var a4 = P(B.X[0][i] / Wn, B.X[1][i] / Wn, B.X[2][i] / Wn); g.moveTo(a4[0] + rr, a4[1]); g.arc(a4[0], a4[1], rr, 0, 2 * Math.PI); }
+      g.stroke();
+      g.fillStyle = col.ink; g.beginPath();
+      for (i = 0; i < B.N; i++) { var a5 = P(S.X[0][i] / Wn, S.X[1][i] / Wn, S.X[2][i] / Wn); g.moveTo(a5[0] + rr, a5[1]); g.arc(a5[0], a5[1], rr, 0, 2 * Math.PI); }
+      g.fill();
+      var kk = S1.sel, A = P(S.X[0][kk] / Wn, S.X[1][kk] / Wn, S.X[2][kk] / Wn);
+      g.strokeStyle = col.accent; g.lineWidth = 2; g.beginPath(); g.arc(A[0], A[1], rr + 3, 0, 2 * Math.PI); g.stroke();
+      $('#hint1').textContent = 'Drag to turn; click a point to inspect it';
+    }
+  }
+  function pick1(e) {
+    var cv = $('#c1'), rect = cv.getBoundingClientRect(), mx = e.clientX - rect.left, my = e.clientY - rect.top, B = D1.B, S = D1.S, Wn = B.W, best = Infinity, arg = null, i;
+    var W = rect.width, H = rect.height;
+    for (i = 0; i < B.N; i++) {
+      var p;
+      if (S1.mode === '2D') { var sc = Math.min(W, H) - 24; p = [12 + S.X[0][i] / Wn * sc, 12 + (1 - S.X[1][i] / Wn) * sc]; }
+      else { var q3 = view1.project(S.X[0][i] / Wn, S.X[1][i] / Wn, S.X[2][i] / Wn), s3 = Math.min(W, H) * 0.56; p = [W / 2 + q3[0] * s3, H / 2 - q3[1] * s3]; }
+      var d = (p[0] - mx) * (p[0] - mx) + (p[1] - my) * (p[1] - my);
+      if (d < best) { best = d; arg = i; }
+    }
+    if (arg !== null && best < 400) { S1.sel = arg; inspect1(); draw1(); }
+  }
+  function inspect1() {
+    var B = D1.B, q = D1.q, m = B.m, k = B.k, i = S1.sel, html = '<h3>Point ' + i + '</h3>';
+    for (var c = 0; c < B.s; c++) {
+      var ex = NC.explainShift(B.X[c][i], S1.tau[c], q, m);
+      var dig = function (arr, cls) { return arr.map(function (d, j) { return '<span class="d' + (j === k ? ' geo' : '') + (cls ? ' ' + cls : '') + '">' + d + '</span>'; }).join(''); };
+      html += '<div class="drow"><span class="lab">' + SUBS[c] + '</span><span class="digits">' + dig(ex.xd) + '</span></div>';
+      html += '<div class="drow"><span class="lab">+</span><span class="digits">' + dig(ex.td, 'jit') + '</span></div>';
+      html += '<div class="drow"><span class="lab">=</span><span class="digits">' + dig(ex.sd) + '</span><span class="note">' + (ex.plain === ex.S ? 'same as with carries' : 'with carries: 0.' + ex.plainDigits.join('')) + '</span></div>';
+    }
+    html += '<p class="note">Digits in base ' + q + ', most significant first. Each column is added modulo ' + q + ' on its own. Highlighted: the digit after the cell digits.</p>';
+    $('#insp1').innerHTML = html;
+  }
+  function read1() {
+    var B = D1.B, s = B.s, lab = s === 2 ? 'δ√<i>N</i>' : 'δ<i>N</i>' + sup('1/3');
+    dl($('#read1'), [
+      ['Points <i>N</i>', String(B.N)],
+      [lab + ', after the shift', trunc(D1.md.c), true],
+      [lab + ', before', trunc(D1.md0.c)],
+      ['every box of volume 1/<i>N</i> holds one point', D1.box.ok ? 'yes, ' + D1.box.shapes + ' shapes' : 'no'],
+      ['one point in every cell', D1.S.onePerCell ? 'yes' : 'no']
+    ]);
+  }
+  function update1(newNet) {
+    compute1(newNet);
+    pressed($('#m1seg'), 'data-mode', S1.mode);
+    $('#view1ctl').hidden = S1.mode !== '3D';
+    digitEditor($('#tau1'), D1.B.s, D1.B.m, D1.q, S1.tau, D1.B.k, function () { update1(false); });
+    read1(); inspect1(); draw1();
+  }
+  view1 = new View3($('#c1'), function () { if (S1.mode === '3D') draw1(); });
+  var down1 = null;
+  $('#c1').addEventListener('pointerdown', function (e) { down1 = [e.clientX, e.clientY]; });
+  $('#c1').addEventListener('click', function (e) { if (down1 && Math.abs(e.clientX - down1[0]) + Math.abs(e.clientY - down1[1]) > 4) return; pick1(e); });
+  $('#m1seg').addEventListener('click', function (e) { var b = e.target.closest('button'); if (!b) return; S1.mode = b.getAttribute('data-mode'); S1.opt = 0; fillOpts1(); update1(true); });
+  $('#q1').addEventListener('change', function (e) { S1.opt = +e.target.value; update1(true); });
+  $('#rand1').addEventListener('click', function () { S1.tau = randomTau(D1.B.s, D1.B.m, D1.q); update1(false); });
+  $('#zero1').addEventListener('click', function () { S1.tau = null; update1(false); });
+  document.querySelectorAll('[data-v1]').forEach(function (b) {
+    b.addEventListener('click', function () {
+      if (b.getAttribute('data-v1') === 'diag') { view1.yaw = Math.PI / 4; view1.pitch = Math.atan(1 / Math.SQRT2); } else { view1.yaw = 0.45; view1.pitch = 0.32; }
+      draw1();
+    });
+  });
+  fillOpts1();
+  S1.tau = [[2, 1], [0, 3]];
+  update1(false);
+  if (window.ResizeObserver) new ResizeObserver(function () { draw1(); }).observe($('#plot1'));
+  themeFns.push(draw1);
+
+  /* ================================================================ section 2 */
+  var S2 = { q: 5, tau: null, samples: [] }, D2 = null, base2 = {};
+  function compute2() {
+    var q = S2.q;
+    if (!base2[q]) { var B0 = NC.build(NC.pNet(2), q); base2[q] = { B: B0, md: NC.minDistFast(B0) }; }
+    var B = base2[q].B;
+    if (!S2.tau) S2.tau = NC.zeroShift(3, 6);
+    var S = NC.shiftNet(B, S2.tau), md = NC.minDistFast(S);
+    var ncell = function (BB, i) { return BB.X.map(function (x) { return Math.floor(x[i] / BB.cw); }); };
+    var n = ncell(S, md.pair.i), n2 = ncell(S, md.pair.j), E = n.map(function (x, c) { return NC.torDiff(n2[c] - x, S.G); });
+    D2 = { B: B, S: S, md: md, md0: base2[q].md, bound: NC.cMain(q), n: n, E: E, sh: NC.stepDigits(S, n, E, 2), un: NC.stepDigits(B, n, E, 2) };
+  }
+  function read2() {
+    dl($('#read2'), [
+      ['Points <i>N</i>', String(D2.B.N) + ' = ' + S2.q + sup(6)],
+      ['δ<i>N</i>' + sup('1/3') + ', exact, shifted', trunc(D2.md.c), true],
+      ['δ<i>N</i>' + sup('1/3') + ', without a shift', trunc(D2.md0.c)],
+      ['proven bound <i>c</i>(<i>q</i>), thm:main', trunc(D2.bound)],
+      ['closest pair: cell step', '(' + D2.E.map(neg).join(', ') + ')']
+    ]);
+    var html = '<thead><tr><th>closest pair, digit 3</th><th>remainder &sigma; mod ' + S2.q + '</th><th>possible changes</th><th>without shift</th><th>with this shift</th></tr></thead><tbody>';
+    for (var c = 0; c < 3; c++) {
+      var a = D2.sh.coords[c], b = D2.un.coords[c];
+      html += '<tr><td>' + SUBS[c] + '</td><td>' + a.residue + '</td><td>' + a.options.map(neg).join(' or ') + '</td><td>' + neg(b.value) + '</td><td class="' + (a.value !== b.value ? 'em' : '') + '">' + neg(a.value) + '</td></tr>';
+    }
+    html += '</tbody>';
+    $('#pairtab').innerHTML = html;
+  }
+  var NS = 'http://www.w3.org/2000/svg';
+  function el(name, attrs, parent, text) { var e = document.createElementNS(NS, name); for (var a in attrs) e.setAttribute(a, attrs[a]); if (text !== undefined) e.textContent = text; if (parent) parent.appendChild(e); return e; }
+  function drawStrip() {
+    var svg = $('#strip'); while (svg.firstChild) svg.removeChild(svg.firstChild);
+    var x0 = 58, x1 = 620, y0 = 16, y1 = 256, vals = S2.samples.map(function (s) { return s.c; }).concat([D2.bound, D2.md0.c, D2.md.c]);
+    var lo = Math.floor((Math.min.apply(null, vals) - 0.02) * 20) / 20, hi = Math.ceil((Math.max.apply(null, vals) + 0.02) * 20) / 20;
+    var Y = function (v) { return y1 - (y1 - y0) * (v - lo) / (hi - lo); }, X = function (i) { return x0 + (x1 - x0) * (i + 0.5) / 40; };
+    for (var t = lo; t <= hi + 1e-9; t += 0.05) {
+      el('line', { x1: x0, x2: x1, y1: Y(t), y2: Y(t), style: 'stroke:var(--grid);stroke-width:1' }, svg);
+      el('text', { x: x0 - 8, y: Y(t) + 4, 'text-anchor': 'end', style: 'fill:var(--muted);font:12px var(--mono)' }, svg, t.toFixed(2));
+    }
+    el('line', { x1: x0, x2: x1, y1: Y(D2.bound), y2: Y(D2.bound), style: 'stroke:var(--slip);stroke-width:1.6;stroke-dasharray:4 3' }, svg);
+    el('line', { x1: x0, x2: x1, y1: Y(D2.md0.c), y2: Y(D2.md0.c), style: 'stroke:var(--muted);stroke-width:1.2' }, svg);
+    S2.samples.forEach(function (s, i) {
+      var cdot = el('circle', { cx: X(i), cy: Y(s.c), r: 4.2, style: 'fill:var(--accent);cursor:pointer', tabindex: 0, role: 'button', 'aria-label': 'shift ' + (i + 1) + ', δN^(1/3) = ' + trunc(s.c) }, svg);
+      var load = function () { S2.tau = s.tau.map(function (r) { return r.slice(); }); update2(); };
+      cdot.addEventListener('click', load); cdot.addEventListener('keydown', function (e) { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); load(); } });
+    });
+    el('text', { x: (x0 + x1) / 2, y: 288, 'text-anchor': 'middle', style: 'fill:var(--muted);font:13px var(--sans)' }, svg, S2.samples.length ? 'random shifts of the ' + 18 + ' digits, base ' + S2.q : 'press the button to sample random shifts');
+    el('text', { x: 14, y: (y0 + y1) / 2, 'text-anchor': 'middle', transform: 'rotate(-90 14 ' + (y0 + y1) / 2 + ')', style: 'fill:var(--muted);font:13px var(--sans)' }, svg, 'δN^(1/3), exact');
+  }
+  function update2() {
+    compute2();
+    $('#q2v').textContent = S2.q;
+    digitEditor($('#tau2'), 3, 6, S2.q, S2.tau, 2, update2);
+    read2(); drawStrip();
+  }
+  var sampling = false;
+  $('#sample2').addEventListener('click', function () {
+    if (sampling) return;
+    sampling = true; S2.samples = []; var q = S2.q, B = base2[q].B, below = 0;
+    $('#sample2').disabled = true;
+    (function step() {
+      if (S2.q !== q) { sampling = false; $('#sample2').disabled = false; return; }
+      var tau = randomTau(3, 6, q), c = NC.minDistFast(NC.shiftNet(B, tau)).c;
+      if (c < D2.bound) below++;
+      S2.samples.push({ tau: tau, c: c });
+      drawStrip();
+      var mn = Math.min.apply(null, S2.samples.map(function (s) { return s.c; }));
+      $('#sample2note').textContent = S2.samples.length + ' of 40 shifts: smallest δN^(1/3) = ' + trunc(mn) + (below ? '; ' + below + ' below the bound' : ', all above the bound ' + trunc(D2.bound));
+      if (S2.samples.length < 40) setTimeout(step, 0); else { sampling = false; $('#sample2').disabled = false; }
+    })();
+  });
+  $('#q2').addEventListener('input', function (e) { S2.q = +e.target.value; S2.tau = null; S2.samples = []; $('#sample2note').textContent = 'Each dot is the exact separation of one shifted net. Click a dot to load its shift.'; update2(); });
+  $('#rand2').addEventListener('click', function () { S2.tau = randomTau(3, 6, S2.q); update2(); });
+  $('#zero2').addEventListener('click', function () { S2.tau = null; update2(); });
+  S2.tau = [[0, 1, 3, 0, 2, 4], [2, 0, 4, 1, 0, 3], [1, 4, 0, 2, 3, 1]];
+  update2();
+  setTimeout(function () { $('#sample2').click(); }, 400);
+
+  /* ================================================================ section 3 */
+  var QC = []; for (var qq = 5; qq * qq * qq <= 100000; qq++) if (qq % 2 && qq % 3) QC.push(qq);
+  $('#q3').innerHTML = QC.map(function (q) { return '<option value="' + q + '">' + q + ' (' + q * q * q + ' points)</option>'; }).join('');
+  var S3 = { q: 11, ax: 0, tau: null }, D3 = null, base3 = {};
+  function preset3(kind) {
+    var q = S3.q, t = randomTau(3, 3, q);
+    if (kind === 0) t = NC.zeroShift(3, 3);
+    else if (kind === 1) { t[1][1] = t[2][1] = t[0][1]; t[1][2] = t[2][2] = t[0][2]; }
+    else if (kind === 2) { t[1][1] = t[2][1] = t[0][1]; if (t[0][2] === t[1][2] && t[1][2] === t[2][2]) t[2][2] = (t[2][2] + 1) % q; }
+    else if (t[0][1] === t[1][1] && t[1][1] === t[2][1]) t[2][1] = (t[2][1] + 1) % q;
+    S3.tau = t;
+  }
+  function compute3() {
+    var q = S3.q;
+    if (!base3[q]) base3[q] = NC.build(NC.colNet(q), q);
+    var S = NC.shiftNet(base3[q], S3.tau);
+    D3 = { S: S, md: NC.minDistFast(S), bounds: NC.colShiftBounds(q, S3.tau), win: NC.colWrapWindows(S, S3.ax) };
+  }
+  function read3() {
+    var b = D3.bounds, c = D3.md.c, rows = [['δ<i>N</i>' + sup('1/3') + ', exact', trunc(c), true]];
+    var txt;
+    if (b.part === 1) { txt = 'Equal shift digits at the second and third position: the minimum distance is exactly that of the unshifted net (prop:colshift(1)).'; rows.push(['without a shift, thm:col', trunc(b.exact)]); }
+    else if (b.part === 2) { txt = 'Equal second shift digits: δN^(1/3) ≥ 1 − (7q − 3)/(√3 q²) (prop:colshift(2)).'; rows.push(['lower bound (2)', trunc(b.lbEq2)]); rows.push(['without a shift, thm:col', trunc(b.exact)]); }
+    else { txt = 'Unequal second shift digits: the wraps are no longer shared, and δN^(1/3) lies between the two bounds of prop:colshift(3).'; rows.push(['upper bound (3), rounded up', ceil4(b.ub)]); rows.push(['without a shift, thm:col', trunc(b.exact)]); }
+    rows.push(['lower bound for every shift (3)', trunc(b.lbEvery)]);
+    var D = D3.md.pair.D, cw = D3.S.cw;
+    rows.push(['closest pair, cell units', '(' + D.map(function (x) { return (x < 0 ? '−' : '') + trunc(Math.abs(x) / cw, 3); }).join(', ') + ')']);
+    $('#case3').textContent = txt;
+    dl($('#read3'), rows);
+  }
+  function drawRing() {
+    var svg = $('#ring'); while (svg.firstChild) svg.removeChild(svg.firstChild);
+    var q = S3.q, cx = 260, cy = 214, radii = [96, 130, 164], wr = D3.win.wraps, ax = S3.ax;
+    function pt(r, a) { return [cx + r * Math.sin(a), cy - r * Math.cos(a)]; }
+    function arc(r0, r1, a0, a1) {
+      var p0 = pt(r1, a0), p1 = pt(r1, a1), p2 = pt(r0, a1), p3 = pt(r0, a0), lg = a1 - a0 > Math.PI ? 1 : 0;
+      return 'M' + p0[0] + ',' + p0[1] + ' A' + r1 + ',' + r1 + ' 0 ' + lg + ' 1 ' + p1[0] + ',' + p1[1] + ' L' + p2[0] + ',' + p2[1] + ' A' + r0 + ',' + r0 + ' 0 ' + lg + ' 0 ' + p3[0] + ',' + p3[1] + ' Z';
+    }
+    for (var d = 0; d < 3; d++) {
+      el('circle', { cx: cx, cy: cy, r: radii[d], style: 'fill:none;stroke:var(--grid);stroke-width:1' }, svg);
+      el('text', { x: cx + 4, y: cy - radii[d] + 13, style: 'fill:var(--muted);font:12px var(--mono)' }, svg, SUBS[d]);
+    }
+    for (var th = 0; th < q; th++) {
+      var a0 = 2 * Math.PI * th / q, a1 = 2 * Math.PI * (th + 1) / q, w = wr[th] || [0, 0, 0], lone = w[ax] === 1 && w[0] + w[1] + w[2] === 1;
+      if (lone) el('path', { d: arc(radii[0] - 16, radii[2] + 16, a0 + 0.004, a1 - 0.004), style: 'fill:none;stroke:var(--slip);stroke-width:2.2' }, svg);
+      for (d = 0; d < 3; d++) if (w[d]) el('path', { d: arc(radii[d] - 11, radii[d] + 11, a0 + 0.006, a1 - 0.006), style: 'fill:var(--accent-soft);stroke:var(--accent);stroke-width:1' }, svg);
+      if (q <= 25 || th % 5 === 0) { var tp = pt(radii[2] + 30, (a0 + a1) / 2); el('text', { x: tp[0], y: tp[1] + 4, 'text-anchor': 'middle', style: 'fill:var(--muted);font:11px var(--mono)' }, svg, String(th)); }
+    }
+    el('text', { x: cx, y: cy - 4, 'text-anchor': 'middle', style: 'fill:var(--ink);font:13px var(--sans)' }, svg, 'shared digit a·n');
+    el('text', { x: cx, y: cy + 14, 'text-anchor': 'middle', style: 'fill:var(--muted);font:12px var(--sans)' }, svg, 'step along e' + SUBS[ax] + ', base ' + q);
+  }
+  function update3() {
+    compute3();
+    $('#q3').value = S3.q; pressed($('#ax3seg'), 'data-ax', S3.ax);
+    digitEditor($('#tau3'), 3, 3, S3.q, S3.tau, 1, update3);
+    read3(); drawRing();
+  }
+  document.querySelectorAll('[data-preset]').forEach(function (b) { b.addEventListener('click', function () { preset3(+b.getAttribute('data-preset')); update3(); }); });
+  $('#q3').addEventListener('change', function (e) { S3.q = +e.target.value; preset3(3); update3(); });
+  $('#ax3seg').addEventListener('click', function (e) { var b = e.target.closest('button'); if (!b) return; S3.ax = +b.getAttribute('data-ax'); update3(); });
+  S3.tau = [[0, 2, 1], [0, 7, 1], [0, 2, 4]];
+  update3();
+
+  /* ================================================================ section 4 */
+  var P4 = NC.primesIn(11, 101), HEATP = [11, 13, 17, 19, 23];
+  $('#p4').innerHTML = P4.map(function (p) { return '<option value="' + p + '">' + p + ' (' + p * p * p + ' points)</option>'; }).join('');
+  var S4 = { p: 17, t: 1, tz: 0, third: false, th3: [0, 0, 0] }, base4 = {}, heat = null, heatJob = 0;
+  function B4(p) { if (!base4[p]) { var B = NC.build(NC.wNet(p), p); base4[p] = { B: B, md: NC.minDistFast(B) }; } return base4[p]; }
+  function update4() {
+    var p = S4.p, bb = B4(p), tau = [[0, S4.t, S4.third ? S4.th3[0] : 0], [0, S4.t, S4.third ? S4.th3[1] : 0], [0, S4.tz, S4.third ? S4.th3[2] : 0]];
+    var S = NC.shiftNet(bb.B, tau), md = NC.minDistFast(S), keeps = NC.wShiftKeeps(p, S4.t, S4.tz), wb = NC.wBounds(p), groups = NC.axisSteps(S, 2);
+    $('#p4').value = p; $('#t4').max = p - 1; $('#tz4').max = p - 1; $('#t4').value = S4.t; $('#tz4').value = S4.tz; $('#t4v').textContent = S4.t; $('#tz4v').textContent = S4.tz;
+    var dd = NC.mod(S4.t - 2 * S4.tz, p);
+    $('#verdict4').innerHTML = 't − 2t′ ≡ ' + dd + ' (mod ' + p + '): ' + (keeps ? 'the lock is kept' + (p >= 53 ? ', and the bound of prop:wnet(2) holds.' : '; the bound of prop:wnet(2) is stated for p ≥ 53.') : 'the lock is broken.');
+    var rows = [['δ<i>N</i>' + sup('1/3') + ', exact, shifted', trunc(md.c), true], ['without a shift', trunc(bb.md.c)]];
+    if (p >= 53) rows.push(['proven bound, prop:wnet(2)', trunc(wb.lb)]);
+    rows.push(['ε = ρ/(2<i>p</i>)', trunc(NC.wNet(p).eps, 5)]);
+    dl($('#read4'), rows);
+    var names = { '000': 'no wrap', '001': '<i>z</i> wraps alone', '110': '<i>x</i>, <i>y</i> wrap', '111': 'all three wrap' };
+    $('#steps4').innerHTML = '<thead><tr><th>steps along <i>e<sub>z</sub></i></th><th>cells</th><th>shortest</th></tr></thead><tbody>' + groups.map(function (g) {
+      return '<tr><td' + (g.key === '001' ? ' style="color:var(--slip)"' : '') + '>' + (names[g.key] || g.key) + '</td><td>' + g.count + '</td><td>' + trunc(g.minLen, 3) + '</td></tr>';
+    }).join('') + '</tbody>';
+    drawHeat();
+  }
+  function startHeat() {
+    var p = S4.p, job = ++heatJob;
+    if (HEATP.indexOf(p) < 0) { heat = null; drawHeat(); return; }
+    heat = { p: p, grid: [], vals: new Float64Array(p * p).fill(-1) };
+    var B = B4(p).B, idx = 0;
+    (function chunk() {
+      if (job !== heatJob) return;
+      var t0 = performance.now();
+      while (idx < p * p && performance.now() - t0 < 30) {
+        var t = Math.floor(idx / p), tz = idx % p;
+        var md = NC.minDistFast(NC.shiftNet(B, [[0, t, 0], [0, t, 0], [0, tz, 0]]));
+        heat.vals[tz * p + t] = md.c; heat.grid.push({ t: t, tz: tz, d2: md.d2 }); idx++;
+      }
+      drawHeat();
+      if (idx < p * p) setTimeout(chunk, 0);
+    })();
+  }
+  function drawHeat() {
+    var cv = $('#c4'), off = $('#heatoff');
+    if (!heat) { off.hidden = false; off.textContent = 'The map of all shifts is computed for p ≤ 23. At p = ' + S4.p + ' use the sliders.'; var cx0 = canvasCtx(cv); if (cx0) { cx0.g.fillStyle = tok('--surface'); cx0.g.fillRect(0, 0, cx0.W, cx0.H); } $('#heatsum').textContent = ''; return; }
+    off.hidden = true;
+    var cx = canvasCtx(cv); if (!cx) return;
+    var g = cx.g, W = cx.W, H = cx.H, p = heat.p, pad = 34, sc = (Math.min(W, H) - pad - 10) / p, col = colors();
+    g.fillStyle = col.surface; g.fillRect(0, 0, W, H);
+    var lo = hexRgb(col.grid), acc = hexRgb(col.accent);
+    for (var tz = 0; tz < p; tz++) for (var t = 0; t < p; t++) {
+      var v = heat.vals[tz * p + t];
+      if (v < 0) continue;
+      var f = Math.max(0, Math.min(1, v / 1.05)), c3 = mix(lo, acc, Math.pow(f, 1.6));
+      g.fillStyle = 'rgb(' + c3.join(',') + ')';
+      g.fillRect(pad + t * sc, 10 + (p - 1 - tz) * sc, sc - 0.6, sc - 0.6);
+    }
+    g.strokeStyle = col.accent; g.lineWidth = 2;
+    g.strokeRect(pad + S4.t * sc - 1, 10 + (p - 1 - S4.tz) * sc - 1, sc + 1.4, sc + 1.4);
+    g.fillStyle = col.muted; g.font = '11px ' + tok('--mono');
+    g.textAlign = 'center';
+    for (var i = 0; i < p; i += (p > 13 ? 2 : 1)) g.fillText(String(i), pad + (i + 0.5) * sc, 10 + p * sc + 14);
+    g.textAlign = 'right';
+    for (i = 0; i < p; i += (p > 13 ? 2 : 1)) g.fillText(String(i), pad - 6, 10 + (p - 1 - i + 0.5) * sc + 4);
+    if (heat.grid.length === p * p) {
+      var sm = NC.wHeatSummary(p, heat.grid, 0.5);
+      $('#heatsum').textContent = 'All ' + sm.total + ' shifts computed at p = ' + p + ': ' + sm.kept + ' keep δN^(1/3) above 0.5, ' + (sm.keptOff ? sm.keptOff + ' of them off the two lines.' : 'and all of them lie on the two lines t ≡ 2t′ and t ≡ 2t′ + 1 (' + sm.onLines + ' shifts).') + ' Smallest value on the lines ' + trunc(sm.onMin) + ', largest off them ' + trunc(sm.offMax) + '.';
+    } else $('#heatsum').textContent = 'Computing: ' + heat.grid.length + ' of ' + p * p + ' shifts.';
+  }
+  function hexRgb(s) {
+    s = s.trim();
+    if (s[0] === '#') { var h = s.slice(1); if (h.length === 3) h = h.split('').map(function (x) { return x + x; }).join(''); return [parseInt(h.slice(0, 2), 16), parseInt(h.slice(2, 4), 16), parseInt(h.slice(4, 6), 16)]; }
+    var m = s.match(/\d+(\.\d+)?/g); return m ? m.slice(0, 3).map(Number) : [128, 128, 128];
+  }
+  function mix(a, b, f) { return [0, 1, 2].map(function (i) { return Math.round(a[i] + (b[i] - a[i]) * f); }); }
+  $('#c4').addEventListener('click', function (e) {
+    if (!heat) return;
+    var rect = e.target.getBoundingClientRect(), p = heat.p, pad = 34, sc = (Math.min(rect.width, rect.height) - pad - 10) / p;
+    var t = Math.floor((e.clientX - rect.left - pad) / sc), tz = p - 1 - Math.floor((e.clientY - rect.top - 10) / sc);
+    if (t < 0 || tz < 0 || t >= p || tz >= p) return;
+    S4.t = t; S4.tz = tz; update4();
+  });
+  $('#p4').addEventListener('change', function (e) { S4.p = +e.target.value; S4.t = Math.min(S4.t, S4.p - 1); S4.tz = Math.min(S4.tz, S4.p - 1); update4(); startHeat(); });
+  $('#t4').addEventListener('input', function (e) { S4.t = +e.target.value; $('#t4v').textContent = S4.t; schedule('w4', update4, S4.p > 53 ? 120 : 0); });
+  $('#tz4').addEventListener('input', function (e) { S4.tz = +e.target.value; $('#tz4v').textContent = S4.tz; schedule('w4', update4, S4.p > 53 ? 120 : 0); });
+  $('#third4').addEventListener('change', function (e) { S4.third = e.target.checked; S4.th3 = [randInt(S4.p), randInt(S4.p), randInt(S4.p)]; update4(); });
+  update4(); startHeat();
+  if (window.ResizeObserver) new ResizeObserver(function () { drawHeat(); }).observe($('#plot4'));
+  themeFns.push(drawHeat);
+
+  /* ================================================================ section 5 */
+  var S5 = { b: 2, d: [0, 0, 1, 1, 1], net: '1,3' }, every5 = {};
+  function drawMu() {
+    var b = S5.b, n = S5.d.length;
+    digitEditor($('#d5'), 1, n, b, [S5.d], -1, drawMu, ['d']);
+    var mu = NC.muDigits(S5.d, b), brute = NC.muBrute(S5.d, b), D = 0;
+    S5.d.forEach(function (x) { D = D * b + x; });
+    dl($('#read5a'), [
+      ['<i>d</i> as an integer, units of ' + b + sup('−' + n), String(D)],
+      ['worst wrap &mu;(<i>d</i>), same units', String(mu), true],
+      ['checked by trying all ' + Math.pow(b, n) + ' values of <i>X</i>', brute === mu ? 'same' : 'differs: ' + brute]
+    ]);
+  }
+  $('#b5seg').addEventListener('click', function (e) { var bt = e.target.closest('button'); if (!bt) return; S5.b = +bt.getAttribute('data-b'); pressed($('#b5seg'), 'data-b', S5.b); S5.d = S5.d.map(function (x) { return x % S5.b; }); drawMu(); });
+  $('#chain5').addEventListener('click', function () { S5.d = S5.d.map(function (_, j) { return j < 2 ? 0 : 1; }); drawMu(); });
+  $('#rand5').addEventListener('click', function () { S5.d = S5.d.map(function () { return randInt(S5.b); }); drawMu(); });
+  function update5() {
+    var kb = S5.net.split(',').map(Number), k = kb[0], b = kb[1];
+    if (!every5[S5.net]) {
+      var B = NC.build(NC.pNet(k), b), ev = NC.everyShiftMin(B), S = NC.shiftNet(B, ev.tau);
+      every5[S5.net] = { B: B, ev: ev, un: NC.minDist(B, true), at: NC.minDist(S, true), brute: null };
+    }
+    var E = every5[S5.net];
+    dl($('#read5b'), [
+      ['Points <i>N</i>', String(E.B.N) + ' = ' + b + sup(E.B.m)],
+      ['δ<i>N</i>' + sup('1/3') + ', without a shift', trunc(E.un.c)],
+      ['smallest over all shifts, by the formula', trunc(E.ev.c), true],
+      ['exact, at the worst shift below', trunc(E.at.c)],
+      ['every box of volume 1/<i>N</i> holds one point', NC.boxCheck(E.B).ok ? 'yes' : 'no']
+    ]);
+    var html = '<div>worst difference &Delta; (digits) and &mu;:</div>';
+    for (var c = 0; c < 3; c++) html += '<div>' + SUBS[c] + ': ' + E.ev.delta[c].join('') + ' &rarr; &mu; = ' + E.ev.mus[c] + '</div>';
+    html += '<div style="margin-top:6px">a worst shift: ' + E.ev.tau.map(function (t, c) { return SUBS[c] + ' 0.' + t.join(''); }).join(', ') + '</div>';
+    $('#delta5').innerHTML = html;
+    var small = E.B.N <= 27;
+    $('#brute5').disabled = !small;
+    $('#brute5note').textContent = E.brute ? 'All ' + E.brute.shifts + ' shifts tried: smallest δN^(1/3) = ' + trunc(E.brute.c) + (Math.abs(E.brute.c - E.ev.c) < 1e-12 ? ', as the formula says.' : '.') : (small ? '' : 'Trying every shift is offered for the two smallest nets.');
+  }
+  $('#n5').addEventListener('change', function (e) { S5.net = e.target.value; update5(); });
+  $('#brute5').addEventListener('click', function () {
+    var E = every5[S5.net]; $('#brute5note').textContent = 'Trying every shift…';
+    setTimeout(function () { E.brute = NC.bruteEveryShift(E.B); update5(); }, 30);
+  });
+  drawMu(); update5();
+})();
+</script>

@@ -1,0 +1,176 @@
+version: "v0.4"
+
+project:
+  name: "Low-discrepancy quasi-uniform digital nets in every dimension"
+  description: >-
+    The main theorem (thm:A, Theorem A "Every dimension", of version 1) of the manuscript
+    "Low-discrepancy quasi-uniform digital nets in every dimension", in one statement. For every
+    dimension s >= 3, every integer base q >= 2 all of whose prime factors are at least s - 1, and
+    every k >= 1, the explicit digital net P^{U*_s}_{k,q} over Z/qZ with N = q^(sk) points
+    (Definition def:Ns for the places infinity, 0, 1, ..., s-2 -- the Faure-Hammersley frame in
+    graph form with the gauges of prop:Ns and prop:Gs -- and the design U*_s of Definition
+    def:Ustar, whose columns are short vectors of the lattices of admissible columns, chosen level
+    by level by Babai rounding) (1) is a (0,sk,s)-net in base q, so every cell of side q^(-k) holds
+    exactly one point, and every point of [0,1]^s lies within Euclidean distance sqrt(s) N^(-1/s)
+    of a net point (covering radius); (2) if q >= 5 a*_s + 4, any two distinct net points have
+    toroidal and Euclidean distance at least (1 - a*_s/q) N^(-1/s), for every k >= 1, and for
+    k >= 2 and q > (s-1) a*_s some two distinct points are closer than
+    (1 - a*_s/q + (s-1)(a*_s+1)^2/q^2) N^(-1/s) (first-order sharpness of a*_s). The constant
+    a*_s = max_c sum_{d != c} max_j |E_{d,j}[c]| of def:Ustar satisfies a*_3 = 2 and, for s >= 4,
+    a*_s <= 2(s-1)^(3/2) (3/2)^(s-2) (s-2)! with |log(that bound) - s log s| <= 3s, i.e.
+    a*_s = e^(s log s + O(s)). Matching bounds of the same order N^(-1/s) for arbitrary N-point
+    sets (the volume argument behind "optimal order") are classical and not formalized.
+
+    Comparator configuration: comparatorHeadline.json (4 compared theorems, all proved, no sorry):
+    Z3NetA.theoremA, and three theorems showing inside the entry that the data the definitions
+    introduce by choice are the paper's -- Z3NetA.ustarCols_spec (the columns E_{d,j} of def:Ustar
+    exist and are unique), Z3NetA.gamma_spec (gamma_j of lem:sat(ii) exists and is unique) and
+    Z3NetA.net_wellDefined (the reduction R_S -> Z/qZ, a solution U' of the residual problem and
+    the coefficients beta of prop:Gs exist, and the net built from any of them is the entry's net). The Challenge (Headline/Challenge.lean) imports only Mathlib and contains
+    verbatim copies of the 43 definitions of the proof side (Z3Net/FDefs.lean, Z3Net/ThmADefs.lean)
+    that the statement reaches. The Solution (Headline/Solution.lean) obtains the theorem from
+    Z3NetA.thmA of the full formalization in the same Lake project (whose single configuration
+    comparator.json covers all compared theorems of the statement library).
+  authors:
+    - {name: "Leonhard Gruenschloss", orcid: "0009-0004-6476-2191"}
+  responsible_maintainers:
+    - {name: "Leonhard Gruenschloss", orcid: "0009-0004-6476-2191"}
+  license: "MIT"
+
+classification:
+  arxiv: [math.NT, math.NA]
+  # Proposed MSC 2020 set (identical in the Hexagon and Zenodo metadata); the author confirms it at the deposit.
+  msc2020: [11K38, 65C05, 11K45, 52C17, 11H06, 94B05, 68V20]
+
+sources:
+  - title: "Low-discrepancy quasi-uniform digital nets in every dimension (version 1)"
+    authors:
+      - {name: "Leonhard Gruenschloss", orcid: "0009-0004-6476-2191"}
+    type: paper
+    id: "HEXAGON_ID_TBD"
+    location: "paper/core.tex in https://github.com/lgruen/separated-nets-lean (archived at Zenodo, ZENODO_DOI_TBD)"
+    relationship: formalizes
+    note: >-
+      Results cited by their LaTeX labels. This entry formalizes thm:A of version 1 (Theorem A
+      "Every dimension", section sec:dims, proved in sec:Ustar), parts (1) and (2) and the closing
+      sentence on a*_s, with the net of def:Ns and the design U*_s of def:Ustar (through
+      sec:lattice: Lambda_j, kappa_j, gamma_j). Not stated in this entry (but proved in the full
+      formalization of the same Lake project, configuration comparator.json): lem:sat, lem:adelic,
+      lem:babai, the local bounds of the proof, the printed sharpness hypotheses (A_sharp), and the
+      display of U*_3. Not formalized: the computed values a*_4, ..., a*_10 of tab:astar and the
+      polynomial running time of def:Ustar.
+  - title: "Point sets and sequences with small discrepancy (Monatsh. Math. 104 (1987) 273-337)"
+    authors: ["Harald Niederreiter"]
+    type: paper
+    relationship: background
+    note: "The t = 0 criterion via box matrices (lem:nie); the Lean proof of the net property is self-contained."
+
+related_formalizations:
+  - id: "github.com/lennrt/palomar-formalizations (zenodo-22264675/palomar)"
+    relationship: other
+    note: >-
+      Different mathematics (two-dimensional even-order Grünschloß-Keller permutation nets).
+      The project layout follows its Palomar template, and the centred residue cres is adapted
+      from its GKEvenNet.cres (MIT licence; here with an integer argument).
+
+status:
+  scope: >-
+    The four compared theorems of comparatorHeadline.json are proved: Z3NetA.theoremA (thm:A, parts
+    (1) and (2) with the first-order sharpness, a*_3 = 2, the bound on a*_s and its form
+    e^(s log s + O(s))), and Z3NetA.ustarCols_spec, Z3NetA.gamma_spec, Z3NetA.net_wellDefined (the
+    choice-defined E_{d,j}, gamma_j, U', beta and the reduction modulo q are the paper's: existence,
+    uniqueness, and independence of the net from the choice of U', beta and the reduction). Symbolic in s, q, k. The proof in Headline/Solution.lean is the theorem
+    Z3NetA.thmA of the full formalization (Z3Net/ThmAFinal.lean), assembled there from the compared
+    theorems A_net, A_covering, A_sep_real, A_sep_eucl, A_sharp_real, aStar_three, aStar_bound,
+    aStar_bound_log (Z3Net/ThmA*.lean). The three further theorems come from the compared theorems
+    Ustar_cols, Ustar_cols_unique, sat_gamma, gamS_unique, A_hom, Ustar_reach, Ustar_data and
+    Apoint_indep (the last via Z3NetF.PGen_indep, Z3Net/ThmAChoice.lean). No analytic number theory is used; a*_3 = 2 is proved from
+    the printed U*_3 and the uniqueness in def:Ustar, not by computation.
+  sorry_count: 0
+  sorry_in_definitions: 0
+  axioms: [propext, Classical.choice, Quot.sound]
+  main_results:
+    - {declaration: "Z3NetA.theoremA", file: "Headline/Solution.lean", sorry_count: 0, axioms: [propext, Classical.choice, Quot.sound], comparator_config: "comparatorHeadline.json"}
+    - {declaration: "Z3NetA.ustarCols_spec", file: "Headline/Solution.lean", sorry_count: 0, axioms: [propext, Classical.choice, Quot.sound], comparator_config: "comparatorHeadline.json"}
+    - {declaration: "Z3NetA.gamma_spec", file: "Headline/Solution.lean", sorry_count: 0, axioms: [propext, Classical.choice, Quot.sound], comparator_config: "comparatorHeadline.json"}
+    - {declaration: "Z3NetA.net_wellDefined", file: "Headline/Solution.lean", sorry_count: 0, axioms: [propext, Classical.choice, Quot.sound], comparator_config: "comparatorHeadline.json"}
+
+automation:
+  methods:
+    - method: agent
+      models: ["Anthropic Claude Opus 5.5"]
+      framework: "AI agents for statement drafting, proof development, and review"
+      tool_setup: >-
+        Lean v4.35.0-rc3 with Mathlib v4.35.0-rc3; finite computations by kernel reduction
+        (decide +kernel), no native_decide; Comparator (leanprover/comparator) with the Lean
+        kernel and NanoDa; Python checkers outside Lean (scripts/).
+    - method: manual
+      models: []
+      framework: "n/a"
+      tool_setup: >-
+        Author review of the Challenge statements against the manuscript. STATUS: APPROVED -- the
+        author reviewed and signed off the headline statement (thm:A, Z3NetA.theoremA) on 2026-10-12.
+  spend_usd: "not tracked"
+  notes: >-
+    The constructions, proofs and Lean formalization were produced by AI systems (Anthropic Claude Opus 5.5; some early exploratory results used Claude Fable 5.1) under the author's direction. The author selected the problems, steered the research and reviewed the formal statements, but has not verified every proof by hand. AI systems are not listed as authors; responsibility for the deposit rests with the author.
+
+fidelity:
+  divergences: |-
+    - Sharpness (thm:A(2), "delta N^(1/s) = 1 - a*_s/q + O(q^-2) as q -> infinity", k >= 2) is
+      stated with an explicit threshold and constant: for q >= 5 a*_s + 4 and q > (s-1) a*_s some
+      two distinct points have toroidal and Euclidean distance
+      < (1 - a*_s/q + (s-1)(a*_s+1)^2/q^2) N^(-1/s). With the lower bound this is the printed O(q^-2)
+      statement. The paper's proof uses q > 2 a*_s and q > sum_{u != i} |F_0[u][i]|, both implied by
+      q > (s-1) a*_s; that printed form is Z3NetA.A_sharp of the full formalization.
+    - e^(s log s + O(s)) is stated as |log(bound) - s log s| <= 3s for every s >= 4 (explicit
+      constant).
+    - The covering radius h and the minimum distance delta are not defined as a supremum and a
+      minimum: (1) says every x in the closed cube [0,1]^s has a net point within Euclidean distance
+      sqrt(s) N^(-1/s); (2) says every pair of distinct points is at least ..., and some pair is
+      closer than .... N^(-1/s) is Real.rpow ((q:R)^(sk)) (-(1/s)).
+    - "Every cell holds exactly one point" is the case d = (k, ..., k) of IsNet0 (the (0,m,s)-net
+      property), which counts indices v. That the net is digital holds by construction (generator
+      matrices over Z/qZ); it is not a separate clause.
+    - The net (Apoint) maps the generator matrices of def:Ns over R_S = Z[1/(s-2)!] to Z/qZ by a
+      chosen ring homomorphism R_S -> Z/qZ (junk value 0 if there is none). The paper leaves the
+      solution U' of the residual problem and the coefficients beta of prop:Gs implicit; the entry
+      fixes them by choice (UrS, betaS). The compared theorem Z3NetA.net_wellDefined shows that for
+      admissible q the homomorphism, U' and beta exist and that the net built from any of them is
+      Apoint, so the choices do not matter (all of thm:A holds for every choice).
+    - The columns E_{d,j} of def:Ustar (Ecol) and gamma_j (gamS) are introduced by choice from
+      their defining properties; the compared theorems Z3NetA.ustarCols_spec and Z3NetA.gamma_spec
+      prove existence and uniqueness inside the entry. Columns are vectors indexed by all s
+      coordinates with a 0 at the row d (the paper's columns have the s-1 rows c != d).
+    - "Optimal order" (delta = O(N^(-1/s)), h = Omega(N^(-1/s)) for every N-point set) is classical
+      and not formalized. The computed values a*_4, ..., a*_10 (tab:astar; the thresholds q = 29,
+      84 for s = 4, 5 in the introduction) and the polynomial running time of def:Ustar are not
+      formalized.
+
+review:
+  status: "agent-reviewed"
+  reviewers: []
+  notes: >-
+    The statement and the definitions were drafted from thm:A, def:Ns and def:Ustar and checked
+    against the source by AI-assisted passes (Anthropic Claude), acting as automated assistants
+    rather than reviewers of record (statement-review notes of the development repository); the
+    definitions are verbatim copies of those of the full formalization. A hash check
+    (scripts/check_headline_identity.py) confirms that all 52 project constants reachable from the
+    four statements (incl. auxiliary _proof_, match_ and _f constants) have identical types and values in
+    the Challenge and Solution environments. Comparator (Lean kernel + NanoDa) accepts the
+    four declarations of comparatorHeadline.json with axioms propext, Quot.sound, Classical.choice
+    (COMPARATOR_RESULTS.md). The author reviewed the statement against the manuscript
+    and signed it off on 2026-10-12 (approved). No independent human
+    peer review has been performed.
+
+alignment:
+  namespace: "Z3NetA"
+  statements:
+    - {source: "**thm:A.** Let s >= 3, let q >= 2 be an integer all of whose prime factors are at least s-1, and let k >= 1. Let P^{U*_s}_{k,q} be the digital net over Z/qZ of def:Ns for the places infinity, 0, 1, ..., s-2 and the design U*_s of def:Ustar, with N = q^(sk) points. Then (1) it is a digital (0,sk,s)-net over Z/qZ, every cell holds exactly one point, and h <= sqrt(s) N^(-1/s); (2) if q >= 5 a*_s + 4, its toroidal (hence also Euclidean) minimum distance satisfies delta >= (1 - a*_s/q) N^(-1/s), for every k >= 1; for k >= 2 the constant a*_s is first-order sharp: delta N^(1/s) = 1 - a*_s/q + O(q^-2) as q -> infinity. Here a*_3 = 2, and a*_s <= 2(s-1)^(3/2)(3/2)^(s-2)(s-2)! = e^(s log s + O(s)) for s >= 4.", lean: "Z3NetA.theoremA", module: "Headline.Solution", status: proved, note: "Sharpness with the explicit threshold q > (s-1) a*_s and constant (s-1)(a*_s+1)^2; O(s) with the constant 3 (fidelity.divergences)."}
+    - {source: "**def:Ustar.** E_{d,0} is the generator of Lambda_0 with kappa_0 > 0; for j >= 1, E_{d,j} is the unique E in Lambda_j with kappa_j(E) = +gamma_j whose orthogonal projection onto V_{j-1} has all its coefficients in the basis E_{d,0}, ..., E_{d,j-1} in [-1/2, 1/2).", lean: "Z3NetA.ustarCols_spec", module: "Headline.Solution", status: proved, note: "Existence and uniqueness of the family characterized by IsUstarCols; Ecol is that family."}
+    - {source: "**lem:sat(ii).** kappa_j(Lambda_j) = gamma_j Z for a positive rational gamma_j.", lean: "Z3NetA.gamma_spec", module: "Headline.Solution", status: proved, note: "Existence and uniqueness of the positive generator; gamS is it. That gamma_j is an S-unit is not needed by the statements and is not stated in the entry (it is part of Z3NetA.sat_gamma of the full formalization)."}
+    - {source: "**def:Ns** with **prop:Gs** (implicit in thm:A). The net P^F_k over R' = R_S, built from a solution (lambda' = 1, U') of the residual problem and the coefficients beta_n of prop:Gs, with all entries reduced modulo q.", lean: "Z3NetA.net_wellDefined", module: "Headline.Solution", status: proved, note: "For admissible q the reduction R_S -> Z/qZ, U' and beta exist, and the net is the same for every choice of them."}
+
+acknowledgements: >-
+  Lean and Mathlib. The centred-residue helper cres is adapted from Lennart Rudolph's
+  MIT-licensed Palomar formalization of the even-order Grünschloß-Keller nets
+  (github.com/lennrt/palomar-formalizations), whose layout this project also follows.
