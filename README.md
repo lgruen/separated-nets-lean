@@ -14,7 +14,7 @@ explicit digital (0, sk, s)-nets over ℤ/qℤ with N = q^(sk) points (Theorem A
 **v1.0.0**, which accompanies **version 1** of the manuscript.
 
 Archived at Zenodo: concept DOI [10.5281/zenodo.23327748](https://doi.org/10.5281/zenodo.23327748) (all versions); release v1.0.0: version DOI
-[10.5281/zenodo.23327749](https://doi.org/10.5281/zenodo.23327749). Palomar entry (Theorem A): PALOMAR_ID_TBD.
+[10.5281/zenodo.23327749](https://doi.org/10.5281/zenodo.23327749). Palomar entry (Theorem A): [PALOMAR-2026-10-13-000011](https://palomar-registry.org/entry?id=PALOMAR-2026-10-13-000011&version=1), version 1 (commit `d7b5f50`).
 Website: <https://lgruen.github.io/separated-nets-lean/>, with the Lean blueprint <https://lgruen.github.io/separated-nets-lean/blueprint/> and the interactive explainers
 <https://lgruen.github.io/separated-nets-lean/explainers/>.
 
