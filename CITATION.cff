@@ -57,4 +57,8 @@ preferred-citation:
       given-names: "Leonhard"
       orcid: "https://orcid.org/0009-0004-6476-2191"
   year: 2026
-  notes: "Version 1. Hexagon identifier HEXAGON_ID_TBD"
+  notes: "Version 1. Hexagon identifier hexagon:2610.00217v1"
+  identifiers:
+    - type: url
+      value: "https://hexagonmath.org/abs/2610.00217v1"
+      description: "Hexagon record of version 1 of the manuscript (hexagon:2610.00217v1)"

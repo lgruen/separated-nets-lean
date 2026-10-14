@@ -5,7 +5,7 @@
 Manuscript, Lean 4 formalization, blueprint and interactive explainers for
 
 > Leonhard Gruenschloss, *Low-discrepancy quasi-uniform digital nets in every dimension*, version 1 (2026).
-> Hexagon: HEXAGON_ID_TBD.
+> Hexagon: [hexagon:2610.00217v1](https://hexagonmath.org/abs/2610.00217v1).
 
 Dick, Goda and Suzuki asked for low-discrepancy digital nets that are quasi-uniform, with minimum distance and covering
 radius both of the optimal order N^(-1/s), and stated the problem as open in dimension s ≥ 3. The manuscript constructs
